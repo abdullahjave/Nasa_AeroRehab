@@ -1,0 +1,93 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>AeroRehab offline render</title>
+<style>html,body{margin:0;background:#050d1f;color:#9fb;font:12px monospace} canvas{display:block;max-width:100%}</style>
+<script type="importmap">
+{ "imports": {
+  "three": "/tools/render/node_modules/three/build/three.module.js",
+  "three/addons/": "/tools/render/node_modules/three/examples/jsm/"
+} }
+</script>
+<body>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const W = 1024, H = 1024;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H, false);
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const draco = new DRACOLoader().setDecoderPath("/tools/render/node_modules/three/examples/jsm/libs/draco/gltf/");
+const loader = new GLTFLoader().setDRACOLoader(draco);
+const load = (url) => new Promise((ok, bad) => loader.load(url, ok, undefined, bad));
+
+const R = (window.R = { THREE, renderer, scene: null, camera: null, THREE_ready: true });
+
+function newScene() {
+  const scene = new THREE.Scene();
+  scene.environment = envTex;
+  scene.environmentIntensity = 0.55;
+  R.scene = scene;
+  return scene;
+}
+
+/** Add key/rim lights: warm-neutral key, cyan rim to match the dark-navy UI. */
+R.addLights = (key = 2.2, rim = 2.4) => {
+  const s = R.scene;
+  const k = new THREE.DirectionalLight(0xffffff, key); k.position.set(-3, 4, 5); s.add(k);
+  const r = new THREE.DirectionalLight(0x38bdf8, rim); r.position.set(4, 2, -4); s.add(r);
+  const f = new THREE.DirectionalLight(0x4f7cff, 0.7); f.position.set(3, -2, 3); s.add(f);
+};
+
+R.loadGLB = async (url) => { const g = await load(url); return g.scene; };
+
+R.camera = null;
+R.setCamera = ({ pos, target, fov = 30, near = 0.01, far = 5000, up = [0, 1, 0], ortho = null }) => {
+  let cam;
+  if (ortho) {
+    const a = W / H;
+    cam = new THREE.OrthographicCamera(-ortho * a, ortho * a, ortho, -ortho, near, far);
+  } else cam = new THREE.PerspectiveCamera(fov, W / H, near, far);
+  cam.up.set(...up);
+  cam.position.set(...pos);
+  cam.lookAt(new THREE.Vector3(...target));
+  cam.updateProjectionMatrix(); cam.updateMatrixWorld(true);
+  R.camera = cam;
+  return cam;
+};
+
+R.render = () => { renderer.render(R.scene, R.camera); };
+
+/** Project a world point to normalised image coordinates (0..1, origin top-left). */
+R.project = (v) => {
+  const p = new THREE.Vector3(...v).project(R.camera);
+  return [(p.x + 1) / 2, (1 - p.y) / 2];
+};
+
+R.bounds = (obj) => {
+  const b = new THREE.Box3().setFromObject(obj);
+  return { min: b.min.toArray(), max: b.max.toArray(), size: b.getSize(new THREE.Vector3()).toArray(), center: b.getCenter(new THREE.Vector3()).toArray() };
+};
+
+R.save = async (name) => {
+  const blob = await new Promise((r) => renderer.domElement.toBlob(r, "image/png"));
+  const res = await fetch("/save/" + name, { method: "POST", body: blob });
+  return res.text();
+};
+
+R.newScene = newScene;
+R.names = (obj) => { const n = []; obj.traverse((o) => { if (o.isMesh) n.push(o.name); }); return n; };
+document.title = "R ready";
+</script>
+</body>

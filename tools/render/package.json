@@ -1,0 +1,1 @@
+{"name":"aerorehab-render-tools","private":true,"type":"module","description":"Offline asset render tooling. Not part of the Next.js app.","dependencies":{"three":"^0.170.0"}}

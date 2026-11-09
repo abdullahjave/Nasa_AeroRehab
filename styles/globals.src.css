@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* Design tokens. Usable as utilities (bg-navy-950, border-cyan-line, ...) and as var(--color-*). */
+@theme {
+  --color-navy-950: #040a18;
+  --color-navy-900: #071226;
+  --color-glass: rgba(8, 20, 44, 0.72);
+  --color-cyan-line: rgba(34, 211, 238, 0.35);
+  --color-led: #34d399;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html, body { background: var(--color-navy-950); color: #fff; overflow-x: clip; }
+body { font-family: var(--font-geist-sans), system-ui, sans-serif; }
+
+/* One fixed backdrop, rendered once in the root layout so it never remounts. */
+.space-backdrop {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 40% at 88% 105%, rgba(56, 189, 248, 0.28), transparent 70%),
+    radial-gradient(ellipse 30% 25% at 90% 100%, rgba(129, 140, 248, 0.22), transparent 70%),
+    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+    radial-gradient(1px 1px at 90px 120px, rgba(255,255,255,.8), transparent),
+    radial-gradient(1.5px 1.5px at 160px 60px, rgba(186,230,253,.9), transparent),
+    radial-gradient(1px 1px at 230px 170px, rgba(255,255,255,.7), transparent),
+    linear-gradient(180deg, var(--color-navy-900), var(--color-navy-950));
+  background-size: auto, auto, 260px 200px, 260px 200px, 260px 200px, 260px 200px, auto;
+}
+/* Poster replaces the CSS starfield when the file exists. Starts framed bottom-right. */
+.space-backdrop--image {
+  background: var(--color-navy-950) url("/images/space-backdrop.webp") right bottom / cover no-repeat;
+}
+/* Video layer: ~92% of the viewport, full frame (contain), anchored bottom-right.
+   --video-ar is set from the clip's real dimensions so the box hugs the picture and the
+   edge fade below blends the picture itself, not empty letterbox space. */
+.space-backdrop__video {
+  position: absolute; right: 0; bottom: 0;
+  --video-ar: 1.7778;
+  aspect-ratio: var(--video-ar);
+  width: min(92vw, calc(92vh * var(--video-ar)));
+  object-fit: contain; object-position: right bottom;
+  background: transparent;
+  opacity: 0; transition: opacity 0.6s ease;
+  pointer-events: none;
+  /* Feather the left and top edges into the navy starfield; no hard rectangle. */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, #000 22%),
+    linear-gradient(to bottom, transparent 0, #000 22%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0, #000 22%),
+    linear-gradient(to bottom, transparent 0, #000 22%);
+  mask-composite: intersect;
+}
+.space-backdrop__video.is-playing { opacity: 1; }
+/* Navy overlay keeps sidebar, top bar, glass cards and labels readable. */
+.space-backdrop__overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(4, 10, 24, 0.55), rgba(4, 10, 24, 0.7));
+}
+
+@utility glass {
+  background: var(--color-glass);
+  border: 1px solid var(--color-cyan-line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@utility led {
+  display: inline-block; height: 8px; width: 8px; border-radius: 9999px;
+  background: var(--color-led); box-shadow: 0 0 6px 1px rgba(52, 211, 153, 0.8);
+  @media (prefers-reduced-motion: no-preference) { animation: led-pulse 2.4s ease-in-out infinite; }
+}
+@keyframes led-pulse { 50% { opacity: 0.55; } }
+/* LED state variants (unlayered so they override the base utility). */
+.led.led-warn { background: #fbbf24; box-shadow: 0 0 6px 1px rgba(251, 191, 36, 0.8); }
+.led.led-off { background: #64748b; box-shadow: none; animation: none; }
+
+/* Visible keyboard focus everywhere. */
+:where(a, button, select, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 2px;
+}
