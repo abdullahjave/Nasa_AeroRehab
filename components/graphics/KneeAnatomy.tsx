@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import KneeAnatomySvg from "./KneeAnatomySvg";
-import { KNEE_IMG as K, rotateAboutPivot } from "@/lib/knee-render";
+import { KNEE_IMG as K, KNEE_PHOTO as P, rotateAboutPivot } from "@/lib/knee-render";
 import type { Sensor } from "@/lib/demo";
 
 // Knee view built from local renders of the supplied skeleton model (see tools/render and assets/ATTRIBUTIONS.md).
@@ -10,6 +10,7 @@ import type { Sensor } from "@/lib/demo";
 // Fallbacks: layers -> static knee-side.webp -> original SVG illustration. The angle arc, sensor patches, LEDs and
 // labels are a separate UI overlay drawn on top; nothing in the renders contains UI.
 
+const PHOTO = "/images/knee-anatomy.webp";
 const IMG = { femur: "/images/knee-femur.webp", tibia: "/images/knee-tibia.webp", patella: "/images/knee-patella.webp", side: "/images/knee-side.webp" };
 
 // Clip and soften the render edges (the tibia swings out of frame at high flexion).
@@ -40,7 +41,9 @@ type Props = {
 
 export default function KneeAnatomy({ angle, thigh, shank, className = "", overlay = true }: Props) {
   const uid = useId().replace(/:/g, "");
-  const [mode, setMode] = useState<"layers" | "static" | "svg">("layers");
+  const [mode, setMode] = useState<"photo" | "layers" | "static" | "svg">("photo");
+
+  if (mode === "photo") return <KneePhoto angle={angle} thigh={thigh} shank={shank} overlay={overlay} className={className} onFail={() => setMode("layers")} />;
 
   if (mode === "svg") {
     return <KneeAnatomySvg angle={angle} thigh={thigh} shank={shank} overlay={overlay} className={className} />;
@@ -128,6 +131,79 @@ export default function KneeAnatomy({ angle, thigh, shank, className = "", overl
           <text x="10" y="676" fontSize="23" fill="#e2e8f0">Shank IMU</text>
           <circle cx="20" cy="700" r="7" fill={ledColor(shank)} />
           <text x="36" y="708" fontSize="20" fill={ledColor(shank)}>{ledText(shank)}</text>
+        </svg>
+      )}
+    </div>
+  );
+}
+
+/** Supplied knee illustration with the angle arc, IMU patches, LEDs and labels as a separate overlay. */
+function KneePhoto({ angle, thigh, shank, overlay, className, onFail }: { angle: number | null; thigh?: Sensor; shank?: Sensor; overlay: boolean; className: string; onFail: () => void }) {
+  const uid = useId().replace(/:/g, "");
+  const ok = angle !== null;
+  const { pivot } = P;
+  const R = 138;
+  const rad = (d: number) => (d * Math.PI) / 180;
+  // Directions are degrees from straight down, positive toward the anterior (right) side.
+  // Rounded so server and client render identical attribute strings (no hydration mismatch).
+  const r3 = (n: number) => Math.round(n * 1000) / 1000;
+  const at = (deg: number, r: number) => ({ x: r3(pivot.x + r * Math.sin(rad(deg))), y: r3(pivot.y + r * Math.cos(rad(deg))) });
+  const a0 = P.femurAxisDeg;
+  const a1 = a0 - (angle ?? 0);
+  const s = at(a0, R);
+  const e = at(a1, R);
+  const axisEnd = at(a0, 330);
+  const sweep = Math.min(angle ?? 0, 359);
+  const mid = at(a0 - sweep / 2, R + 34);
+  const badge = { x: 626, y: 760 };
+  const tp = P.thighPatch;
+  const sp = P.shankPatch;
+  return (
+    <div className={`relative aspect-[3/4] ${className}`}>
+      <div className="absolute inset-0 overflow-hidden" style={{ maskImage: EDGE_FADE, WebkitMaskImage: EDGE_FADE }}>
+        <div className="absolute inset-0" style={{ maskImage: "linear-gradient(to bottom, #000 0, #000 88%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, #000 0, #000 88%, transparent 100%)" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={PHOTO} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full select-none" style={{ mixBlendMode: "screen" }} draggable={false}
+            onError={onFail} ref={(el) => failedEarly(el, onFail)} />
+        </div>
+      </div>
+      {overlay && (
+        <svg viewBox={`0 0 ${P.w} ${P.h}`} className="pointer-events-none absolute inset-0 h-full w-full" role="img"
+          aria-label={ok ? `Side view of the knee, measured flexion ${angle} degrees. The illustration is static; the arc shows the measurement.` : "Side view of the knee, angle unavailable"}>
+          <defs>
+            <filter id={`${uid}-glow`} x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="5" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+          {/* straight-leg reference: the femur axis continued past the knee */}
+          <line x1={pivot.x} y1={pivot.y} x2={axisEnd.x} y2={axisEnd.y} stroke="#94a3b8" strokeOpacity="0.7" strokeDasharray="8 9" strokeWidth="3" />
+          <circle cx={pivot.x} cy={pivot.y} r="8" fill="#041224" stroke="#22d3ee" strokeWidth="3.5" />
+          {ok && (
+            <>
+              <path d={`M ${s.x} ${s.y} A ${R} ${R} 0 ${sweep > 180 ? 1 : 0} 1 ${e.x} ${e.y}`} fill="none" stroke="#22d3ee" strokeWidth="6" strokeLinecap="round" />
+              <circle cx={e.x} cy={e.y} r="9" fill="#22d3ee" />
+              <line x1={mid.x + 8} y1={mid.y + 4} x2={badge.x - 46} y2={badge.y - 8} stroke="#22d3ee" strokeOpacity="0.5" strokeWidth="2" />
+              <rect x={badge.x - 54} y={badge.y - 27} width="108" height="54" rx="27" fill="#041224" fillOpacity="0.9" stroke="#22d3ee" strokeOpacity="0.75" strokeWidth="2.5" />
+              <text x={badge.x} y={badge.y + 12} textAnchor="middle" fontSize="34" fontWeight="700" fill="#67e8f9">{angle}&deg;</text>
+            </>
+          )}
+
+          {/* thigh IMU patch on the femur, shank IMU patch on the tibia */}
+          <g transform={`rotate(${tp.rotDeg} ${tp.x} ${tp.y})`}><rect x={tp.x - 20} y={tp.y - 56} width="40" height="112" rx="13" fill="#0b1d36" fillOpacity="0.88" stroke="#38bdf8" strokeWidth="3.5" /></g>
+          <circle cx={tp.x} cy={tp.y} r="11" fill={ledColor(thigh)} filter={`url(#${uid}-glow)`} />
+          <g transform={`rotate(${sp.rotDeg} ${sp.x} ${sp.y})`}><rect x={sp.x - 20} y={sp.y - 52} width="40" height="104" rx="13" fill="#0b1d36" fillOpacity="0.88" stroke="#38bdf8" strokeWidth="3.5" /></g>
+          <circle cx={sp.x} cy={sp.y} r="11" fill={ledColor(shank)} filter={`url(#${uid}-glow)`} />
+
+          {/* labels with leader lines, in the empty right-hand margin */}
+          <line x1="548" y1="112" x2={tp.x + 24} y2={tp.y - 20} stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="2.5" />
+          <text x="552" y="96" fontSize="30" fill="#e2e8f0">Thigh IMU</text>
+          <circle cx="562" cy="128" r="9" fill={ledColor(thigh)} />
+          <text x="580" y="136" fontSize="26" fill={ledColor(thigh)}>{ledText(thigh)}</text>
+
+          <line x1="556" y1="930" x2={sp.x + 26} y2={sp.y + 30} stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="2.5" />
+          <text x="560" y="954" fontSize="30" fill="#e2e8f0">Shank IMU</text>
+          <circle cx="570" cy="984" r="9" fill={ledColor(shank)} />
+          <text x="588" y="992" fontSize="26" fill={ledColor(shank)}>{ledText(shank)}</text>
         </svg>
       )}
     </div>

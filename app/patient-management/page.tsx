@@ -1,11 +1,8 @@
-﻿import type { Metadata } from "next";
-import PagePlaceholder from "@/components/PagePlaceholder";
-import { NAV_ITEMS } from "@/lib/nav";
+import type { Metadata } from "next";
+import PatientManagement from "@/components/patients/PatientManagement";
 
-export const metadata: Metadata = {
-  title: NAV_ITEMS.find((n) => n.href === "/patient-management")!.label + " | AeroRehab",
-};
+export const metadata: Metadata = { title: "Patient Management | AeroRehab" };
 
 export default function Page() {
-  return <PagePlaceholder href="/patient-management" />;
+  return <PatientManagement />;
 }

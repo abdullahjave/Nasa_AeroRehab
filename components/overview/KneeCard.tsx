@@ -57,7 +57,7 @@ export default function KneeCard({ astronaut, session }: { astronaut: AstronautR
       <div className="grid flex-1 gap-3 md:grid-cols-[300px_1fr]">
         <div className="flex flex-col gap-2">
           <KneeAnatomy angle={knee.currentAngleDeg} thigh={thigh} shank={shank} className="mx-auto w-full max-w-[300px]" />
-          <p className="text-center text-[10px] leading-tight text-slate-500">Bone model: &ldquo;Human Skeleton&rdquo; by Terrie, CC BY 4.0 (via Sketchfab)</p>
+          <p className="text-center text-[10px] leading-tight text-slate-500">Static knee illustration (supplied artwork); arc and labels are live</p>
           <div className="grid grid-cols-3 gap-2">
             <Stat label="Current flexion" value={knee.currentAngleDeg} digits={1} unit="°" big />
             <Stat label="Peak flexion" value={knee.peakFlexionDeg} unit="°" sub="Session maximum" big />

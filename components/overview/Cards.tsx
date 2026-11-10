@@ -1,25 +1,26 @@
 import Panel, { Chip, Stat } from "@/components/ui/Panel";
 import GaugeRing from "@/components/ui/GaugeRing";
-import Footprints, { PressureLegend } from "@/components/graphics/Footprints";
 import WalkingFigure from "@/components/graphics/WalkingFigure";
+import PhotoPose from "@/components/graphics/PhotoPose";
 import AstronautImage from "@/components/graphics/AstronautImage";
+import CrewPortrait from "@/components/graphics/CrewPortrait";
 import { fmt, fmtSigned } from "@/lib/format";
-import { peakPressure } from "@/lib/demo";
-import type { AstronautRecord, Insight, Mission, OverviewMetrics, Session } from "@/lib/demo";
+import { REDUCED_ROM_DEMO } from "@/lib/insights/config";
+import type { InsightView } from "@/lib/insights";
+import type { AstronautRecord, Mission, OverviewMetrics, Session } from "@/lib/demo";
 
 const CYAN = "#22d3ee";
 const GREEN = "#34d399";
 
 const kisLabel = (v: number | null) => (v === null ? null : v >= 90 ? "Excellent" : v >= 80 ? "Good" : "Fair");
 const readinessLabel = (v: number | null) => (v === null ? null : v >= 90 ? "Ready" : v >= 80 ? "Nearly ready" : "Limited");
-const balanceLabel = (v: number | null) => (v === null ? null : v >= 85 ? "Stable" : v >= 70 ? "Moderate" : "Unstable");
 
 export function ProfileCard({ a, mission }: { a: AstronautRecord; mission: Mission }) {
   const p = a.profile;
   return (
     <Panel id="profile" title="Astronaut Profile" icon="user" className="h-full">
       <div className="flex items-stretch gap-3">
-        <div className="h-28 w-24 shrink-0 overflow-hidden rounded-md bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/30"><AstronautImage className="h-full w-full" label={`${p.displayName}: astronaut portrait (render of the supplied 3D model, not a photo of the person)`} /></div>
+        <div className="h-28 w-24 shrink-0 overflow-hidden rounded-md bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/30"><CrewPortrait profile={p} className="h-full w-full text-3xl" /></div>
         <dl className="min-w-0 space-y-1 text-xs">
           <div className="flex gap-1"><dt className="text-slate-400">ID:</dt><dd className="text-white">{p.crewCode}</dd></div>
           <div className="flex gap-1"><dt className="text-slate-400">Role:</dt><dd className="text-white">{p.role}</dd></div>
@@ -53,11 +54,11 @@ export function ReadinessCard({ o }: { o: OverviewMetrics }) {
   const label = readinessLabel(o.readinessPct);
   return (
     <Panel id="readiness" title="Mission Readiness" className="h-full">
-      <div className="flex flex-1 items-center gap-3">
-        <GaugeRing value={o.readinessPct} max={100} color={GREEN} ariaLabel={`Mission readiness ${o.readinessPct} percent`} size="h-24 w-24" />
-        <div>
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+        <GaugeRing value={o.readinessPct} max={100} color={GREEN} ariaLabel={`Mission readiness ${o.readinessPct} percent`} size="h-20 w-20" />
+        <div className="min-w-0">
           {o.readinessPct === null ? <p className="text-sm text-amber-200">Unavailable</p> : (
-            <p className="text-3xl font-semibold tabular-nums text-white">{o.readinessPct}%</p>
+            <p className="text-2xl font-semibold tabular-nums text-white">{o.readinessPct}%</p>
           )}
           {label && <Chip>{label}</Chip>}
         </div>
@@ -66,13 +67,22 @@ export function ReadinessCard({ o }: { o: OverviewMetrics }) {
   );
 }
 
-export function BaselineCard({ o }: { o: OverviewMetrics }) {
-  const d = o.baselineDeviationPct;
-  const within = d !== null && Math.abs(d) <= 5;
+/**
+ * Baseline deviation = the same ROM comparison that AI Insights and Joint Analytics use (insightView), for the shown
+ * session. It is only available when the baseline matches the session's knee side and protocol.
+ */
+export function BaselineCard({ view }: { view: InsightView }) {
+  const rom = view.rom;
+  const has = rom.pct.kind === "value" && rom.baseline.kind === "value" && rom.current.kind === "value";
+  const limit = Math.abs(REDUCED_ROM_DEMO.thresholdPct);
+  const within = has && Math.abs((rom.pct as { value: number }).value) <= limit;
   return (
     <Panel id="baseline" title="Baseline Deviation" className="h-full">
-      {d === null ? (
-        <p className="text-sm text-amber-200">Unavailable</p>
+      {!has ? (
+        <>
+          <p className="text-sm text-amber-200">Unavailable</p>
+          <p className="text-[11px] text-slate-300">No baseline recorded for this session&rsquo;s knee side and protocol, so no comparison is made.</p>
+        </>
       ) : (
         <div className="flex items-center gap-3">
           <span className={`flex h-9 w-9 items-center justify-center rounded-full ${within ? "bg-emerald-400/20 text-emerald-300" : "bg-amber-300/20 text-amber-200"}`} aria-hidden="true">
@@ -80,7 +90,8 @@ export function BaselineCard({ o }: { o: OverviewMetrics }) {
           </span>
           <div>
             <p className={`text-base font-semibold ${within ? "text-emerald-300" : "text-amber-200"}`}>{within ? "Within Baseline" : "Outside Baseline"}</p>
-            <p className="text-xs text-slate-300">{fmtSigned(d, "%", 1)} vs personal baseline (limit &plusmn;5%)</p>
+            <p className="text-xs text-slate-300">ROM {fmtSigned((rom.pct as { value: number }).value, "%", 1)} vs Day {view.baselineDay} baseline (limit &plusmn;{limit}%, demo)</p>
+            <p className="text-[10px] text-slate-400">{fmt((rom.current as { value: number }).value, "°")} now vs {fmt((rom.baseline as { value: number }).value, "°")} baseline &middot; {view.context.side} knee</p>
           </div>
         </div>
       )}
@@ -109,25 +120,6 @@ export function ActivityCard({ o }: { o: OverviewMetrics }) {
   );
 }
 
-export function RehabStatusCard({ o }: { o: OverviewMetrics }) {
-  const r = o.rehab;
-  return (
-    <Panel id="rehab" title="Rehabilitation Status" href="/rehabilitation" linkLabel="Plan" className="h-full">
-      <div className="flex items-center gap-2">
-        <svg viewBox="0 0 24 24" className="h-7 w-7 text-cyan-300" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M4 20h16M7 20V12M12 20V6M17 20v-5" /></svg>
-        <div>
-          <p className="text-base font-semibold text-emerald-300">{r.progressPct === null ? "Unavailable" : r.statusLabel}</p>
-          <p className="text-[11px] text-slate-300">{r.deltaVsLastPct === null ? "" : `${fmtSigned(r.deltaVsLastPct, "%", 0)} vs last session`} &middot; {fmt(r.progressPct, "%")} complete</p>
-        </div>
-      </div>
-      <div className="mt-2 h-1.5 rounded-full bg-slate-700/60" role="img" aria-label={`Rehab ${r.progressPct} percent complete`}>
-        <div className="h-full rounded-full bg-emerald-400" style={{ width: `${r.progressPct ?? 0}%` }} />
-      </div>
-      <p className="mt-1 text-[11px] text-slate-400">{r.phase} &middot; Week {r.week}/{r.totalWeeks}</p>
-    </Panel>
-  );
-}
-
 export function GaitPreviewCard({ a, s }: { a: AstronautRecord; s: Session }) {
   const g = s.gait;
   return (
@@ -150,99 +142,10 @@ export function GaitPreviewCard({ a, s }: { a: AstronautRecord; s: Session }) {
             <Stat label="Cadence" value={g.cadenceSpm} unit="steps/min" />
             <Stat label="Stride Length" value={g.strideLengthM} digits={2} unit="m" />
           </div>
-          <WalkingFigure p={5} scale={g.curveScale} className="h-full min-h-[18rem] w-44" ariaLabel={`Walking figure for ${a.profile.displayName}`} />
+          <PhotoPose src="/images/gait-walk-overview.webp" alt="Walking pose illustration (toe-off, supplied artwork; not live data)" className="h-full min-h-[18rem] w-44" blend={false}
+            fallback={<WalkingFigure p={5} scale={g.curveScale} className="h-full min-h-[18rem] w-44" ariaLabel={`Walking figure for ${a.profile.displayName}`} />} />
         </div>
       )}
-    </Panel>
-  );
-}
-
-export function PressureCard({ s }: { s: Session }) {
-  const p = s.pressure;
-  const l = s.loadSplit;
-  const peaks = p ? [peakPressure(p.left), peakPressure(p.right)].filter((v): v is number => v !== null) : [];
-  const peak = peaks.length ? Math.max(...peaks) : null;
-  return (
-    <Panel id="pressure" title="Load & Pressure" icon="foot" href="/load-pressure" linkLabel="Load details" className="h-full">
-      <div className="flex flex-1 items-center gap-2">
-        <PressureLegend className="h-44 w-12 shrink-0" />
-        <Footprints left={p?.left ?? null} right={p?.right ?? null} className="h-44 w-36 shrink-0" />
-        <div className="min-w-0 space-y-2">
-          <div>
-            <p className="text-[11px] text-slate-300">Weight Distribution</p>
-            {l === null ? <p className="text-sm text-amber-200">Unavailable</p> : (
-              <p className="text-lg font-semibold tabular-nums text-white">{l.leftPct}% <span className="text-[11px] font-normal text-slate-400">Left</span> &nbsp;{l.rightPct}% <span className="text-[11px] font-normal text-slate-400">Right</span></p>
-            )}
-          </div>
-          <div>
-            <p className="text-[11px] text-slate-300">Peak Pressure</p>
-            <p className={`font-semibold tabular-nums ${peak === null ? "text-sm text-amber-200" : "text-xl text-white"}`}>{peak === null ? "Unavailable" : <>{peak} <span className="text-xs font-normal text-slate-300">kPa</span></>}</p>
-          </div>
-        </div>
-      </div>
-    </Panel>
-  );
-}
-
-const RADAR_LABELS = ["Forward", "Backward", "Right", "Lateral", "Left"]; // clockwise from top
-const RADAR_INDEX = [0, 1, 3, 4, 2]; // into balanceAxes [forward, backward, left, right, lateral]
-
-export function BalanceCard({ s }: { s: Session }) {
-  const b = s.balanceIndex;
-  const axes = s.balanceAxes;
-  const cx = 88;
-  const cy = 66;
-  const R = 46;
-  const pt = (i: number, f: number) => {
-    const ang = ((-90 + i * 72) * Math.PI) / 180;
-    return [cx + R * f * Math.cos(ang), cy + R * f * Math.sin(ang)] as const;
-  };
-  const ring = (f: number) => [0, 1, 2, 3, 4].map((i) => pt(i, f).join(",")).join(" ");
-  const label = balanceLabel(b);
-  return (
-    <Panel id="balance" title="Stability & Balance" icon="balance" href="/stability-balance" linkLabel="Stability" className="h-full">
-      <div className="flex flex-1 items-center gap-3">
-        <svg viewBox="0 0 176 132" className="h-32 w-44 shrink-0" role="img" aria-label={axes ? "Balance radar chart" : "Balance radar unavailable"}>
-          {[0.33, 0.66, 1].map((f) => <polygon key={f} points={ring(f)} fill="none" stroke="rgba(148,163,184,0.3)" />)}
-          {[0, 1, 2, 3, 4].map((i) => <line key={i} x1={cx} y1={cy} x2={pt(i, 1)[0]} y2={pt(i, 1)[1]} stroke="rgba(148,163,184,0.25)" />)}
-          {axes && (
-            <polygon points={[0, 1, 2, 3, 4].map((i) => pt(i, axes[RADAR_INDEX[i]] / 100).join(",")).join(" ")} fill="rgba(34,211,238,0.25)" stroke={CYAN} strokeWidth="1.8" />
-          )}
-          {RADAR_LABELS.map((t, i) => {
-            const [x, y] = pt(i, 1.25);
-            return <text key={t} x={x} y={y + 3} textAnchor={i === 0 || i === 3 ? "middle" : i < 3 ? "start" : "end"} fontSize="8.5" fill="#cbd5e1">{t}</text>;
-          })}
-          {!axes && <text x={cx} y={cy + 3} textAnchor="middle" fontSize="10" fill="#fde68a">Unavailable</text>}
-        </svg>
-        <div>
-          <p className="text-[11px] text-slate-300">Balance Index</p>
-          {b === null ? <p className="text-sm text-amber-200">Unavailable</p> : (
-            <p className="text-3xl font-semibold tabular-nums text-white">{b}<span className="ml-1 text-sm font-normal text-slate-300">/100</span></p>
-          )}
-          {label ? <Chip>{label}</Chip> : <p className="text-[11px] text-slate-400">Not calibrated</p>}
-        </div>
-      </div>
-    </Panel>
-  );
-}
-
-export function InsightCard({ insight, session }: { insight: Insight; session: Session | undefined }) {
-  const watch = insight.severity === "watch";
-  return (
-    <Panel id="insight" title="AI Health Insights" icon="brain" href="/ai-insights" linkLabel="AI insights" className="h-full">
-      <div className={`flex-1 rounded-md border p-3 ${watch ? "border-amber-300/70 bg-amber-300/5" : "border-cyan-300/50 bg-cyan-300/5"}`}>
-        <div className="flex items-start gap-2">
-          <svg viewBox="0 0 24 24" className={`mt-0.5 h-5 w-5 shrink-0 ${watch ? "text-amber-300" : "text-cyan-300"}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d={watch ? "M12 3l10 18H2zM12 10v5M12 18v.5" : "M5 13l4 4 10-10"} />
-          </svg>
-          <div>
-            <p className={`text-sm font-semibold ${watch ? "text-amber-200" : "text-cyan-200"}`}>{insight.title}</p>
-            <p className="mt-0.5 text-xs text-slate-200">{insight.body}</p>
-            {insight.recommendation && <p className="mt-1.5 text-xs text-slate-300"><span className="text-amber-200">Recommendation: </span>{insight.recommendation}</p>}
-          </div>
-        </div>
-        <p className="mt-2 text-[10px] text-slate-400">Simulated &middot; {insight.generatedAt}{session ? ` · from ${session.id}` : ""}</p>
-      </div>
     </Panel>
   );
 }

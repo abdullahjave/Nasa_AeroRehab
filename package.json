@@ -9,7 +9,8 @@
     "lint": "eslint",
     "css": "node scripts/build-css.mjs",
     "css:watch": "node scripts/dev.mjs --css-only",
-    "prebuild": "npm run css"
+    "prebuild": "npm run css",
+    "test": "node scripts/run-tests.mjs"
   },
   "dependencies": {
     "next": "16.4.5",

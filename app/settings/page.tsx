@@ -1,5 +1,6 @@
-﻿import type { Metadata } from "next";
-import PagePlaceholder from "@/components/PagePlaceholder";
+import type { Metadata } from "next";
+import Settings from "@/components/settings/Settings";
+import { backdropAssets } from "@/lib/backdrop-assets";
 import { NAV_ITEMS } from "@/lib/nav";
 
 export const metadata: Metadata = {
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PagePlaceholder href="/settings" />;
+  return <Settings assets={backdropAssets()} />;
 }

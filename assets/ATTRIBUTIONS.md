@@ -31,3 +31,21 @@
 
 The four knee images share one camera and canvas, so one coordinate system (`lib/knee-render.ts`) aligns the UI
 overlay (angle arc, sensor patches, LEDs, labels) to all of them.
+
+## Supplied artwork (added by the project owner, Nov 2026)
+These files were placed in `public/images/` by the owner. Their original source and licence are NOT recorded and were not
+provided (several carry a small sparkle watermark in a corner, which suggests an AI image generator). Confirm the licence
+and terms of use before publishing. The originals are kept untouched; the files below were derived from them.
+
+| Derived file (used by the app) | Made from (kept as is) | What was done |
+|---|---|---|
+| `astronaut-portrait.webp` | `Astronaut_wearing_space_suit_..._2K-removebg-preview.png` | Converted to WebP (transparent background) |
+| `astronaut-balance.webp` | `astronaut.webp` (owner-replaced, checkerboard baked into the pixels) | Checkerboard keyed out, cropped to the figure, transparent PNG-style alpha |
+| `knee-anatomy.webp` | `Medical_illustration_of_human_knee.jpg` | Cropped to 3:4 (top 2048 px, below the watermark), resized to 768x1024 |
+| `knee-joint-front.webp` | `Joint Anylatic.jpg` | Cropped around the joint, resized to 372x570 |
+| `gait-phase-preswing.webp` | `Step3.jpg` | Cropped to the figure (watermark excluded), resized |
+| `gait-walk-overview.webp` | `Step1.png` | Trimmed to the figure, converted to WebP |
+| Foot clip path in `components/graphics/Footprints.tsx` | `Barefoot_for Loadand presure.png` | Left-foot contour traced, smoothed and fitted to the sensor layout |
+
+The earlier Sketchfab bone renders (`knee-side/femur/tibia/patella.webp`) were removed from `public/images/` by the owner; the
+knee view now uses `knee-anatomy.webp`. The Terrie / CC BY 4.0 credit above only applies if those renders are restored.

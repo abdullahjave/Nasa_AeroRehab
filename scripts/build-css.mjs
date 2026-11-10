@@ -44,7 +44,11 @@ export async function buildCss() {
   const candidates = new Set();
   for (const dir of SCAN_DIRS) {
     for (const f of walk(dir)) {
-      for (const t of readFileSync(f, "utf8").split(/[\s"'`<>={}()]+/)) if (t) candidates.add(t);
+      const text = readFileSync(f, "utf8");
+      // Whole tokens keep parentheses (e.g. grid-cols-[200px_minmax(0,1fr)]); the paren-split pieces are also added
+      // for code like cn("a", "b"). Tailwind ignores candidates that are not utilities.
+      for (const t of text.split(/[\s"'`<>={}]+/)) if (t) candidates.add(t);
+      for (const t of text.split(/[\s"'`<>={}()]+/)) if (t) candidates.add(t);
     }
   }
   const compiler = await compile(readFileSync(SOURCE_CSS, "utf8"), {

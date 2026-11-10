@@ -63,6 +63,12 @@ body { font-family: var(--font-geist-sans), system-ui, sans-serif; }
   background: linear-gradient(180deg, rgba(4, 10, 24, 0.55), rgba(4, 10, 24, 0.7));
 }
 
+/* Reduced motion (system setting or the Display Settings switch, mirrored on <html> by SpaceBackdrop). */
+html[data-reduce-motion="true"] *, html[data-reduce-motion="true"] *::before, html[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+}
+
 @utility glass {
   background: var(--color-glass);
   border: 1px solid var(--color-cyan-line);
@@ -84,4 +90,16 @@ body { font-family: var(--font-geist-sans), system-ui, sans-serif; }
 :where(a, button, select, input, textarea, [tabindex]):focus-visible {
   outline: 2px solid #67e8f9;
   outline-offset: 2px;
+}
+
+/* Print (Reports > Save PDF): only the report document, on white, no navigation/video/controls. */
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; color: #0f172a !important; }
+  .space-backdrop, aside, body header.glass.sticky, .no-print, nextjs-portal { display: none !important; }
+  main { padding: 0 !important; }
+  .report-doc { box-shadow: none !important; max-width: none !important; padding: 0 !important; border-radius: 0 !important; }
+  .avoid-break { break-inside: avoid; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
 }

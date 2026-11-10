@@ -1,11 +1,8 @@
-﻿import type { Metadata } from "next";
-import PagePlaceholder from "@/components/PagePlaceholder";
-import { NAV_ITEMS } from "@/lib/nav";
+import type { Metadata } from "next";
+import Reports from "@/components/reports/Reports";
 
-export const metadata: Metadata = {
-  title: NAV_ITEMS.find((n) => n.href === "/reports")!.label + " | AeroRehab",
-};
+export const metadata: Metadata = { title: "Reports | AeroRehab" };
 
 export default function Page() {
-  return <PagePlaceholder href="/reports" />;
+  return <Reports />;
 }

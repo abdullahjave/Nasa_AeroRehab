@@ -1,11 +1,12 @@
-﻿import type { Metadata } from "next";
-import PagePlaceholder from "@/components/PagePlaceholder";
-import { NAV_ITEMS } from "@/lib/nav";
+import type { Metadata } from "next";
+import fs from "node:fs";
+import path from "node:path";
+import StabilityBalance from "@/components/balance/StabilityBalance";
 
-export const metadata: Metadata = {
-  title: NAV_ITEMS.find((n) => n.href === "/stability-balance")!.label + " | AeroRehab",
-};
+export const metadata: Metadata = { title: "Stability & Balance | AeroRehab" };
 
 export default function Page() {
-  return <PagePlaceholder href="/stability-balance" />;
+  // Checked when the page renders (build time in production) so a missing artwork file never causes a failed request.
+  const hasBalanceArt = fs.existsSync(path.join(process.cwd(), "public/images/astronaut-balance.webp"));
+  return <StabilityBalance hasBalanceArt={hasBalanceArt} />;
 }

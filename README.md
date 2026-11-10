@@ -23,8 +23,8 @@ compiler into `app/globals.css` (generated, committed). It runs automatically be
 on machines where Tailwind's native binary is blocked.
 
 ## Assets
-- `public/images/*.webp` are renders made locally from 3D models (see `assets/ATTRIBUTIONS.md` and `tools/render`).
-- Knee bone model: "Human Skeleton" by Terrie, CC BY 4.0 (via Sketchfab).
+- `public/images/*.webp` are derived from the artwork supplied by the project owner (see `assets/ATTRIBUTIONS.md`). Original source and licence are not recorded; confirm before publishing.
+- The old Sketchfab knee renders (Terrie, CC BY 4.0) are no longer in `public/images/`.
 - `public/models/astronaut.glb`: source and licence not recorded yet. Confirm before publishing.
 - Optional background video: add `public/videos/space-loop.mp4` (and `public/images/space-backdrop.webp` as poster).
   Without them the app uses a CSS starfield.

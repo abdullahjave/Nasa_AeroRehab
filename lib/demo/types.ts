@@ -1,3 +1,6 @@
+import type { PressureSpec } from "../pressure/simulate";
+import type { BalanceTrialSpec } from "../balance/simulate";
+
 // Shared simulated dataset types. Every reading that can be missing is `number | null`;
 // the UI renders null as "Unavailable" (never 0). All values are fixtures, not live data.
 
@@ -15,6 +18,8 @@ export type Sensor = {
   status: SensorStatus;
   /** 0-100, null when the sensor is offline. */
   battery: number | null;
+  /** Link signal 0-100. Optional: the demo fixtures do not provide it, and the UI never invents one. */
+  signalPct?: number | null;
 };
 
 export type AstronautProfile = {
@@ -31,6 +36,8 @@ export type AstronautProfile = {
   rehabFocus: string;
   affectedLimb: "left" | "right";
   initials: string;
+  /** Supplied portrait for this one astronaut (public path). Crew without one show initials, never another person's image. */
+  portrait?: string;
 };
 
 export type Mission = {
@@ -90,9 +97,7 @@ export type GaitData = {
   insight: { title: string; text: string };
 };
 
-export type ZoneKey = "hallux" | "toes" | "mt1" | "mt23" | "mt45" | "midfoot" | "heel";
-/** Plantar pressure per zone in kPa. null = insole unavailable for that zone. */
-export type PressureZones = Record<ZoneKey, number | null>;
+export type { ZoneKey } from "../pressure/types";
 
 export type ImuCalibration = {
   status: "valid" | "stale" | "unavailable";
@@ -100,6 +105,16 @@ export type ImuCalibration = {
   scaleFactor: number | null;
   tempC: number | null;
 };
+
+export type KneeMeasurementContext = {
+  side: "left" | "right";
+  movement: "knee-flexion-extension";
+  /** e.g. "active-knee-flexion", "loaded-knee-flexion", "balance-drill-knee-tracking". */
+  protocol: string;
+};
+
+/** Seeded scenario event (not computed from measurements). */
+export type ScenarioEvent = { id: string; tSec: number; label: string; detail: string };
 
 export type JointData = {
   /** Fixture: peak simulated torque at peak flexion. */
@@ -109,11 +124,35 @@ export type JointData = {
   symmetryPct: number | null;
   /** Other-knee summary. null when there is no bilateral data. */
   contralateral: { romDeg: number; torqueNm: number; peakVelDegS: number } | null;
-  /** Personal baseline for the instrumented knee. */
-  baseline: { peakFlexionDeg: number; romDeg: number; torqueNm: number; smoothnessPct: number } | null;
+  /** What the session's knee time series measures. Used to decide whether a baseline is comparable. */
+  measurement: KneeMeasurementContext;
+  /**
+   * Personal baseline for a knee. Comparable only when side, movement and protocol match `measurement`.
+   * `reference` parameters regenerate the baseline recording (simulated) for the repetition overlay.
+   */
+  baseline: (KneeMeasurementContext & {
+    peakFlexionDeg: number;
+    romDeg: number;
+    torqueNm: number;
+    smoothnessPct: number;
+    recordedMissionDay: number;
+    reference: { repPeriodSec: number; phase: number };
+  }) | null;
   cartilage: { peakMpa: number; limitMpa: number; medial: number; lateral: number; patellofemoral: number } | null;
   checks: string[];
   imu: { thigh: ImuCalibration; shank: ImuCalibration };
+};
+
+/** Labelled simulated fixtures: there is no documented scoring model behind these numbers. */
+export type SessionBalance = {
+  /** Demo Balance Index 0-100. null = not calibrated. */
+  index: number | null;
+  /** Demo status text shown next to the index. */
+  indexStatus: string;
+  /** Demo radar scores 0-100. */
+  profile: { staticBalance: number; dynamicBalance: number; vestibular: number; proprioception: number; trunk: number; reactive: number } | null;
+  /** Scenario flag for the demo. Not a clinical assessment. */
+  scenarioFlag: string | null;
 };
 
 export type Session = {
@@ -129,14 +168,18 @@ export type Session = {
   knee: KneeSummary;
   /** null = session has no gait data. */
   gait: GaitData | null;
-  pressure: { left: PressureZones; right: PressureZones } | null;
-  /** Percent of body load, left/right. null = insole unavailable. */
-  loadSplit: { leftPct: number; rightPct: number } | null;
-  /** Fixture score 0-100. null = not calibrated. */
-  balanceIndex: number | null;
-  /** Radar values 0-100: forward, backward, left, right, lateral. */
-  balanceAxes: [number, number, number, number, number] | null;
+  /**
+   * Parameters of the simulated plantar-pressure recording (null = none for this session). Samples, shares,
+   * peaks and CoP are all derived from these in lib/pressure; there are no separate load-split fixtures.
+   */
+  pressureSpec: PressureSpec | null;
+  /** Session-level balance demo fixtures. Sway metrics are computed from the trials in AstronautRecord.balanceTrials. */
+  balance: SessionBalance | null;
   joint: JointData;
+  /** Seeded demo scenario events on the session timeline. Measured events (data gaps) are derived separately. */
+  scenarioEvents: ScenarioEvent[];
+  /** Demo scenario fatigue output. null = no fatigue indicator for this session. */
+  fatigue: { pct: number; label: string } | null;
 };
 
 export type OverviewMetrics = {
@@ -144,23 +187,12 @@ export type OverviewMetrics = {
   kis: number | null;
   kisMax: 100;
   readinessPct: number | null;
-  /** Signed percent difference from personal baseline. */
-  baselineDeviationPct: number | null;
   dailyActivity: {
     steps: number | null;
     stepGoal: number;
     distanceKm: number | null;
     activeMinutes: number | null;
     hourly: number[];
-  };
-  rehab: {
-    progressPct: number | null;
-    deltaVsLastPct: number | null;
-    statusLabel: string;
-    phase: string;
-    week: number;
-    totalWeeks: number;
-    nextExercise: string;
   };
 };
 
@@ -174,17 +206,6 @@ export type TrendPoint = {
   movementScorePct: number | null;
 };
 
-export type Insight = {
-  id: InsightId;
-  astronautId: AstronautId;
-  /** Session this insight was derived from. */
-  sessionId: SessionId;
-  severity: "info" | "watch";
-  title: string;
-  body: string;
-  recommendation: string | null;
-  generatedAt: string;
-};
 
 export type AstronautRecord = {
   id: AstronautId;
@@ -194,5 +215,6 @@ export type AstronautRecord = {
   sessions: Session[]; // oldest -> newest; the last one is the latest
   overview: OverviewMetrics;
   trend: TrendPoint[];
-  insights: Insight[];
+  /** Simulated balance trials (single-leg stance), linked by sessionId; includes history days. */
+  balanceTrials: BalanceTrialSpec[];
 };

@@ -1,5 +1,3 @@
-import type { PressureZones, ZoneKey } from "./types";
-
 /** Shared colour scale for footprints and the legend (kPa). Blue -> cyan -> green -> yellow -> orange -> red. */
 export const PRESSURE_MAX_KPA = 250;
 export const PRESSURE_STOPS: { kpa: number; color: string }[] = [
@@ -30,11 +28,4 @@ export function pressureColor(kpa: number): string {
     }
   }
   return PRESSURE_STOPS[PRESSURE_STOPS.length - 1].color;
-}
-
-export const ZONE_KEYS: ZoneKey[] = ["hallux", "toes", "mt1", "mt23", "mt45", "midfoot", "heel"];
-
-export function peakPressure(zones: PressureZones): number | null {
-  const vals = ZONE_KEYS.map((k) => zones[k]).filter((v): v is number => v !== null);
-  return vals.length ? Math.max(...vals) : null;
 }

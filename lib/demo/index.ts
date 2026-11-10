@@ -1,5 +1,5 @@
 import { ASTRONAUTS, MISSION } from "./fixtures";
-import type { AstronautId, AstronautRecord, Insight, Session } from "./types";
+import type { AstronautId, AstronautRecord, Session } from "./types";
 
 export * from "./types";
 export * from "./knee";
@@ -22,11 +22,6 @@ export function getLatestSession(a: AstronautRecord): Session {
   return a.sessions[a.sessions.length - 1];
 }
 
-/** The newest insight, plus the session it was derived from. */
-export function getLatestInsight(a: AstronautRecord): { insight: Insight; session: Session | undefined } {
-  const insight = a.insights[a.insights.length - 1];
-  return { insight, session: a.sessions.find((s) => s.id === insight.sessionId) };
-}
 
 /** Sensors summary used by the sidebar status. */
 export function getSensorSummary(a: AstronautRecord) {

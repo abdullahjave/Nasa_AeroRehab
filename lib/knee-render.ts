@@ -27,3 +27,19 @@ export function rotateAboutPivot(p: { x: number; y: number }, deg: number) {
   const s = Math.sin(rad(deg));
   return { x: pivot.x + dx * c - dy * s, y: pivot.y + dx * s + dy * c };
 }
+
+/**
+ * Geometry of the supplied knee illustration (public/images/knee-anatomy.webp, 768 x 1024, lateral view, anterior = right).
+ * The picture is static, so only UI overlays move: sensor patches sit on the thigh and shank bones, and the angle arc is
+ * drawn from the femur axis (straight-leg line) by the measured flexion.
+ */
+export const KNEE_PHOTO = {
+  w: 768,
+  h: 1024,
+  /** Joint centre (femoral condyle / joint line). */
+  pivot: { x: 445, y: 548 },
+  /** Direction of the femur axis continued past the knee, degrees from straight down toward +x (anterior). */
+  femurAxisDeg: 43.5,
+  thighPatch: { x: 236, y: 214, rotDeg: -43.5 },
+  shankPatch: { x: 478, y: 842, rotDeg: -1 },
+} as const;

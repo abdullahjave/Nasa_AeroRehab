@@ -7,6 +7,7 @@ import Panel, { Chip, Stat } from "@/components/ui/Panel";
 import SessionPicker from "@/components/ui/SessionPicker";
 import GaugeRing from "@/components/ui/GaugeRing";
 import WalkingFigure from "@/components/graphics/WalkingFigure";
+import PhotoPose from "@/components/graphics/PhotoPose";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
 import { fmt, fmtSigned } from "@/lib/format";
 import { GAIT_PHASES, gaitCurveRows, getLatestSession, jointAnglesAt, phaseAt } from "@/lib/demo";
@@ -57,6 +58,16 @@ function Donut({ stance, swing }: { stance: number; swing: number }) {
       <text x="50" y="63" textAnchor="middle" fontSize="9" fill="#cbd5e1">Stance</text>
     </svg>
   );
+}
+
+/** Axis that fits the data: whole `step` multiples around min and max, so it never clips the series. */
+function axisFor(values: number[], step: number) {
+  const lo = Math.floor(Math.min(...values) / step + 1e-9) * step;
+  let hi = Math.ceil(Math.max(...values) / step - 1e-9) * step;
+  if (hi - lo < step * 2) hi = lo + step * 2;
+  const ticks: number[] = [];
+  for (let v = lo; v <= hi + 1e-9; v += step) ticks.push(Math.round(v * 1000) / 1000);
+  return { domain: [ticks[0], ticks[ticks.length - 1]] as [number, number], ticks };
 }
 
 export default function GaitAnalysis() {
@@ -213,7 +224,13 @@ export default function GaitAnalysis() {
                 return (
                   <button key={ph.key} type="button" aria-pressed={active} onClick={() => setP(ph.p)}
                     className={`flex flex-col items-center rounded-md border p-1 ${active ? "border-cyan-300 bg-cyan-400/15" : "border-cyan-400/20 hover:bg-white/5"}`}>
-                    <WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />
+                    {ph.key === "pre-swing" ? (
+                      // The only supplied walking pose that matches a phase: rear foot at toe-off, front foot flat (double support).
+                      <PhotoPose src="/images/gait-phase-preswing.webp" alt={`${ph.label} pose (supplied illustration)`} className="h-24 w-full"
+                        fallback={<WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />} />
+                    ) : (
+                      <WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />
+                    )}
                     <span className="text-center text-[11px] leading-tight text-slate-100">{ph.label}</span>
                     <span className="text-[10px] text-slate-400">{ph.p}%</span>
                   </button>
@@ -255,8 +272,8 @@ export default function GaitAnalysis() {
                     <LineChart data={g.strideSeries.strideLengthM.map((v, i) => ({ n: i + 1, len: v, step: g.strideSeries!.stepTimeS[i] }))} margin={{ top: 4, right: 4, bottom: 2, left: 0 }}>
                       <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
                       <XAxis dataKey="n" type="number" domain={[1, 30]} ticks={[1, 5, 10, 15, 20, 25, 30]} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} />
-                      <YAxis yAxisId="l" domain={[1.1, 1.4]} ticks={[1.1, 1.2, 1.3, 1.4]} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 10 }} stroke={C.cyan} width={38} />
-                      <YAxis yAxisId="r" orientation="right" domain={[0.5, 0.6]} ticks={[0.5, 0.52, 0.54, 0.56, 0.58, 0.6]} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 10 }} stroke={C.magenta} width={38} />
+                      <YAxis yAxisId="l" domain={axisFor(g.strideSeries.strideLengthM, 0.1).domain} ticks={axisFor(g.strideSeries.strideLengthM, 0.1).ticks} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 10 }} stroke={C.cyan} width={38} />
+                      <YAxis yAxisId="r" orientation="right" domain={axisFor(g.strideSeries.stepTimeS, 0.02).domain} ticks={axisFor(g.strideSeries.stepTimeS, 0.02).ticks} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 10 }} stroke={C.magenta} width={38} />
                       <Tooltip content={({ active, payload }) => {
                         const r = payload?.[0]?.payload as { n: number; len: number; step: number } | undefined;
                         if (!active || !r) return null;

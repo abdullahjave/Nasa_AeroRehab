@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import { pressureColor } from "@/lib/demo";
 
 /** Stylised astronaut (original illustration). `earth` adds a planet limb behind. */
@@ -104,11 +104,11 @@ export function OrientationGizmo({ roll, pitch, yaw, className = "" }: { roll: n
 export function JointLoadKnee({ medial, lateral, patellofemoral, className = "" }: { medial: number; lateral: number; patellofemoral: number; className?: string }) {
   const uid = useId().replace(/:/g, "");
   const col = (mpa: number) => pressureColor((mpa / 4) * 250);
-  const blobs = [
-    { id: "m", x: 40, y: 92, r: 22, v: medial },
-    { id: "l", x: 84, y: 92, r: 20, v: lateral },
-    { id: "p", x: 62, y: 56, r: 17, v: patellofemoral },
-  ];
+  const [photoFailed, setPhotoFailed] = useState(false);
+  // Blob centres sit on the medial / lateral femoral condyle contact and on the (ghost) patella of the supplied front view.
+  const blobs = photoFailed
+    ? [{ id: "m", x: 40, y: 92, r: 22, v: medial }, { id: "l", x: 84, y: 92, r: 20, v: lateral }, { id: "p", x: 62, y: 56, r: 17, v: patellofemoral }]
+    : [{ id: "m", x: 37, y: 98, r: 17, v: medial }, { id: "l", x: 75, y: 98, r: 17, v: lateral }, { id: "p", x: 66, y: 74, r: 13, v: patellofemoral }];
   return (
     <svg viewBox="0 0 124 190" className={className} role="img" aria-label={`Knee cartilage pressure: medial ${medial}, lateral ${lateral}, patellofemoral ${patellofemoral} megapascals`}>
       <defs>
@@ -122,6 +122,8 @@ export function JointLoadKnee({ medial, lateral, patellofemoral, className = "" 
         ))}
         <filter id={`${uid}-bl`}><feGaussianBlur stdDeviation="2" /></filter>
       </defs>
+      {photoFailed ? (
+        <>
       {/* femur */}
       <path d="M 44 4 L 80 4 C 82 30 84 50 96 70 C 106 92 100 110 86 112 L 62 106 L 38 112 C 22 110 18 92 28 70 C 40 50 42 30 44 4 Z" fill={`url(#${uid}-bone)`} stroke="#e0f2fe" />
       {/* tibia + fibula */}
@@ -132,6 +134,10 @@ export function JointLoadKnee({ medial, lateral, patellofemoral, className = "" 
       {/* menisci */}
       <path d="M 28 114 C 34 106 52 106 58 114 C 50 122 36 122 28 114 Z" fill="#22d3ee" fillOpacity="0.35" />
       <path d="M 68 114 C 74 106 92 106 98 114 C 90 122 76 122 68 114 Z" fill="#22d3ee" fillOpacity="0.35" />
+        </>
+      ) : (
+        <image href="/images/knee-joint-front.webp" x="0" y="0" width="124" height="190" preserveAspectRatio="xMidYMid slice" style={{ mixBlendMode: "screen" }} onError={() => setPhotoFailed(true)} />
+      )}
       <g filter={`url(#${uid}-bl)`}>
         {blobs.map((b) => <circle key={b.id} cx={b.x} cy={b.y} r={b.r} fill={`url(#${uid}-${b.id})`} />)}
       </g>

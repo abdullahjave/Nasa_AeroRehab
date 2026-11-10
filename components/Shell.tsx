@@ -7,10 +7,11 @@ import { NAV_ITEMS, isActive } from "@/lib/nav";
 import { useAstronaut } from "@/components/AstronautProvider";
 import { getSensorSummary } from "@/lib/demo";
 import { fmt } from "@/lib/format";
+import { usePlayback } from "@/components/settings/stores";
 
 function Icon({ d }: { d: string }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d={d} />
     </svg>
   );
@@ -55,7 +56,7 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
 }
 
 function ConnectionStatus() {
-  const { astronaut, mission } = useAstronaut();
+  const { astronaut, mission, hubConnected } = useAstronaut();
   const sum = getSensorSummary(astronaut);
   const battery = sum.lowestBattery;
   const label = sum.state === "all" ? "Sensors connected" : sum.state === "partial" ? "Sensors partial" : "Sensors offline";
@@ -65,7 +66,7 @@ function ConnectionStatus() {
         <span className={`led ${sum.state === "all" ? "" : sum.state === "partial" ? "led-warn" : "led-off"}`} aria-hidden="true" />
         <span>{label} ({sum.connected}/{sum.total})</span>
       </div>
-      <p className="text-slate-300">{mission.hubId} <span className="text-slate-500">&middot; simulated</span></p>
+      <p className="text-slate-300">{mission.hubId} <span className="text-slate-500">&middot; simulated{hubConnected ? "" : " · hub disconnected"}</span></p>
       <div className="flex items-center gap-2 text-slate-300">
         <span>Battery</span>
         <span className="relative h-3 w-8 rounded-[3px] border border-cyan-300/60 p-[1px]" role="img" aria-label={battery === null ? "Battery unavailable" : `Lowest sensor battery ${battery} percent`}>
@@ -83,6 +84,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { astronauts, mission, selectedId, select } = useAstronaut();
+  const playback = usePlayback();
 
   useEffect(() => {
     if (!open) return;
@@ -143,7 +145,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             </div>
           </dl>
           <div className="hidden items-center gap-3 text-xs text-slate-200 md:flex">
-            <span className="flex items-center gap-1.5"><span className="led" aria-hidden="true" />Simulated Monitoring</span>
+            <span className="flex items-center gap-1.5" aria-live="polite"><span className={`led ${playback === "running" ? "" : "led-warn"}`} aria-hidden="true" />{playback === "running" ? "Simulated Monitoring" : "Simulated Monitoring paused"}</span>
             <span className="tabular-nums text-slate-300">UTC {mission.displayClockUtc}</span>
             <svg viewBox="0 0 20 16" className="h-4 w-5 text-emerald-400" fill="currentColor" role="img" aria-label="Link strength: simulated, full">
               <rect x="1" y="10" width="3" height="5" rx="0.5" /><rect x="6" y="7" width="3" height="8" rx="0.5" /><rect x="11" y="4" width="3" height="11" rx="0.5" /><rect x="16" y="1" width="3" height="14" rx="0.5" />

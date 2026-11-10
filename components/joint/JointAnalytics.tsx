@@ -8,8 +8,11 @@ import SessionPicker from "@/components/ui/SessionPicker";
 import GaugeRing from "@/components/ui/GaugeRing";
 import KneeAnatomy from "@/components/graphics/KneeAnatomy";
 import { ImuChip, JointLoadKnee, OrientationGizmo } from "@/components/graphics/Misc";
+import { insightView } from "@/lib/insights";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
 import { fmt, fmtClock, fmtSigned } from "@/lib/format";
+import { fmtStamp } from "@/components/settings/parts";
+import { getLatestSession } from "@/lib/demo";
 import {
   IMU_WINDOW_SEC, PRESSURE_STOPS, angularAccelerationAt, angularVelocityAt, imuWindow, imuWindowStart, kneeAt,
   orientationAt, peakAngularVelocity, sessionEnd, torqueAt, type ImuPoint, type ImuSite,
@@ -99,14 +102,19 @@ function BaselineRow({ label, value, base, unit, digits = 0 }: { label: string; 
 }
 
 export default function JointAnalytics() {
-  const { astronaut, session } = useAstronaut();
+  const { astronaut, session, kneeSide, selectKneeSide, jointFocus, deviceState } = useAstronaut();
+  // Shared comparability rule (lib/insights): the baseline is used only for the same side, movement and protocol.
+  const insight = useMemo(() => insightView(astronaut, session), [astronaut, session]);
   const end = sessionEnd(session);
   const [cur, setCur] = useState<{ sid: string; t: number } | null>(null);
-  const t = cur && cur.sid === session.id ? cur.t : end;
+  // A "Review measurement" link can open the page at an event time for this session.
+  const focusT = jointFocus && jointFocus.sessionId === session.id ? jointFocus.tSec : null;
+  const t = cur && cur.sid === session.id ? cur.t : focusT ?? end;
   const setT = (v: number) => setCur({ sid: session.id, t: Math.max(0, Math.min(end, Math.round(v))) });
 
   const affected = astronaut.profile.affectedLimb;
-  const [side, setSide] = useState<"left" | "right" | null>(null);
+  const side = kneeSide;
+  const setSide = selectKneeSide;
   const shown = side ?? affected;
   const live = shown === affected;
   const [site, setSite] = useState<ImuSite>("shank");
@@ -134,7 +142,9 @@ export default function JointAnalytics() {
   }, [win, session, live]);
 
   const sensor = astronaut.sensors.find((s) => s.site === site);
-  const cal = j.imu[site];
+  // A simulated calibration run only changes the status and time shown for the current (latest) session.
+  const calRun = sensor && session.id === getLatestSession(astronaut).id ? deviceState?.sensors[sensor.id]?.calibration : undefined;
+  const cal = calRun ? { ...j.imu[site], status: "valid" as const } : j.imu[site];
   const thighS = astronaut.sensors.find((s) => s.site === "thigh");
   const shankS = astronaut.sensors.find((s) => s.site === "shank");
 
@@ -198,7 +208,7 @@ export default function JointAnalytics() {
                 </div>
               </div>
             </div>
-            <p className="mt-1 text-center text-[10px] text-slate-500">Bone model: &ldquo;Human Skeleton&rdquo; by Terrie, CC BY 4.0 (via Sketchfab). Overlays are live UI.</p>
+            <p className="mt-1 text-center text-[10px] text-slate-500">Knee illustration is static (supplied artwork). Arc, IMU patches and labels are live UI.</p>
           </Panel>
         </div>
 
@@ -247,7 +257,12 @@ export default function JointAnalytics() {
             )}
           </Panel>
           <Panel id="baseline" title="Personal Baseline" icon="chart">
-            {j.baseline === null ? <p className="text-sm text-amber-200">Unavailable</p> : (
+            {j.baseline === null || !insight.baselineComparable ? (
+              <div className="text-sm">
+                <p className="font-semibold text-amber-200">No comparable baseline</p>
+                <p className="text-xs text-slate-300">The stored baseline is for a different knee, movement or protocol ({insight.context.protocol}). Current: peak {knee.peakFlexionDeg ?? "Unavailable"}°, ROM {knee.romDeg ?? "Unavailable"}°.</p>
+              </div>
+            ) : (
               <div className="space-y-2">
                 <BaselineRow label="Peak flexion" value={live ? knee.peakFlexionDeg : null} base={j.baseline.peakFlexionDeg} unit="°" />
                 <BaselineRow label="ROM" value={live ? knee.romDeg : null} base={j.baseline.romDeg} unit="°" />
@@ -284,6 +299,7 @@ export default function JointAnalytics() {
               <dl className="space-y-1 text-xs">
                 <div className="flex justify-between gap-2"><dt className="text-slate-400">Connection</dt><dd className={sensor?.status === "offline" ? "text-slate-300" : sensor?.status === "low-battery" ? "text-amber-300" : "text-emerald-300"}>{sensor?.status === "offline" ? "Offline" : sensor?.status === "low-battery" ? `Low battery (${sensor.battery}%)` : `Online (${fmt(sensor?.battery ?? null, "%")})`}</dd></div>
                 <div className="flex justify-between gap-2"><dt className="text-slate-400">Calibration</dt><dd className={cal.status === "valid" ? "text-emerald-300" : "text-amber-300"}>{cal.status === "valid" ? "✓ Valid" : cal.status === "stale" ? "Stale" : "Unavailable"}</dd></div>
+                {calRun && <div className="flex justify-between gap-2"><dt className="text-slate-400">Calibrated</dt><dd className="text-white">{fmtStamp(calRun.at)} <span className="text-slate-500">(sim.)</span></dd></div>}
                 <div className="flex justify-between gap-2"><dt className="text-slate-400">Bias (X/Y/Z)</dt><dd className="tabular-nums text-white">{cal.biasG.map((b) => b.toFixed(2)).join(" / ")} g</dd></div>
                 <div className="flex justify-between gap-2"><dt className="text-slate-400">Scale factor</dt><dd className="tabular-nums text-white">{fmt(cal.scaleFactor, "", 3)}</dd></div>
                 <div className="flex justify-between gap-2"><dt className="text-slate-400">Temp.</dt><dd className="tabular-nums text-white">{fmt(cal.tempC, " °C", 1)}</dd></div>
@@ -308,7 +324,7 @@ export default function JointAnalytics() {
                       <XAxis dataKey="t" type="number" domain={[0, end]} tickFormatter={fmtClock} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} tickCount={6} />
                       <YAxis domain={[0, 130]} ticks={[0, 30, 60, 90, 120]} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} width={34} unit="°" />
                       <ReferenceArea x1={t0} x2={t0 + IMU_WINDOW_SEC} fill="#22d3ee" fillOpacity={0.15} />
-                      {j.baseline && <ReferenceLine y={j.baseline.peakFlexionDeg} stroke={C.amber} strokeDasharray="4 4" label={{ value: `Baseline peak ${j.baseline.peakFlexionDeg}°`, fill: "#fde68a", fontSize: 10, position: "insideTopRight" }} />}
+                      {j.baseline && insight.baselineComparable && <ReferenceLine y={j.baseline.peakFlexionDeg} stroke={C.amber} strokeDasharray="4 4" label={{ value: `Baseline peak ${j.baseline.peakFlexionDeg}°`, fill: "#fde68a", fontSize: 10, position: "insideTopRight" }} />}
                       <ReferenceLine x={t} stroke="#fff" strokeOpacity={0.8} strokeDasharray="4 3" />
                       <Tooltip content={({ active, payload }) => {
                         const p = payload?.[0]?.payload as { t: number; flexionDeg: number | null } | undefined;
