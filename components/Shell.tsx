@@ -21,7 +21,7 @@ function Brand() {
   return (
     <div className="flex items-center gap-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo.png" alt="AeroRehab logo" className="h-9 w-9 shrink-0 object-contain" />
+      <img src="/images/logo.png" alt="AeroRehab logo" className="h-9 w-9 shrink-0 object-contain" />
       <span className="text-lg font-semibold tracking-wide text-white">Aero<span className="text-cyan-300">Rehab</span></span>
     </div>
   );
