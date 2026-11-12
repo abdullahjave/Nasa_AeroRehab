@@ -17,7 +17,7 @@ export function GaitPreviewCard({ a, s }: { a: AstronautRecord; s: Session }) {
         <div className="grid flex-1 grid-cols-[1fr_auto] gap-2">
           <div className="space-y-3">
             <div>
-              <p className="text-[11px] text-slate-300">Walking Speed</p>
+              <p className="text-[13px] text-slate-300">Walking Speed</p>
               <p className="text-2xl font-semibold tabular-nums text-white">
                 {g.speedMs === null ? <span className="text-sm text-amber-200">Unavailable</span> : <>{g.speedMs.toFixed(2)} <span className="text-sm font-normal text-slate-300">m/s</span></>}
                 {g.speedDeltaPct !== null && <span className={`ml-2 text-xs ${g.speedDeltaPct >= 0 ? "text-emerald-300" : "text-amber-300"}`}>{g.speedDeltaPct >= 0 ? "↑" : "↓"} {fmtSigned(g.speedDeltaPct, "%", 0)}</span>}

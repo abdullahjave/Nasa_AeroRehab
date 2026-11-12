@@ -181,7 +181,7 @@ export default function Reports() {
                     <Panel key={c.key} id={`rep-${c.key}`} title={c.title} icon="chart" className="h-full"
                       action={<span className={`text-xs font-semibold ${row.change === null ? "text-slate-400" : row.change >= 0 ? "text-emerald-300" : "text-amber-300"}`}>{row.change === null ? "No comparison" : `${row.change >= 0 ? "\u2191" : "\u2193"} ${fmtChange(row)}`}</span>}>
                       <figure className="flex min-h-[190px] flex-1 flex-col rounded-md bg-black/35 p-2">
-                        <figcaption className="mb-1 text-[11px] text-slate-300">
+                        <figcaption className="mb-1 text-[13px] text-slate-300">
                           {meta.label} ({meta.unit.trim()}) &middot; {n === 0 ? (missing ? "no values" : "no sessions") : n === 1 ? "1 session in this range" : `${n} sessions`}{missing ? ` \u00B7 ${missing} missing measurement${missing > 1 ? "s" : ""} (line joins the neighbouring sessions)` : ""}
                         </figcaption>
                         {n === 0 || !domain ? (
@@ -197,12 +197,12 @@ export default function Reports() {
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                                <XAxis dataKey="day" type="number" domain={[report.range.start, report.range.end]} ticks={ticks} tickFormatter={dayLabel} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} />
-                                <YAxis domain={domain} tickCount={5} allowDecimals tickFormatter={(v) => Number(v).toFixed(c.key === "speedMs" ? 2 : 0)} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} width={40} />
+                                <XAxis dataKey="day" type="number" domain={[report.range.start, report.range.end]} ticks={ticks} tickFormatter={dayLabel} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} />
+                                <YAxis domain={domain} tickCount={5} allowDecimals tickFormatter={(v) => Number(v).toFixed(c.key === "speedMs" ? 2 : 0)} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={40} />
                                 <Tooltip cursor={{ stroke: c.color, strokeOpacity: 0.4 }} content={({ active, payload }) => {
                                   const p = payload?.[0]?.payload as { day: number; sessionId: string; value: number | null } | undefined;
                                   if (!active || !p) return null;
-                                  return <div className={TIP_CLASS}><p className="font-semibold text-white">{fullDate(p.day)} &middot; Day {p.day}</p><p className="text-slate-300">{meta.label} <span className="font-semibold" style={{ color: c.color }}>{p.value === null ? "Missing measurement" : `${p.value.toFixed(meta.digits)}${meta.unit}`}</span></p><p className="text-[10px] text-slate-400">{p.sessionId}</p></div>;
+                                  return <div className={TIP_CLASS}><p className="font-semibold text-white">{fullDate(p.day)} &middot; Day {p.day}</p><p className="text-slate-300">{meta.label} <span className="font-semibold" style={{ color: c.color }}>{p.value === null ? "Missing measurement" : `${p.value.toFixed(meta.digits)}${meta.unit}`}</span></p><p className="text-[12px] text-slate-400">{p.sessionId}</p></div>;
                                 }} />
                                 <Area type="linear" dataKey="value" stroke={c.color} strokeWidth={1.6} fill={`url(#grad-${c.key})`} dot={{ r: 2.6, fill: c.color, strokeWidth: 0 }} activeDot={{ r: 4.5 }} connectNulls isAnimationActive={false} />
                               </AreaChart>
@@ -219,7 +219,7 @@ export default function Reports() {
                 {!noTable && <div className="min-w-0 xl:col-span-5">
                   <Panel id="rep-table" title={`Key Metrics Summary (vs. previous ${report.range.end - report.range.start + 1} day${report.range.end === report.range.start ? "" : "s"})`} icon="chart" className="h-full">
                     <div className="overflow-x-auto">
-                      <table className="w-full min-w-[440px] text-left text-xs">
+                      <table className="w-full text-left text-[13px] [&_td]:align-top [&_th]:align-top">
                         <thead className="text-slate-400"><tr className="border-b border-cyan-400/20"><th className="py-1 pr-2 font-normal">Metric</th><th className="pr-2 font-normal">Current</th><th className="pr-2 font-normal">Previous</th><th className="font-normal">Change</th></tr></thead>
                         <tbody>
                           {report.rows.filter((r) => shown.includes(r.metric)).map((row) => (
@@ -233,7 +233,7 @@ export default function Reports() {
                         </tbody>
                       </table>
                     </div>
-                    <p className="mt-2 text-[10px] text-slate-400">
+                    <p className="mt-2 text-[12px] text-slate-400">
                       Previous = {report.prevRange.end < 1 ? "none (before mission start)" : report.prevRange.start < 1 ? `Day 1–${report.prevRange.end} (shorter: mission data starts at Day 1)` : `Day ${report.prevRange.start}–${report.prevRange.end} (same length, just before)`}. Means of valid sessions; ROM only for {report.ref ? `${report.ref.side} knee, ${report.ref.protocol}` : "the reference knee context"}
                       {report.rows[0].excludedCurrent + report.rows[0].excludedPrevious > 0 ? ` (${report.rows[0].excludedCurrent + report.rows[0].excludedPrevious} session(s) with a different protocol excluded)` : ""}.
                     </p>
@@ -242,7 +242,7 @@ export default function Reports() {
                 <div className={`min-w-0 ${noTable ? "xl:col-span-6" : "xl:col-span-4"}`}>
                   <Panel id="rep-doc" title="Report Document" icon="check" className="h-full">
                     <div className="flex flex-1 gap-3">
-                      <div className="flex h-36 w-28 shrink-0 flex-col justify-between rounded border border-cyan-300/40 bg-white p-2 text-[8px] text-slate-800 shadow-lg" aria-hidden="true">
+                      <div className="flex h-36 w-28 shrink-0 flex-col justify-between rounded border border-cyan-300/40 bg-white p-2 text-[12px] text-slate-800 shadow-lg" aria-hidden="true">
                         <p className="font-bold text-cyan-800">AeroRehab<br />Rehabilitation Report</p>
                         <div className="space-y-0.5">{[0, 1, 2, 3].map((i) => <div key={i} className="h-1 rounded bg-slate-300" style={{ width: `${90 - i * 15}%` }} />)}</div>
                         <p className="font-bold text-amber-700">{recorded ? "RECORDED" : "SIMULATED"}</p>

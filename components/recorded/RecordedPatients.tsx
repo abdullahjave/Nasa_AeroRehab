@@ -20,8 +20,8 @@ function Field({ id, label, error, hint, children }: { id: string; label: string
     <div className="min-w-0">
       <label htmlFor={id} className="mb-0.5 block text-xs text-slate-300">{label}</label>
       {children}
-      {hint && !error && <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p>}
-      {error && <p id={`${id}-err`} role="alert" className="mt-0.5 text-[11px] text-rose-300">{error}</p>}
+      {hint && !error && <p className="mt-0.5 text-[13px] text-slate-400">{hint}</p>}
+      {error && <p id={`${id}-err`} role="alert" className="mt-0.5 text-[13px] text-rose-300">{error}</p>}
     </div>
   );
 }
@@ -64,7 +64,7 @@ function ProfileForm({ a }: { a: AstronautRecord }) {
           </Field>
         </div>
         <Field id="pf-rehabFocus" label="Rehabilitation focus" error={err("rehabFocus")}><input {...props("rehabFocus")} /></Field>
-        <p className="text-[11px] text-slate-400">Crew code {p.crewCode} and ID {a.id} cannot be changed.</p>
+        <p className="text-[13px] text-slate-400">Crew code {p.crewCode} and ID {a.id} cannot be changed.</p>
         {errors.form && <p role="alert" className="rounded border border-rose-400/60 bg-rose-500/10 px-2 py-1 text-xs text-rose-200">{errors.form}</p>}
         <div className="flex flex-wrap items-center gap-3">
           <button type="submit" className={btn} disabled={busy || !dirty}>{busy ? "Saving…" : "Save profile"}</button>
@@ -114,7 +114,7 @@ function SessionForm({ a, editing, onClose }: { a: AstronautRecord; editing: Ses
   return (
     <Panel id="rp-form" title={id ? "Edit session" : "Add session"} icon="joint" action={<button type="button" className={ghost} onClick={onClose}>Close</button>}>
       <form onSubmit={save} noValidate className="space-y-2" aria-label={id ? "Edit knee session" : "Add knee session"}>
-        <p className="text-[11px] text-slate-300">Manual entry for {a.profile.displayName}. Angles are in degrees (°), torque in newton-metres (Nm). Times are UTC.</p>
+        <p className="text-[13px] text-slate-300">Manual entry for {a.profile.displayName}. Angles are in degrees (°), torque in newton-metres (Nm). Times are UTC.</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <Field id="sf-recordedAt" label="Date and time (UTC)" error={err("recordedAt")}><input type="datetime-local" {...p("recordedAt")} /></Field>
           <Field id="sf-activity" label="Activity" error={err("activity")}>
@@ -157,7 +157,7 @@ function SessionRow({ s, onEdit }: { s: Session; onEdit: () => void }) {
   return (
     <li className="rounded-md border border-cyan-400/20 p-2 text-xs" data-session-id={s.id}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-semibold text-white">{s.label} <span className="font-normal text-slate-400">&middot; {s.startedAt}</span>{r.isBaseline && <span className="ml-2 rounded-full border border-emerald-300/60 bg-emerald-300/10 px-2 py-0.5 text-[10px] text-emerald-200">Baseline</span>}</p>
+        <p className="font-semibold text-white">{s.label} <span className="font-normal text-slate-400">&middot; {s.startedAt}</span>{r.isBaseline && <span className="ml-2 rounded-full border border-emerald-300/60 bg-emerald-300/10 px-2 py-0.5 text-[12px] text-emerald-200">Baseline</span>}</p>
         <span className="flex gap-2">
           <button type="button" className={ghost} onClick={onEdit} aria-label={`Edit ${s.label}`}>Edit</button>
           <button type="button" className={ghost} onClick={toggle} disabled={busy} aria-label={`${r.isBaseline ? "Clear baseline" : "Use as baseline"}: ${s.label}`}>{r.isBaseline ? "Clear baseline" : "Use as baseline"}</button>
@@ -207,7 +207,7 @@ export default function RecordedPatients() {
                 <button type="button" aria-pressed={a.id === astronaut.id} onClick={() => select(a.id)}
                   className={`w-full rounded-md border px-2 py-1.5 text-left text-sm ${a.id === astronaut.id ? "border-cyan-300 bg-cyan-400/15 text-white" : "border-cyan-400/20 text-slate-200 hover:bg-white/5"}`}>
                   <span className="block font-medium">{a.profile.displayName}</span>
-                  <span className="block text-[11px] text-slate-400">{a.profile.crewCode} &middot; {a.sessions.length} saved session{a.sessions.length === 1 ? "" : "s"}</span>
+                  <span className="block text-[13px] text-slate-400">{a.profile.crewCode} &middot; {a.sessions.length} saved session{a.sessions.length === 1 ? "" : "s"}</span>
                 </button>
               </li>
             ))}
@@ -226,7 +226,7 @@ export default function RecordedPatients() {
                 {sessions.map((s) => <SessionRow key={s.id} s={s} onEdit={() => openForm(s.id)} />)}
               </ul>
             )}
-            <p className="mt-2 text-[11px] text-slate-400">&ldquo;Use as baseline&rdquo; compares later sessions for the same astronaut, knee side, movement and protocol with that session.</p>
+            <p className="mt-2 text-[13px] text-slate-400">&ldquo;Use as baseline&rdquo; compares later sessions for the same astronaut, knee side, movement and protocol with that session.</p>
           </Panel>
 
           <RecordedWalkingPanel a={astronaut} />

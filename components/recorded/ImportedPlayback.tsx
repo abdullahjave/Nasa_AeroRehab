@@ -47,7 +47,7 @@ function usePlayer(n: number, idx: number, setIdx: (i: number) => void, stepMs: 
 }
 
 function Badge() {
-  return <span data-testid="imported-badge" className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[10px] font-medium text-violet-100">Imported CSV</span>;
+  return <span data-testid="imported-badge" className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[12px] font-medium text-violet-100">Imported CSV</span>;
 }
 
 const Wait = ({ text }: { text: string }) => <p role="status" className="text-xs text-slate-300">{text}</p>;
@@ -64,7 +64,7 @@ function PressureLoader({ x, astronautId }: { x: PressureAssessmentView; astrona
   const s = useSamples("pressure", astronautId, x.id, imp.id);
   return (
     <Panel id="rl-import" title="Heatmap and centre-of-pressure playback" icon="pulse" action={<Badge />}>
-      <p className="text-[11px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {imp.template} &middot; an imported file, not a live sensor feed</p>
+      <p className="text-[13px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {imp.template} &middot; an imported file, not a live sensor feed</p>
       {s.status === "loading" && <Wait text="Loading the saved sensor samples…" />}
       {s.status === "error" && <p role="alert" className="text-sm text-amber-200">The saved samples could not be loaded. Reload the page to try again.</p>}
       {s.status === "ready" && s.data.kind === "pressure" && <PressureView data={s.data} />}
@@ -129,14 +129,14 @@ function PressureView({ data }: { data: Extract<ImportData, { kind: "pressure" }
           {sharesNow ? (
             <p data-testid="ip-shares" className="text-xl font-semibold tabular-nums text-white">{sharesNow.leftPct.toFixed(0)}% <span className="text-xs font-normal text-slate-400">Left</span> <span className="mx-1 text-slate-500">|</span> {sharesNow.rightPct.toFixed(0)}% <span className="text-xs font-normal text-slate-400">Right</span></p>
           ) : <p data-testid="ip-shares" className="text-sm font-semibold text-amber-200">Unavailable <span className="font-normal text-slate-300">({why(an.shares)})</span></p>}
-          <p data-testid="ip-diff" className="text-[11px] text-slate-300">Difference: {show(an.differencePp, "percentage points", 1).text}</p>
-          <p className="mt-1 text-[10px] text-slate-400">Cursor frame. Needs both feet complete and a positive total force. Session mean (frames with both feet complete: {S.completeFrames} of {S.frameCount}): {sharesMean ? `${sharesMean.leftPct.toFixed(1)}% / ${sharesMean.rightPct.toFixed(1)}%` : `Unavailable (${why(S.meanShares)})`}</p>
+          <p data-testid="ip-diff" className="text-[13px] text-slate-300">Difference: {show(an.differencePp, "percentage points", 1).text}</p>
+          <p className="mt-1 text-[12px] text-slate-400">Cursor frame. Needs both feet complete and a positive total force. Session mean (frames with both feet complete: {S.completeFrames} of {S.frameCount}): {sharesMean ? `${sharesMean.leftPct.toFixed(1)}% / ${sharesMean.rightPct.toFixed(1)}%` : `Unavailable (${why(S.meanShares)})`}</p>
         </div>
         <div className="rounded-md border border-cyan-400/15 p-2">
           <p className="text-xs font-semibold text-white">Peak pressure</p>
           <p data-testid="ip-peak" className={`text-xl font-semibold tabular-nums ${toneClass(show(an.peakKpa, "kPa").tone)}`}>{show(an.peakKpa, "kPa", 1).text}</p>
-          <p className="text-[10px] text-slate-400">Cursor frame (L {show(an.left.peakKpa, "kPa", 1).text} &middot; R {show(an.right.peakKpa, "kPa", 1).text})</p>
-          <p className="text-[10px] text-slate-400">Whole recording: {show(S.peakKpa.overall, "kPa", 1).text}{S.peakKpa.overall.kind === "unavailable" ? ` (L ${show(S.peakKpa.left, "kPa", 1).text}, R ${show(S.peakKpa.right, "kPa", 1).text})` : ""}</p>
+          <p className="text-[12px] text-slate-400">Cursor frame (L {show(an.left.peakKpa, "kPa", 1).text} &middot; R {show(an.right.peakKpa, "kPa", 1).text})</p>
+          <p className="text-[12px] text-slate-400">Whole recording: {show(S.peakKpa.overall, "kPa", 1).text}{S.peakKpa.overall.kind === "unavailable" ? ` (L ${show(S.peakKpa.left, "kPa", 1).text}, R ${show(S.peakKpa.right, "kPa", 1).text})` : ""}</p>
         </div>
         <div className="rounded-md border border-cyan-400/15 p-2"><FootStat f={an.left} label="Left" /></div>
         <div className="rounded-md border border-cyan-400/15 p-2"><FootStat f={an.right} label="Right" /></div>
@@ -148,7 +148,7 @@ function PressureView({ data }: { data: Extract<ImportData, { kind: "pressure" }
             <p className="text-xs font-semibold text-white">Foot pressure distribution</p>
             <div role="group" aria-label="Heatmap scope" className="flex overflow-hidden rounded-md border border-cyan-400/40">
               {([["frame", "Cursor frame"], ["peak", "Recording peak"]] as const).map(([k, l]) => (
-                <button key={k} type="button" aria-pressed={scope === k} onClick={() => setScope(k)} className={`px-2 py-0.5 text-[11px] ${scope === k ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{l}</button>
+                <button key={k} type="button" aria-pressed={scope === k} onClick={() => setScope(k)} className={`px-2 py-0.5 text-[13px] ${scope === k ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{l}</button>
               ))}
             </div>
           </div>
@@ -159,7 +159,7 @@ function PressureView({ data }: { data: Extract<ImportData, { kind: "pressure" }
               <div className="mx-auto mt-1 flex max-w-[330px] justify-around text-xs"><span style={{ color: LEFT }}>Left</span><span style={{ color: RIGHT }}>Right</span></div>
             </div>
           </div>
-          <p className="mt-1 text-[10px] leading-snug text-slate-400">Fixed 0&ndash;250 kPa scale, the same for every frame. White dot = measured; ring with 0 = measured zero; dashed &times; and hatching = missing reading (Unavailable). {scope === "frame" ? `Frame at ${(tMs / 1000).toFixed(2)} s.` : "Per-sensor maximum over the whole recording."}</p>
+          <p className="mt-1 text-[12px] leading-snug text-slate-400">Fixed 0&ndash;250 kPa scale, the same for every frame. White dot = measured; ring with 0 = measured zero; dashed &times; and hatching = missing reading (Unavailable). {scope === "frame" ? `Frame at ${(tMs / 1000).toFixed(2)} s.` : "Per-sensor maximum over the whole recording."}</p>
         </div>
         <div>
           <p className="mb-1 text-xs font-semibold text-white">Centre of pressure (each foot in its own foot-local frame)</p>
@@ -169,10 +169,10 @@ function PressureView({ data }: { data: Extract<ImportData, { kind: "pressure" }
             <div><dt style={{ color: LEFT }}>Left CoP</dt><dd data-testid="ip-cop-left" className="tabular-nums text-white">{copText(an.left)}</dd></div>
             <div><dt style={{ color: RIGHT }}>Right CoP</dt><dd data-testid="ip-cop-right" className="tabular-nums text-white">{copText(an.right)}</dd></div>
           </dl>
-          <p className="mt-1 text-[10px] text-slate-400">Force-weighted, foot-local frame: origin at the heel centre, +y toward the toes, +x medial. The two feet are never merged into one frame, and the trace is not bridged across a frame without a CoP.</p>
+          <p className="mt-1 text-[12px] text-slate-400">Force-weighted, foot-local frame: origin at the heel centre, +y toward the toes, +x medial. The two feet are never merged into one frame, and the trace is not bridged across a frame without a CoP.</p>
         </div>
       </div>
-      <p className="text-[10px] text-slate-400">{SUMMARY_RULE} Force = pressure (kPa) &times; area (cm²) &times; 0.1 &rarr; N.</p>
+      <p className="text-[12px] text-slate-400">{SUMMARY_RULE} Force = pressure (kPa) &times; area (cm²) &times; 0.1 &rarr; N.</p>
     </div>
   );
 }
@@ -189,7 +189,7 @@ function BalanceLoader({ x, astronautId }: { x: BalanceAssessmentView; astronaut
   const s = useSamples("balance", astronautId, x.id, imp.id);
   return (
     <Panel id="rb-import" title="Sway path, ellipse and replay" icon="pulse" action={<Badge />}>
-      <p className="text-[11px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {x.trialSide === "left" ? "Left" : "Right"}-leg stance (from the saved trial) &middot; {imp.template} &middot; an imported file, not a live sensor feed</p>
+      <p className="text-[13px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {x.trialSide === "left" ? "Left" : "Right"}-leg stance (from the saved trial) &middot; {imp.template} &middot; an imported file, not a live sensor feed</p>
       {s.status === "loading" && <Wait text="Loading the saved sensor samples…" />}
       {s.status === "error" && <p role="alert" className="text-sm text-amber-200">The saved samples could not be loaded. Reload the page to try again.</p>}
       {s.status === "ready" && s.data.kind === "balance" && <BalanceView data={s.data} x={x} />}
@@ -249,11 +249,11 @@ function BalanceView({ data, x }: { data: Extract<ImportData, { kind: "balance" 
             <p className="font-semibold text-white">Sway RMS: manual vs CSV</p>
             <p className="text-slate-200">ML: manual {x.mlRmsMm === null ? "not entered" : `${x.mlRmsMm.toFixed(1)} mm`} &middot; from CSV {summary.rmsMlMm.kind === "value" ? `${summary.rmsMlMm.value.toFixed(1)} mm` : "Unavailable"}</p>
             <p className="text-slate-200">AP: manual {x.apRmsMm === null ? "not entered" : `${x.apRmsMm.toFixed(1)} mm`} &middot; from CSV {summary.rmsApMm.kind === "value" ? `${summary.rmsApMm.value.toFixed(1)} mm` : "Unavailable"}</p>
-            <p className="mt-1 text-[11px] text-slate-400">{SUMMARY_RULE}</p>
+            <p className="mt-1 text-[13px] text-slate-400">{SUMMARY_RULE}</p>
           </div>
         </div>
       </div>
-      <p className="text-[10px] text-slate-400">Trial frame: +ML toward the astronaut&apos;s right, +AP anterior, millimetres. The path and replay never bridge a missing interval ({prev && prev.gaps.length ? prev.gaps.map((g) => `${g.fromS.toFixed(2)}–${g.toS.toFixed(2)} s`).join(", ") : "none in this file"}). No Balance Index or fall-risk alert is created from an import: no documented scoring rule applies. <Link href="/patient-management" className="text-cyan-300 hover:underline">Replace or re-import →</Link></p>
+      <p className="text-[12px] text-slate-400">Trial frame: +ML toward the astronaut&apos;s right, +AP anterior, millimetres. The path and replay never bridge a missing interval ({prev && prev.gaps.length ? prev.gaps.map((g) => `${g.fromS.toFixed(2)}–${g.toS.toFixed(2)} s`).join(", ") : "none in this file"}). No Balance Index or fall-risk alert is created from an import: no documented scoring rule applies. <Link href="/patient-management" className="text-cyan-300 hover:underline">Replace or re-import →</Link></p>
     </div>
   );
 }

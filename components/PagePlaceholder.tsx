@@ -5,7 +5,7 @@ export default function PagePlaceholder({ href }: { href: string }) {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[11px] uppercase tracking-[0.2em] text-cyan-300/70">AeroRehab</p>
+        <p className="text-[13px] uppercase tracking-[0.2em] text-cyan-300/70">AeroRehab</p>
         <h1 className="text-2xl font-semibold text-white sm:text-3xl">{item.label}</h1>
         <p className="mt-1 text-sm text-slate-300">{item.blurb}</p>
       </header>

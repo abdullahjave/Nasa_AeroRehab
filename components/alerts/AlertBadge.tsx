@@ -24,7 +24,7 @@ export default function AlertBadge({ severity, label, simulated = false }: { sev
         <SeverityIcon severity={severity} className="h-4 w-4" />
         {label}
       </span>
-      {simulated && <span className="rounded-full border border-cyan-300/50 bg-cyan-300/10 px-2 py-0.5 text-[10px] font-medium text-cyan-100">Simulated scenario</span>}
+      {simulated && <span className="rounded-full border border-cyan-300/50 bg-cyan-300/10 px-2 py-0.5 text-[12px] font-medium text-cyan-100">Simulated scenario</span>}
     </span>
   );
 }

@@ -52,9 +52,9 @@ function DemoPatientManagement() {
       <header className="glass flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-1.5">
         <div>
           <h1 className="text-base font-semibold text-white sm:text-lg">Patient Management <span className="font-normal text-slate-300">&ndash; Astronaut Roster &amp; Clinical Profile</span></h1>
-          <p className="text-[10px] text-slate-300">{astronauts.length} astronauts on record &middot; fictional demo data</p>
+          <p className="text-[12px] text-slate-300">{astronauts.length} astronauts on record &middot; fictional demo data</p>
         </div>
-        <span className="rounded-full border border-amber-300/60 bg-amber-300/10 px-2 py-0.5 text-[10px] font-medium text-amber-200">Simulated Data</span>
+        <span className="rounded-full border border-amber-300/60 bg-amber-300/10 px-2 py-0.5 text-[12px] font-medium text-amber-200">Simulated Data</span>
       </header>
 
       <div className="grid gap-2 text-xs xl:grid-cols-[200px_1.25fr_1fr_170px]">
@@ -103,10 +103,10 @@ function Roster({ filtered, total, query, setQuery, missions, missionFilter, set
               <li key={a.id}>
                 <button type="button" aria-pressed={sel} onClick={() => onSelect(a.id)}
                   className={`flex w-full items-center gap-2 rounded-md border p-1.5 text-left ${sel ? "border-cyan-300 bg-cyan-400/15" : "border-cyan-400/15 hover:bg-white/5"}`}>
-                  <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/40"><CrewPortrait profile={a.profile} className="h-full w-full text-[11px]" /></span>
+                  <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/40"><CrewPortrait profile={a.profile} className="h-full w-full text-[13px]" /></span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold leading-tight text-white">{a.profile.displayName}</span>
-                    <span className="flex items-center gap-1.5 text-[11px] text-slate-400">{a.profile.crewCode}<span className="flex items-center gap-1 text-emerald-300"><span className="led" aria-hidden="true" />{a.profile.status}</span></span>
+                    <span className="flex items-center gap-1.5 text-[13px] text-slate-400">{a.profile.crewCode}<span className="flex items-center gap-1 text-emerald-300"><span className="led" aria-hidden="true" />{a.profile.status}</span></span>
                   </span>
                                   </button>
               </li>
@@ -124,7 +124,7 @@ function Profile({ a, missionName, missionDay, outside }: { a: AstronautRecord; 
   const nominal = sum.state === "all";
   return (
     <Panel id="pm-profile" title="Clinical Profile" icon="user" className="h-full">
-      {outside && <p role="status" className="mb-2 rounded border border-amber-300/40 bg-amber-300/10 px-2 py-1 text-[11px] text-amber-100">{p.displayName} is selected but hidden by the current search or mission filter.</p>}
+      {outside && <p role="status" className="mb-2 rounded border border-amber-300/40 bg-amber-300/10 px-2 py-1 text-[13px] text-amber-100">{p.displayName} is selected but hidden by the current search or mission filter.</p>}
       <div className="flex flex-wrap items-start gap-4">
         <div className="h-28 w-24 shrink-0 overflow-hidden rounded-md bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/30"><CrewPortrait profile={p} className="h-full w-full text-3xl" /></div>
         <div className="min-w-0 flex-1">
@@ -167,7 +167,7 @@ function Sensors({ a, session }: { a: AstronautRecord; session: Session }) {
           );
         })}
       </ul>
-      <p className="mt-2 text-[10px] text-slate-400">Same sensor records as the sidebar status. Thigh and shank IMUs are on the {knee} knee used in this session.</p>
+      <p className="mt-2 text-[12px] text-slate-400">Same sensor records as the sidebar status. Thigh and shank IMUs are on the {knee} knee used in this session.</p>
     </Panel>
   );
 }
@@ -195,14 +195,14 @@ function Records({ a }: { a: AstronautRecord }) {
 
   return (
     <Panel id="pm-records" title="Clinical Records" icon="check" className="h-full"
-      action={<button type="button" onClick={() => start(null)} className="rounded border border-cyan-400/50 px-2 py-0.5 text-[11px] text-cyan-100 hover:bg-white/10">Add note</button>}>
+      action={<button type="button" onClick={() => start(null)} className="rounded border border-cyan-400/50 px-2 py-0.5 text-[13px] text-cyan-100 hover:bg-white/10">Add note</button>}>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead className="text-slate-400"><tr className="border-b border-cyan-400/20"><th className="py-1 pr-2 font-normal">Record</th><th className="pr-2 font-normal">Date</th><th className="pr-2 font-normal">Status</th><th className="font-normal"><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>
             {records.map((r) => (
               <tr key={r.id} className="border-b border-cyan-400/10 align-middle">
-                <th scope="row" className="py-1.5 pr-2 font-normal text-white">{r.title}<span className="block text-[10px] text-slate-400">{r.text}</span></th>
+                <th scope="row" className="py-1.5 pr-2 font-normal text-white">{r.title}<span className="block text-[12px] text-slate-400">{r.text}</span></th>
                 <td className="whitespace-nowrap pr-2 tabular-nums text-slate-200">{fmtDate(r.date)}</td>
                 <td className="pr-2"><Chip tone={r.status === "Note" ? "cyan" : "green"}>{r.status}</Chip></td>
                 <td><button type="button" onClick={() => start(r)} aria-label={`Edit ${r.title}`} className="rounded px-1 text-cyan-300 hover:text-white hover:underline">Edit</button></td>
@@ -214,15 +214,15 @@ function Records({ a }: { a: AstronautRecord }) {
       {open && (
         <form className="mt-3 space-y-2 rounded-md border border-cyan-400/30 bg-black/25 p-2" onSubmit={(e) => { e.preventDefault(); submit(); }} noValidate aria-label={open.id ? "Edit note" : "Add note"}>
           <p className="text-xs font-semibold text-white">{open.id ? "Edit record" : "Add demo note"} <span className="font-normal text-slate-400">({a.profile.displayName})</span></p>
-          <label className="block text-[11px] text-slate-300">Title
+          <label className="block text-[13px] text-slate-300">Title
             <input value={open.draft.title} onChange={(e) => upd("title", e.target.value)} className={field} aria-invalid={!!errors.title} aria-describedby={errors.title ? "pm-e-title" : undefined} />
             {errors.title && <span id="pm-e-title" role="alert" className="text-amber-200">{errors.title}</span>}
           </label>
-          <label className="block text-[11px] text-slate-300">Date
+          <label className="block text-[13px] text-slate-300">Date
             <input type="date" value={open.draft.date} onChange={(e) => upd("date", e.target.value)} className={`${field} [color-scheme:dark]`} aria-invalid={!!errors.date} />
             {errors.date && <span role="alert" className="text-amber-200">{errors.date}</span>}
           </label>
-          <label className="block text-[11px] text-slate-300">Note
+          <label className="block text-[13px] text-slate-300">Note
             <textarea rows={3} value={open.draft.text} onChange={(e) => upd("text", e.target.value)} className={field} aria-invalid={!!errors.text} />
             {errors.text && <span role="alert" className="text-amber-200">{errors.text}</span>}
           </label>
@@ -232,7 +232,7 @@ function Records({ a }: { a: AstronautRecord }) {
           </div>
         </form>
       )}
-      <p className="mt-2 text-[10px] text-slate-500">Fictional records. Notes are saved in this browser per astronaut and record ID.</p>
+      <p className="mt-2 text-[12px] text-slate-500">Fictional records. Notes are saved in this browser per astronaut and record ID.</p>
     </Panel>
   );
 }
@@ -256,7 +256,7 @@ function Assessments({ a, session, onOpen }: { a: AstronautRecord; session: Sess
   ];
   return (
     <Panel id="pm-assess" title="Recent Assessments" icon="chart" className="h-full">
-      <p className="mb-1 text-[11px] text-slate-300">{session.label} &middot; {dayLabel(session.missionDay)}</p>
+      <p className="mb-1 text-[13px] text-slate-300">{session.label} &middot; {dayLabel(session.missionDay)}</p>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead className="text-slate-400"><tr className="border-b border-cyan-400/20"><th className="py-1 pr-2 font-normal">Assessment</th><th className="pr-2 font-normal">Value</th><th className="font-normal">Status</th></tr></thead>
@@ -273,7 +273,7 @@ function Assessments({ a, session, onOpen }: { a: AstronautRecord; session: Sess
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-[10px] text-slate-400">Values come from the same session records as the analytics pages. Simulated.</p>
+      <p className="mt-2 text-[12px] text-slate-400">Values come from the same session records as the analytics pages. Simulated.</p>
     </Panel>
   );
 }

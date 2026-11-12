@@ -44,7 +44,7 @@ export default function RecordedTrend({ id = "rec-trend" }: { id?: string }) {
             </g>
           ))}
         </svg>
-        <figcaption className="text-[10px] text-slate-400">Green ring = saved baseline. Entered values only; no sensor trace.</figcaption>
+        <figcaption className="text-[12px] text-slate-400">Green ring = saved baseline. Entered values only; no sensor trace.</figcaption>
       </figure>
       <ul className="mt-1 space-y-0.5 text-xs text-slate-200">
         {rows.map((r) => <li key={r.sessionId} className="tabular-nums">{r.label}: <span className="font-semibold text-white">{r.romDeg}°</span>{r.isBaseline && <span className="text-emerald-300"> &middot; baseline</span>}</li>)}

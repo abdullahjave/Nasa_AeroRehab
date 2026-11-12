@@ -60,17 +60,17 @@ function ImuTip({ active, payload, unit }: { active?: boolean; payload?: Readonl
 function ImuChart({ id, title, unit, data, cursorT, t0, domain }: { id: string; title: string; unit: "g" | "°/s"; data: ImuPoint[]; cursorT: number; t0: number; domain: [number, number] }) {
   const isA = unit === "g";
   return (
-    <Panel id={id} title={title} icon="pulse" className="h-full" action={<span className="text-[11px] text-slate-400">&plusmn;{domain[1]} {unit}</span>}>
+    <Panel id={id} title={title} icon="pulse" className="h-full" action={<span className="text-[13px] text-slate-400">&plusmn;{domain[1]} {unit}</span>}>
       <figure className="flex min-h-[190px] flex-1 flex-col rounded-md bg-black/35 p-2">
         <figcaption className="sr-only">{title} X, Y and Z over a 20 second window. Cursor at {fmtClock(cursorT)}.</figcaption>
         <div className="min-h-[170px] flex-1">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 420, height: 190 }}>
             <LineChart data={data} margin={{ top: 4, right: 10, bottom: 2, left: 0 }}>
               <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-              <XAxis dataKey="t" type="number" domain={[t0, t0 + IMU_WINDOW_SEC]} tickFormatter={fmtClock} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} tickCount={6} />
-              <YAxis domain={domain} allowDecimals={false} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} width={34} />
+              <XAxis dataKey="t" type="number" domain={[t0, t0 + IMU_WINDOW_SEC]} tickFormatter={fmtClock} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} tickCount={6} />
+              <YAxis domain={domain} allowDecimals={false} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={34} />
               <Tooltip content={({ active, payload }) => <ImuTip active={active} payload={payload as never} unit={unit} />} cursor={{ stroke: C.cyan, strokeOpacity: 0.4 }} />
-              <Legend verticalAlign="top" align="right" height={20} iconType="circle" wrapperStyle={{ fontSize: 11, color: AXIS }} />
+              <Legend verticalAlign="top" align="right" height={20} iconType="circle" wrapperStyle={{ fontSize: 12, color: AXIS }} />
               <ReferenceLine x={Math.max(t0, Math.min(t0 + IMU_WINDOW_SEC, cursorT))} stroke="#fff" strokeOpacity={0.7} strokeDasharray="4 3" />
               <Line name="X" dataKey={isA ? "ax" : "gx"} stroke={C.cyan} strokeWidth={1.8} dot={false} isAnimationActive={false} connectNulls={false} />
               <Line name="Y" dataKey={isA ? "ay" : "gy"} stroke={C.magenta} strokeWidth={1.8} dot={false} isAnimationActive={false} connectNulls={false} />
@@ -215,7 +215,7 @@ function DemoJointAnalytics() {
                 </div>
               </div>
             </div>
-            <p className="mt-1 text-center text-[10px] text-slate-500">Knee illustration is static (supplied artwork). Arc, IMU patches and labels are live UI.</p>
+            <p className="mt-1 text-center text-[12px] text-slate-500">Knee illustration is static (supplied artwork). Arc, IMU patches and labels are live UI.</p>
           </Panel>
         </div>
 
@@ -231,7 +231,7 @@ function DemoJointAnalytics() {
           </Panel>
           <Panel id="smooth" title="Movement Smoothness" icon="chart">
             <p className="text-2xl font-semibold tabular-nums text-white">{live ? fmt(j.smoothnessPct, "%") : "Unavailable"}</p>
-            <p className="text-[11px] text-slate-400">Simulated session score (fixture)</p>
+            <p className="text-[13px] text-slate-400">Simulated session score (fixture)</p>
           </Panel>
         </div>
 
@@ -294,7 +294,7 @@ function DemoJointAnalytics() {
               <div role="group" aria-label="IMU site" className="flex overflow-hidden rounded-md border border-cyan-400/40">
                 {(["thigh", "shank"] as const).map((s) => (
                   <button key={s} type="button" aria-pressed={site === s} onClick={() => setSite(s)}
-                    className={`px-2 py-0.5 text-[11px] ${site === s ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{s === "thigh" ? "Thigh" : "Shank"}</button>
+                    className={`px-2 py-0.5 text-[13px] ${site === s ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{s === "thigh" ? "Thigh" : "Shank"}</button>
                 ))}
               </div>
             }>
@@ -322,16 +322,16 @@ function DemoJointAnalytics() {
           <Panel id="flex" title="Knee Flexion (°) · Session" icon="pulse" className="h-full">
             {live ? (
               <figure className="flex min-h-[200px] flex-1 flex-col rounded-md bg-black/35 p-2">
-                <figcaption className="mb-1 text-[11px] text-slate-300">Click the chart or use the time cursor. Shaded band = 20 s IMU window.</figcaption>
+                <figcaption className="mb-1 text-[13px] text-slate-300">Click the chart or use the time cursor. Shaded band = 20 s IMU window.</figcaption>
                 <div className="min-h-[170px] flex-1">
                   <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 420, height: 190 }}>
                     <LineChart data={flexRows} margin={{ top: 6, right: 10, bottom: 2, left: 0 }}
                       onClick={(s) => { const x = (s as { activeLabel?: string | number } | undefined)?.activeLabel; if (x !== undefined && !Number.isNaN(Number(x))) setT(Number(x)); }}>
                       <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                      <XAxis dataKey="t" type="number" domain={[0, end]} tickFormatter={fmtClock} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} tickCount={6} />
-                      <YAxis domain={[0, 130]} ticks={[0, 30, 60, 90, 120]} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} width={34} unit="°" />
+                      <XAxis dataKey="t" type="number" domain={[0, end]} tickFormatter={fmtClock} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} tickCount={6} />
+                      <YAxis domain={[0, 130]} ticks={[0, 30, 60, 90, 120]} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={34} unit="°" />
                       <ReferenceArea x1={t0} x2={t0 + IMU_WINDOW_SEC} fill="#22d3ee" fillOpacity={0.15} />
-                      {j.baseline && insight.baselineComparable && <ReferenceLine y={j.baseline.peakFlexionDeg} stroke={C.amber} strokeDasharray="4 4" label={{ value: `Baseline peak ${j.baseline.peakFlexionDeg}°`, fill: "#fde68a", fontSize: 10, position: "insideTopRight" }} />}
+                      {j.baseline && insight.baselineComparable && <ReferenceLine y={j.baseline.peakFlexionDeg} stroke={C.amber} strokeDasharray="4 4" label={{ value: `Baseline peak ${j.baseline.peakFlexionDeg}°`, fill: "#fde68a", fontSize: 12, position: "insideTopRight" }} />}
                       <ReferenceLine x={t} stroke="#fff" strokeOpacity={0.8} strokeDasharray="4 3" />
                       <Tooltip content={({ active, payload }) => {
                         const p = payload?.[0]?.payload as { t: number; flexionDeg: number | null } | undefined;
@@ -342,7 +342,7 @@ function DemoJointAnalytics() {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <p className="mt-1 text-center text-[11px] text-slate-300">ROM: {fmt(knee.minAngleDeg, "°")} &ndash; {fmt(knee.peakFlexionDeg, "°")} &middot; Cursor {fmtClock(t)}: {fmt(angle, "°", 1)}</p>
+                <p className="mt-1 text-center text-[13px] text-slate-300">ROM: {fmt(knee.minAngleDeg, "°")} &ndash; {fmt(knee.peakFlexionDeg, "°")} &middot; Cursor {fmtClock(t)}: {fmt(angle, "°", 1)}</p>
               </figure>
             ) : <p className="text-sm text-amber-200">Unavailable</p>}
           </Panel>
@@ -366,10 +366,10 @@ function DemoJointAnalytics() {
                   <text x="2" y="6" fontSize="8" fill="#94a3b8">MPa</text>
                 </svg>
                 <div>
-                  <p className="text-[11px] text-slate-300">Cartilage Pressure (Peak)</p>
+                  <p className="text-[13px] text-slate-300">Cartilage Pressure (Peak)</p>
                   <p className="text-2xl font-semibold tabular-nums text-white">{j.cartilage.peakMpa.toFixed(1)} <span className="text-sm font-normal text-slate-300">MPa</span></p>
                   <Chip tone={j.cartilage.peakMpa <= j.cartilage.limitMpa ? "green" : "amber"}>{j.cartilage.peakMpa <= j.cartilage.limitMpa ? "Within Limit" : "Above Limit"}</Chip>
-                  <p className="mt-1 text-[10px] text-slate-400">Limit {j.cartilage.limitMpa.toFixed(1)} MPa &middot; medial {j.cartilage.medial.toFixed(1)} &middot; lateral {j.cartilage.lateral.toFixed(1)} &middot; patellofemoral {j.cartilage.patellofemoral.toFixed(1)}</p>
+                  <p className="mt-1 text-[12px] text-slate-400">Limit {j.cartilage.limitMpa.toFixed(1)} MPa &middot; medial {j.cartilage.medial.toFixed(1)} &middot; lateral {j.cartilage.lateral.toFixed(1)} &middot; patellofemoral {j.cartilage.patellofemoral.toFixed(1)}</p>
                 </div>
               </div>
             )}
@@ -391,7 +391,7 @@ function DemoJointAnalytics() {
                 );
               })}
             </ul>
-            <p className="mt-2 text-[10px] text-slate-400">Simulated &middot; {session.id}</p>
+            <p className="mt-2 text-[12px] text-slate-400">Simulated &middot; {session.id}</p>
           </Panel>
         </div>
       </div>

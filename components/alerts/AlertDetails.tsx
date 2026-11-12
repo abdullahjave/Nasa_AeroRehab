@@ -30,16 +30,16 @@ export default function AlertDetails({ alert }: { alert: Alert }) {
       <summary className="cursor-pointer text-xs font-medium text-cyan-200 hover:text-white">Why am I seeing this?</summary>
       <div className="mt-1.5 text-xs text-slate-100">
         <ul className="list-disc space-y-1 pl-4">{alert.why.map((w) => <li key={w}>{w}</li>)}</ul>
-        <p className="mt-2 text-[11px] text-slate-300">
+        <p className="mt-2 text-[13px] text-slate-300">
           Source: {sourceLine}
           {isReview && <> &middot; <Link href="/joint-analytics" onClick={review} className="text-cyan-300 hover:underline">Open this measurement &rarr;</Link></>}
         </p>
         {alert.guidance && !alert.guidance.reviewed && (
-          <p className="mt-2 text-[11px] text-slate-400">No clinician-reviewed guidance is available for this alert. Demo guidance is listed under Rehabilitation Recommendations in AI Insights ({alert.guidance.sourceLabel}).</p>
+          <p className="mt-2 text-[13px] text-slate-400">No clinician-reviewed guidance is available for this alert. Demo guidance is listed under Rehabilitation Recommendations in AI Insights ({alert.guidance.sourceLabel}).</p>
         )}
         {alert.guidance?.reviewed && (
           <div className="mt-2 rounded border border-emerald-400/30 p-2">
-            <p className="text-[11px] font-medium text-emerald-200">Reviewed guidance &middot; Source: {alert.guidance.sourceLabel}</p>
+            <p className="text-[13px] font-medium text-emerald-200">Reviewed guidance &middot; Source: {alert.guidance.sourceLabel}</p>
             <ul className="list-disc pl-4">{alert.guidance.items.map((g) => <li key={g}>{g}</li>)}</ul>
           </div>
         )}

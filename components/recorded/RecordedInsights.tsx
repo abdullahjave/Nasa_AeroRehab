@@ -38,7 +38,7 @@ export default function RecordedInsights() {
       </header>
 
       <Panel id="ai-alerts" title="Your alerts" icon="warn">
-        <p className="mb-2 text-[11px] text-slate-300">{summary.scope} Press "Get AI Recommendation" on a card for suggested next steps; only the knee numbers and status are sent, never names or notes.</p>
+        <p className="mb-2 text-[13px] text-slate-300">{summary.scope} Press &quot;Get AI Recommendation&quot; on a card for suggested next steps; only the knee numbers and status are sent, never names or notes.</p>
         <NotAssessed />
         {health.length > 0 && <ul className="space-y-2" aria-label="Health findings">{health.map(li)}</ul>}
         {data.length > 0 && (

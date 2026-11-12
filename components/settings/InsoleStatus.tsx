@@ -12,7 +12,7 @@ export default function InsoleStatus() {
   if (!insoles.length) return null;
   const down = insoles.filter((s) => s.status === "offline");
   return (
-    <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-300" aria-live="polite">
+    <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-slate-300" aria-live="polite">
       <span className="text-slate-400">Live insoles{!hubConnected ? " (hub disconnected)" : playback === "paused" ? " (playback paused)" : ""}:</span>
       {insoles.map((s) => (
         <span key={s.id} className="flex items-center gap-1">

@@ -98,7 +98,7 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
             <div>
               {fixtures?.index != null ? <p className="text-3xl font-semibold tabular-nums text-white">{fixtures.index}<span className="ml-1 text-sm font-normal text-slate-300">/100</span></p> : <p className="text-sm font-semibold text-amber-200">Unavailable</p>}
               {fixtures && <Chip tone={fixtures.index != null ? "green" : "amber"}>{fixtures.indexStatus}</Chip>}
-              <p className="mt-1 text-[10px] text-slate-400">Simulated demo score (session fixture)</p>
+              <p className="mt-1 text-[12px] text-slate-400">Simulated demo score (session fixture)</p>
             </div>
           </div>
         </Panel>
@@ -107,7 +107,7 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
             <dl className="space-y-2">
               <div className="flex items-baseline justify-between"><dt className="text-xs text-slate-300">ML (Med-Lat)</dt><dd><M m={summary.rmsMlMm} unit="mm" /></dd></div>
               <div className="flex items-baseline justify-between"><dt className="text-xs text-slate-300">AP (Ant-Post)</dt><dd><M m={summary.rmsApMm} unit="mm" /></dd></div>
-              <p className="text-[10px] text-slate-400">Full {balanceSide}-leg trial, mean-centred RMS per axis{summary.partial ? ` · ${Math.round(summary.coverage * 100)}% coverage` : ""}</p>
+              <p className="text-[12px] text-slate-400">Full {balanceSide}-leg trial, mean-centred RMS per axis{summary.partial ? ` · ${Math.round(summary.coverage * 100)}% coverage` : ""}</p>
             </dl>
           )}
         </Panel>
@@ -115,7 +115,7 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
           {!summary ? noTrial : (
             <>
               <p><M m={area(summary)} unit="mm²" big /></p>
-              {summary.ellipse.kind === "unavailable" && <p className="text-[11px] text-slate-400">{why(summary.ellipse)}</p>}
+              {summary.ellipse.kind === "unavailable" && <p className="text-[13px] text-slate-400">{why(summary.ellipse)}</p>}
               <p className={`mt-1 text-xs ${view.areaChangePct.kind === "value" ? (view.areaChangePct.value <= 0 ? "text-emerald-300" : "text-amber-300") : "text-slate-400"}`}>
                 {view.areaChangePct.kind === "value"
                   ? `${view.areaChangePct.value <= 0 ? "↓" : "↑"} ${pct(view.areaChangePct)} vs baseline (Day ${view.baseline?.trial.missionDay}, same leg and protocol)`
@@ -130,13 +130,13 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
               <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-300/25 text-amber-200" aria-hidden="true">!</span>
               <div>
                 <p className="text-base font-semibold text-amber-200">Demo flag</p>
-                <p className="text-[11px] text-slate-200">{fixtures.scenarioFlag}</p>
+                <p className="text-[13px] text-slate-200">{fixtures.scenarioFlag}</p>
               </div>
             </div>
           ) : (
             <div className="rounded-md border border-cyan-400/25 p-2">
               <p className="text-sm font-semibold text-slate-200">No demo flag set</p>
-              <p className="text-[11px] text-slate-400">This session has no scenario flag. No risk score is calculated.</p>
+              <p className="text-[13px] text-slate-400">This session has no scenario flag. No risk score is calculated.</p>
             </div>
           )}
         </Panel>
@@ -164,7 +164,7 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
                   </div>
                 </div>
                 {summary.partial && (
-                  <p className="mt-1 rounded border border-amber-300/40 bg-amber-300/10 px-2 py-1 text-[11px] text-amber-100">
+                  <p className="mt-1 rounded border border-amber-300/40 bg-amber-300/10 px-2 py-1 text-[13px] text-amber-100">
                     Partial coverage: {Math.round(summary.coverage * 100)}% valid samples. The path is broken at the gap; distance is not added across it.
                   </p>
                 )}
@@ -201,29 +201,29 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
                       className={`w-full rounded-md border p-2 text-left text-xs ${selected ? "border-cyan-300 bg-cyan-400/10" : "border-cyan-400/20 hover:bg-white/5"}`}>
                       <p className="flex items-center justify-between font-semibold text-white">
                         Single-Leg Stance ({s === "left" ? "L" : "R"})
-                        {selected && <span className="rounded border border-cyan-300/60 px-1 text-[10px] font-normal text-cyan-200">Selected</span>}
+                        {selected && <span className="rounded border border-cyan-300/60 px-1 text-[12px] font-normal text-cyan-200">Selected</span>}
                       </p>
                       {v.trial && v.summary ? (
                         <dl className="mt-1 space-y-0.5">
                           <div className="flex justify-between"><dt className="text-slate-400">Time</dt><dd className="tabular-nums text-white">{v.trial.durationS.toFixed(1)} s</dd></div>
                           <div className="flex justify-between"><dt className="text-slate-400">Sway (resultant RMS)</dt><dd><M m={v.summary.rmsResultantMm} unit="mm" /></dd></div>
-                          {v.summary.partial && <div className="text-[10px] text-amber-200">{Math.round(v.summary.coverage * 100)}% coverage</div>}
+                          {v.summary.partial && <div className="text-[12px] text-amber-200">{Math.round(v.summary.coverage * 100)}% coverage</div>}
                         </dl>
                       ) : <p className="mt-1 text-amber-200">Unavailable: no trial</p>}
                     </button>
                   );
                 })}
-                <p className="text-[10px] text-slate-400">Resultant RMS = &radic;(ML RMS&sup2; + AP RMS&sup2;)</p>
+                <p className="text-[12px] text-slate-400">Resultant RMS = &radic;(ML RMS&sup2; + AP RMS&sup2;)</p>
               </div>
             </div>
-            <p className="mt-1 text-[10px] text-slate-500">{hasBalanceArt ? "Illustration: supplied astronaut artwork, mirrored for the left leg. Decorative; it does not show measured sway." : "Illustration: local fallback pose (astronaut-balance.webp not present)."}</p>
+            <p className="mt-1 text-[12px] text-slate-500">{hasBalanceArt ? "Illustration: supplied astronaut artwork, mirrored for the left leg. Decorative; it does not show measured sway." : "Illustration: local fallback pose (astronaut-balance.webp not present)."}</p>
           </Panel>
         </div>
 
         <div className="xl:col-span-3">
           <Panel id="b-profile" title="Stability Profile" icon="chart" className="h-full">
             <div className="flex flex-1 items-center justify-center"><StabilityRadar profile={fixtures?.profile ?? null} /></div>
-            <p className="text-center text-[10px] text-slate-400">Demo scores, 0&ndash;100 (simulated fixture, no scoring model)</p>
+            <p className="text-center text-[12px] text-slate-400">Demo scores, 0&ndash;100 (simulated fixture, no scoring model)</p>
           </Panel>
         </div>
       </div>
@@ -236,20 +236,20 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
               <div role="group" aria-label="History metric" className="flex overflow-hidden rounded-md border border-cyan-400/40">
                 {([["area", "Sway area"], ["rms", "Resultant RMS"]] as const).map(([k, l]) => (
                   <button key={k} type="button" aria-pressed={metric === k} onClick={() => setMetric(k)}
-                    className={`px-2 py-0.5 text-[11px] ${metric === k ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{l}</button>
+                    className={`px-2 py-0.5 text-[13px] ${metric === k ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{l}</button>
                 ))}
               </div>
             }>
             <figure className="flex min-h-[200px] flex-1 flex-col rounded-md bg-black/35 p-2">
-              <figcaption className="mb-1 text-[11px] text-slate-300">
+              <figcaption className="mb-1 text-[13px] text-slate-300">
                 {metric === "area" ? "95% sway ellipse area (mm²)" : "Resultant sway RMS (mm)"} per {balanceSide}-leg trial, {PROTOCOL_LABEL[view.protocol].toLowerCase()}. Lower = less sway.
               </figcaption>
               <div className="min-h-[170px] flex-1">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 560, height: 180 }}>
                   <LineChart data={rows} margin={{ top: 6, right: 12, bottom: 2, left: 0 }}>
                     <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS} />
-                    <YAxis domain={[0, "auto"]} tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS} width={40} unit={metric === "area" ? "" : ""} allowDecimals={false} />
+                    <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} />
+                    <YAxis domain={[0, "auto"]} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={40} unit={metric === "area" ? "" : ""} allowDecimals={false} />
                     <Tooltip cursor={{ stroke: C.green, strokeOpacity: 0.4 }} content={({ active, payload }) => {
                       const r = payload?.[0]?.payload as (typeof rows)[number] | undefined;
                       if (!active || !r) return null;
@@ -258,7 +258,7 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
                         <div className={TIP_CLASS}>
                           <p className="font-semibold text-white">{r.label} &middot; {r.startedAt}{r.current ? " (selected session)" : ""}</p>
                           <p className="text-slate-300">{metric === "area" ? "Sway area" : "Resultant RMS"} <span className="font-semibold text-emerald-300">{val === null ? "Unavailable" : metric === "area" ? `${val.toFixed(1)} mm²` : `${val.toFixed(2)} mm`}</span></p>
-                          <p className="text-[10px] text-slate-400">Coverage {Math.round(r.coverage * 100)}%</p>
+                          <p className="text-[12px] text-slate-400">Coverage {Math.round(r.coverage * 100)}%</p>
                         </div>
                       );
                     }} />
@@ -269,7 +269,7 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <p className="text-center text-[10px] text-slate-400">White point = selected session. Days 36&ndash;40 are history trials without a full session record.</p>
+              <p className="text-center text-[12px] text-slate-400">White point = selected session. Days 36&ndash;40 are history trials without a full session record.</p>
             </figure>
           </Panel>
         </div>
@@ -295,14 +295,14 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
                 ...(fixtures?.scenarioFlag ? [{ ok: false, warn: true, text: `Demo flag: ${fixtures.scenarioFlag}` }] : []),
               ].map((r, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${r.warn ? "bg-amber-300/25 text-amber-200" : r.ok ? "bg-emerald-400/20 text-emerald-300" : "bg-slate-500/25 text-slate-300"}`} aria-hidden="true">
+                  <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${r.warn ? "bg-amber-300/25 text-amber-200" : r.ok ? "bg-emerald-400/20 text-emerald-300" : "bg-slate-500/25 text-slate-300"}`} aria-hidden="true">
                     {r.warn ? "!" : r.ok ? "✓" : "•"}
                   </span>
                   <span className={r.warn ? "text-amber-100" : "text-slate-100"}>{r.text}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-2 text-[10px] text-slate-400">Comparisons are computed from the same trial records as the cards and charts. Simulated data.</p>
+            <p className="mt-2 text-[12px] text-slate-400">Comparisons are computed from the same trial records as the cards and charts. Simulated data.</p>
           </Panel>
         </div>
       </div>

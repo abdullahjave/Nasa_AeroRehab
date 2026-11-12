@@ -20,9 +20,8 @@ function Icon({ d }: { d: string }) {
 function Brand() {
   return (
     <div className="flex items-center gap-2">
-      <span className="flex h-8 w-8 items-center justify-center rounded-md border border-cyan-400/50 bg-cyan-400/10 text-cyan-300">
-        <Icon d="M3 12l18-8-6 16-3-7z" />
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo.png" alt="AeroRehab logo" className="h-9 w-9 shrink-0 object-contain" />
       <span className="text-lg font-semibold tracking-wide text-white">Aero<span className="text-cyan-300">Rehab</span></span>
     </div>
   );
@@ -30,7 +29,7 @@ function Brand() {
 
 function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
-    <ul className="space-y-1">
+    <ul className="space-y-1.5">
       {NAV_ITEMS.map((item) => {
         const active = isActive(pathname, item.href);
         return (
@@ -39,11 +38,7 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
               href={item.href}
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
-              className={`flex items-center gap-3 rounded-md border px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 ${
-                active
-                  ? "border-cyan-400/60 bg-cyan-400/15 text-white shadow-[0_0_12px_rgba(34,211,238,0.25)]"
-                  : "border-transparent text-slate-300 hover:border-cyan-400/20 hover:bg-white/5 hover:text-white"
-              }`}
+              className="nav-link"
             >
               <Icon d={item.icon} />
               <span>{item.label}</span>
@@ -83,7 +78,7 @@ function ConnectionStatus() {
         </span>
         <span>{battery === null ? "Unavailable" : fmt(battery, "%")}</span>
       </div>
-      <p className="text-[10px] text-slate-500">Lowest sensor battery</p>
+      <p className="text-[12px] text-slate-500">Lowest sensor battery</p>
     </div>
   );
 }
@@ -104,7 +99,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative z-10 flex min-h-dvh">
       {/* Desktop sidebar */}
-      <aside className="glass sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-4 p-4 lg:flex">
+      <aside className="glass bar sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-4 p-4 lg:flex">
         <Brand />
         <nav aria-label="Primary" className="flex-1 overflow-y-auto">
           <NavList pathname={pathname} />
@@ -113,7 +108,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="glass sticky top-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 text-sm">
+        <header className="glass bar sticky top-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 text-sm">
           <button
             type="button"
             className="rounded-md border border-cyan-400/40 p-2 text-cyan-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 lg:hidden"
@@ -187,7 +182,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         {open && (
           <div className="fixed inset-0 z-30 lg:hidden">
             <button type="button" aria-label="Close navigation menu" className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
-            <div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu" className="glass absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col gap-4 p-4">
+            <div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu" className="glass bar absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col gap-4 p-4">
               <div className="flex items-center justify-between">
                 <Brand />
                 <button type="button" aria-label="Close navigation menu" className="rounded-md border border-cyan-400/40 p-2 text-cyan-200" onClick={() => setOpen(false)} autoFocus>

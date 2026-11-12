@@ -46,13 +46,13 @@ export default function RecordedPressure() {
       ) : (
         <>
           <div className="grid gap-3 lg:grid-cols-2">
-            <Panel id="rl-measured" title="Measured values" icon="foot" action={<Link href="/patient-management" className="text-[11px] text-cyan-300 hover:underline">Edit assessment &rarr;</Link>}>
-              <p className="text-[11px] text-slate-300">{x.startedAt} &middot; manual entry{x.csvImport ? <> plus <span data-testid="imported-badge" className="rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[10px] text-violet-100">Imported CSV</span></> : null}. Force and peak pressure are separate readings.</p>
+            <Panel id="rl-measured" title="Measured values" icon="foot" action={<Link href="/patient-management" className="text-[13px] text-cyan-300 hover:underline">Edit assessment &rarr;</Link>}>
+              <p className="text-[13px] text-slate-300">{x.startedAt} &middot; manual entry{x.csvImport ? <> plus <span data-testid="imported-badge" className="rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[12px] text-violet-100">Imported CSV</span></> : null}. Force and peak pressure are separate readings.</p>
               <dl className="mt-2 grid grid-cols-2 gap-3">
                 <div><dt className="text-xs text-slate-400">Left force</dt><dd data-metric="leftForce" className="text-xl font-semibold tabular-nums text-white">{x.leftForceN === null ? MISSING : <>{r1(x.leftForceN)} <span className="text-sm font-normal text-slate-300">N</span></>}</dd></div>
                 <div><dt className="text-xs text-slate-400">Right force</dt><dd data-metric="rightForce" className="text-xl font-semibold tabular-nums text-white">{x.rightForceN === null ? MISSING : <>{r1(x.rightForceN)} <span className="text-sm font-normal text-slate-300">N</span></>}</dd></div>
-                <div><dt className="text-xs text-slate-400">Left peak pressure</dt><dd data-metric="leftPeak" className="text-xl font-semibold tabular-nums text-white">{pkL.value === null ? MISSING : <>{r1(pkL.value)} <span className="text-sm font-normal text-slate-300">kPa</span>{pkL.origin === "csv" && <span className="ml-1 text-[10px] font-normal text-violet-200">{ORIGIN_LABEL.csv}</span>}</>}</dd></div>
-                <div><dt className="text-xs text-slate-400">Right peak pressure</dt><dd data-metric="rightPeak" className="text-xl font-semibold tabular-nums text-white">{pkR.value === null ? MISSING : <>{r1(pkR.value)} <span className="text-sm font-normal text-slate-300">kPa</span>{pkR.origin === "csv" && <span className="ml-1 text-[10px] font-normal text-violet-200">{ORIGIN_LABEL.csv}</span>}</>}</dd></div>
+                <div><dt className="text-xs text-slate-400">Left peak pressure</dt><dd data-metric="leftPeak" className="text-xl font-semibold tabular-nums text-white">{pkL.value === null ? MISSING : <>{r1(pkL.value)} <span className="text-sm font-normal text-slate-300">kPa</span>{pkL.origin === "csv" && <span className="ml-1 text-[12px] font-normal text-violet-200">{ORIGIN_LABEL.csv}</span>}</>}</dd></div>
+                <div><dt className="text-xs text-slate-400">Right peak pressure</dt><dd data-metric="rightPeak" className="text-xl font-semibold tabular-nums text-white">{pkR.value === null ? MISSING : <>{r1(pkR.value)} <span className="text-sm font-normal text-slate-300">kPa</span>{pkR.origin === "csv" && <span className="ml-1 text-[12px] font-normal text-violet-200">{ORIGIN_LABEL.csv}</span>}</>}</dd></div>
               </dl>
             </Panel>
 
@@ -61,7 +61,7 @@ export default function RecordedPressure() {
                 <>
                   <p data-metric="shares" className="text-2xl font-semibold tabular-nums text-white">Left {r1(sh.shares.leftPct)}% <span className="text-slate-400">&middot;</span> Right {r1(sh.shares.rightPct)}%</p>
                   <p data-metric="diff" className="mt-1 text-sm tabular-nums text-slate-100">Difference: {r1(sh.shares.diffPp)} percentage points{sh.shares.heavier === "equal" ? " (equal)" : ` more on the ${sh.shares.heavier} foot`}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">{sh.origin === "csv" ? "Calculated from the imported CSV: the session mean over frames where both feet are complete. No forces were entered by hand." : "Load share = foot force ÷ combined force × 100, from the two forces entered for this assessment."} <span data-testid="share-origin" className="text-violet-200">[{sh.origin ? ORIGIN_LABEL[sh.origin] : ""}]</span> No comparison rule is set, so no status is given. {SUMMARY_RULE}</p>
+                  <p className="mt-1 text-[13px] text-slate-400">{sh.origin === "csv" ? "Calculated from the imported CSV: the session mean over frames where both feet are complete. No forces were entered by hand." : "Load share = foot force ÷ combined force × 100, from the two forces entered for this assessment."} <span data-testid="share-origin" className="text-violet-200">[{sh.origin ? ORIGIN_LABEL[sh.origin] : ""}]</span> No comparison rule is set, so no status is given. {SUMMARY_RULE}</p>
                 </>
               ) : (
                 <>

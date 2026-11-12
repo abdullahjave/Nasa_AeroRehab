@@ -49,13 +49,13 @@ function PreviewCard({ p, geometry }: { p: PreviewValue["preview"]; geometry?: P
           <Row k="Blank readings" v={p.blankReadings} />
           <Row k="Sensors with no row" v={p.absentReadings} />
           <Row k="Frames without a left / right foot" v={`${p.missingFootFrames.left} / ${p.missingFootFrames.right}`} />
-          <p className="mt-1 text-[11px] text-slate-300">{p.orientation}</p>
-          <p className="mt-1 text-[11px] text-slate-400">Missing readings stay missing (Unavailable); they are never read as 0 kPa. Load share is only calculated from frames where both feet are complete.</p>
+          <p className="mt-1 text-[13px] text-slate-300">{p.orientation}</p>
+          <p className="mt-1 text-[13px] text-slate-400">Missing readings stay missing (Unavailable); they are never read as 0 kPa. Load share is only calculated from frames where both feet are complete.</p>
         </dl>
         {geometry && geometry.length > 0 && (
           <figure className="mx-auto w-40" aria-label="Imported sensor positions on the foot outlines">
             <Footprints left={views("left")} right={views("right")} mode="outline" markers className="h-44 w-full" />
-            <figcaption className="text-center text-[10px] text-slate-400">Sensor positions. Toes point up; big-toe side faces the other foot.</figcaption>
+            <figcaption className="text-center text-[12px] text-slate-400">Sensor positions. Toes point up; big-toe side faces the other foot.</figcaption>
           </figure>
         )}
       </div>
@@ -71,7 +71,7 @@ function PreviewCard({ p, geometry }: { p: PreviewValue["preview"]; geometry?: P
       <Row k="Observed duration (CSV)" v={`${p.observedDurationS.toFixed(2)} s`} />
       <Row k="Sampling interval (median)" v={`${p.intervalMs} ms`} />
       <Row k="Gaps" v={p.gaps.length === 0 ? "none" : p.gaps.map((g) => `${g.fromS.toFixed(2)}–${g.toS.toFixed(2)} s`).join(", ")} />
-      <p className="mt-1 text-[11px] text-slate-400">The path and replay are never drawn across a gap. No Balance Index or fall-risk flag is created from an import.</p>
+      <p className="mt-1 text-[13px] text-slate-400">The path and replay are never drawn across a gap. No Balance Index or fall-risk flag is created from an import.</p>
     </dl>
   );
 }
@@ -176,7 +176,7 @@ export default function SensorImport({ a, target, onClose }: { a: AstronautRecor
                 {st.failure.hidden > 0 && <li>…and {st.failure.hidden} more problem{st.failure.hidden === 1 ? "" : "s"}.</li>}
               </ul>
             )}
-            <p className="mt-1 text-[11px] text-rose-100/80">Nothing was saved. Fix the file and choose it again.</p>
+            <p className="mt-1 text-[13px] text-rose-100/80">Nothing was saved. Fix the file and choose it again.</p>
           </div>
         )}
 

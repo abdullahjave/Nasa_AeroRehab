@@ -21,8 +21,8 @@ function Field({ id, label, error, hint, children }: { id: string; label: string
     <div className="min-w-0">
       <label htmlFor={id} className="mb-0.5 block text-xs text-slate-300">{label}</label>
       {children}
-      {hint && !error && <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p>}
-      {error && <p id={`${id}-err`} role="alert" className="mt-0.5 text-[11px] text-rose-300">{error}</p>}
+      {hint && !error && <p className="mt-0.5 text-[13px] text-slate-400">{hint}</p>}
+      {error && <p id={`${id}-err`} role="alert" className="mt-0.5 text-[13px] text-rose-300">{error}</p>}
     </div>
   );
 }
@@ -61,7 +61,7 @@ function PressureForm({ a, editing, onClose }: { a: AstronautRecord; editing: Pr
   return (
     <Panel id="rp-pform" title={id ? "Edit pressure assessment" : "Add pressure assessment"} icon="foot" action={<button type="button" className={ghost} onClick={onClose}>Close</button>}>
       <form onSubmit={save} noValidate className="space-y-2" aria-label={id ? "Edit pressure assessment" : "Add pressure assessment"}>
-        <p className="text-[11px] text-slate-300">Manual entry for {a.profile.displayName}. Force in newtons (N) and peak pressure in kilopascals (kPa) are separate readings; leave a box blank if it was not measured (blank is not 0). Times are UTC.</p>
+        <p className="text-[13px] text-slate-300">Manual entry for {a.profile.displayName}. Force in newtons (N) and peak pressure in kilopascals (kPa) are separate readings; leave a box blank if it was not measured (blank is not 0). Times are UTC.</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <Field id="pf-recordedAt" label="Date and time (UTC)" error={errors.recordedAt}><input type="datetime-local" {...p("recordedAt")} /></Field>
           <Field id="pf-protocol" label="Protocol" error={errors.protocol}><select {...p("protocol")}>{PRESSURE_PROTOCOLS.map((x) => <option key={x} value={x}>{PRESSURE_PROTOCOL_LABEL[x]}</option>)}</select></Field>
@@ -114,7 +114,7 @@ function BalanceForm({ a, editing, onClose }: { a: AstronautRecord; editing: Bal
   return (
     <Panel id="rp-bform" title={id ? "Edit balance trial" : "Add balance trial"} icon="balance" action={<button type="button" className={ghost} onClick={onClose}>Close</button>}>
       <form onSubmit={save} noValidate className="space-y-2" aria-label={id ? "Edit balance trial" : "Add balance trial"}>
-        <p className="text-[11px] text-slate-300">Manual entry for {a.profile.displayName}. Sway RMS values are what the instrument reported; they are saved as entered measurements. Times are UTC.</p>
+        <p className="text-[13px] text-slate-300">Manual entry for {a.profile.displayName}. Sway RMS values are what the instrument reported; they are saved as entered measurements. Times are UTC.</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <Field id="bf-recordedAt" label="Date and time (UTC)" error={errors.recordedAt}><input type="datetime-local" {...p("recordedAt")} /></Field>
           <Field id="bf-protocol" label="Protocol" error={errors.protocol}><select {...p("protocol")}>{BALANCE_PROTOCOLS.map((x) => <option key={x} value={x}>{BALANCE_PROTOCOL_LABEL[x]}</option>)}</select></Field>
@@ -156,11 +156,11 @@ export default function RecordedAssessmentsPanel({ a }: { a: AstronautRecord }) 
             {pRows.map((x) => (
               <li key={x.id} className="rounded-md border border-cyan-400/20 p-2 text-xs" data-pressure-id={x.id}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-semibold text-white">{x.label} <span className="font-normal text-slate-400">&middot; {x.startedAt}</span> {x.csvImport && <span data-testid="imported-badge" className="ml-1 rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[10px] font-medium text-violet-100">Imported CSV</span>}</p>
+                  <p className="font-semibold text-white">{x.label} <span className="font-normal text-slate-400">&middot; {x.startedAt}</span> {x.csvImport && <span data-testid="imported-badge" className="ml-1 rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[12px] font-medium text-violet-100">Imported CSV</span>}</p>
                   <span className="flex gap-2"><button type="button" className={ghost} aria-label={`Import sensor CSV for ${x.label}`} onClick={() => { selectPressureAssessment(x.id); setImp({ aid: a.id, kind: "pressure", id: x.id }); }}>Import sensor CSV</button>
                   <button type="button" className={ghost} aria-label={`Edit ${x.label}`} onClick={() => { selectPressureAssessment(x.id); setPf((f) => ({ aid: a.id, id: x.id, n: (f?.n ?? 0) + 1 })); }}>Edit</button></span>
                 </div>
-                {x.csvImport && <p className="mt-0.5 text-[11px] text-violet-200">Imported CSV: {x.csvImport.fileName} &middot; {x.csvImport.preview.kind === "pressure" ? `${x.csvImport.preview.frameCount} frames, ${x.csvImport.preview.incompleteFrames} with missing data` : `${x.csvImport.preview.validSamples} valid samples, ${(x.csvImport.preview.coverage * 100).toFixed(0)}% coverage`}</p>}
+                {x.csvImport && <p className="mt-0.5 text-[13px] text-violet-200">Imported CSV: {x.csvImport.fileName} &middot; {x.csvImport.preview.kind === "pressure" ? `${x.csvImport.preview.frameCount} frames, ${x.csvImport.preview.incompleteFrames} with missing data` : `${x.csvImport.preview.validSamples} valid samples, ${(x.csvImport.preview.coverage * 100).toFixed(0)}% coverage`}</p>}
                 <p className="mt-0.5 tabular-nums text-slate-100">Force L {x.leftForceN === null ? "—" : `${r1(x.leftForceN)} N`} &middot; R {x.rightForceN === null ? "—" : `${r1(x.rightForceN)} N`} &middot; Peak L {x.leftPeakKpa === null ? "—" : `${r1(x.leftPeakKpa)} kPa`} &middot; R {x.rightPeakKpa === null ? "—" : `${r1(x.rightPeakKpa)} kPa`}</p>
                 <p className="mt-0.5 tabular-nums text-slate-300">{x.shares.kind === "value" ? `Load share L ${r1(x.shares.leftPct)}% · R ${r1(x.shares.rightPct)}% (difference ${r1(x.shares.diffPp)} pp)` : `Load share unavailable: ${SHARE_REASON[x.shares.reason]}`} &middot; manual entry</p>
               </li>
@@ -179,11 +179,11 @@ export default function RecordedAssessmentsPanel({ a }: { a: AstronautRecord }) 
             {bRows.map((x) => (
               <li key={x.id} className="rounded-md border border-cyan-400/20 p-2 text-xs" data-balance-id={x.id}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-semibold text-white">{x.label} <span className="font-normal text-slate-400">&middot; {x.startedAt}</span> {x.csvImport && <span data-testid="imported-badge" className="ml-1 rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[10px] font-medium text-violet-100">Imported CSV</span>}</p>
+                  <p className="font-semibold text-white">{x.label} <span className="font-normal text-slate-400">&middot; {x.startedAt}</span> {x.csvImport && <span data-testid="imported-badge" className="ml-1 rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[12px] font-medium text-violet-100">Imported CSV</span>}</p>
                   <span className="flex gap-2"><button type="button" className={ghost} aria-label={`Import sensor CSV for ${x.label}`} onClick={() => { selectBalanceTrial(x.id); setImp({ aid: a.id, kind: "balance", id: x.id }); }}>Import sensor CSV</button>
                   <button type="button" className={ghost} aria-label={`Edit ${x.label}`} onClick={() => { selectBalanceTrial(x.id); setBf((f) => ({ aid: a.id, id: x.id, n: (f?.n ?? 0) + 1 })); }}>Edit</button></span>
                 </div>
-                {x.csvImport && <p className="mt-0.5 text-[11px] text-violet-200">Imported CSV: {x.csvImport.fileName} &middot; {x.csvImport.preview.kind === "pressure" ? `${x.csvImport.preview.frameCount} frames, ${x.csvImport.preview.incompleteFrames} with missing data` : `${x.csvImport.preview.validSamples} valid samples, ${(x.csvImport.preview.coverage * 100).toFixed(0)}% coverage`}</p>}
+                {x.csvImport && <p className="mt-0.5 text-[13px] text-violet-200">Imported CSV: {x.csvImport.fileName} &middot; {x.csvImport.preview.kind === "pressure" ? `${x.csvImport.preview.frameCount} frames, ${x.csvImport.preview.incompleteFrames} with missing data` : `${x.csvImport.preview.validSamples} valid samples, ${(x.csvImport.preview.coverage * 100).toFixed(0)}% coverage`}</p>}
                 <p className="mt-0.5 tabular-nums text-slate-100">{r1(x.durationS)} s observed &middot; ML RMS {x.mlRmsMm === null ? "not entered" : `${r1(x.mlRmsMm)} mm`} &middot; AP RMS {x.apRmsMm === null ? "not entered" : `${r1(x.apRmsMm)} mm`} &middot; manual entry</p>
               </li>
             ))}

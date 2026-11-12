@@ -61,7 +61,7 @@ function DemoAIInsights() {
     m.kind === "value" ? (
       <span className={`rounded-md border px-2 py-1 text-center text-sm font-semibold tabular-nums ${m.value < 0 ? "border-rose-400/70 bg-rose-500/15 text-rose-200" : "border-emerald-400/60 bg-emerald-400/10 text-emerald-200"}`}>
         {m.value < 0 ? "↓" : m.value > 0 ? "↑" : ""} {signed(m.value, "°")}
-        <span className="block text-[11px] font-normal">{pct.kind === "value" ? `(${signed(pct.value, "%")})` : why(pct)}</span>
+        <span className="block text-[13px] font-normal">{pct.kind === "value" ? `(${signed(pct.value, "%")})` : why(pct)}</span>
       </span>
     ) : <span className="text-xs text-amber-200">{why(m)}</span>;
 
@@ -85,7 +85,7 @@ function DemoAIInsights() {
 
       {/* Actionable alerts first: severity, then time. Data issues are listed separately from health findings. */}
       <Panel id="ai-alerts" title="Your alerts" icon="warn">
-        <p className="mb-2 text-[11px] text-slate-300">{summary.scope}</p>
+        <p className="mb-2 text-[13px] text-slate-300">{summary.scope}</p>
         <NotAssessed />
         {healthAlerts.length === 0 ? (
           <p className="text-sm text-slate-200">No health check could be evaluated for this session, so nothing is shown as good or flagged.</p>
@@ -113,32 +113,32 @@ function DemoAIInsights() {
       {/* Top row */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.6fr_1fr_1fr]">
         <Panel id="ai-angle" title="Knee Angle Analysis" icon="joint">
-          <p className="mb-2 text-[11px] text-slate-300">How far your knee bent at its deepest point, next to your baseline session.</p>
+          <p className="mb-2 text-[13px] text-slate-300">How far your knee bent at its deepest point, next to your baseline session.</p>
           <div className="flex flex-wrap items-center gap-4">
             <div>
               <p className="text-3xl font-semibold tabular-nums text-white">{v.peak.current.kind === "value" ? `${n1(v.peak.current.value)}°` : <span className="text-sm text-amber-200">Unavailable</span>}</p>
-              <p className="text-[11px] text-slate-300">Current (peak flexion)</p>
+              <p className="text-[13px] text-slate-300">Current (peak flexion)</p>
             </div>
             <div className="border-l border-cyan-400/20 pl-4">
               <p className="text-3xl font-semibold tabular-nums text-white">{v.peak.baseline.kind === "value" ? `${n1(v.peak.baseline.value)}°` : <span className="text-sm text-amber-200">{why(v.peak.baseline)}</span>}</p>
-              <p className="text-[11px] text-slate-300">Personal baseline{v.baselineDay ? ` (Day ${v.baselineDay})` : ""}</p>
+              <p className="text-[13px] text-slate-300">Personal baseline{v.baselineDay ? ` (Day ${v.baselineDay})` : ""}</p>
             </div>
             {diffChip(v.peak.diff, v.peak.pct)}
           </div>
         </Panel>
         <Panel id="ai-rom" title="Knee movement" icon="compare">
-          <p className="mb-1 text-[11px] text-slate-300">{READINGS.knee.meaning}</p>
+          <p className="mb-1 text-[13px] text-slate-300">{READINGS.knee.meaning}</p>
           <p className="text-3xl font-semibold tabular-nums text-white">{v.rom.current.kind === "value" ? `${n1(v.rom.current.value)}°` : <span className="text-sm text-amber-200">Unavailable</span>}</p>
           <p className={`text-xs ${v.rom.diff.kind === "value" ? (v.rom.diff.value < 0 ? "text-rose-200" : "text-emerald-300") : "text-amber-200"}`}>
             {v.rom.diff.kind === "value" ? `(${v.rom.diff.value < 0 ? "↓" : "↑"} ${signed(v.rom.diff.value, "°")} vs. baseline${v.rom.baseline.kind === "value" ? ` ${n1(v.rom.baseline.value)}°` : ""})` : why(v.rom.diff)}
           </p>
-          <p className="mt-1 text-[10px] text-slate-400">{READINGS.knee.technical}: {READINGS.knee.shows} (Joint Analytics convention)</p>
+          <p className="mt-1 text-[12px] text-slate-400">{READINGS.knee.technical}: {READINGS.knee.shows} (Joint Analytics convention)</p>
         </Panel>
         <Panel id="ai-events" title="Movement Anomalies" icon="pulse">
-          <p className="mb-1 text-[11px] text-slate-300">Moments the demo scenario marked as unusual movement, plus gaps in the sensor data.</p>
+          <p className="mb-1 text-[13px] text-slate-300">Moments the demo scenario marked as unusual movement, plus gaps in the sensor data.</p>
           <p className="text-3xl font-semibold tabular-nums text-white">{v.events.length} <span className="text-base font-normal">Event{v.events.length === 1 ? "" : "s"}</span></p>
           <p className="text-xs text-slate-300">{deltaEvents === null ? "No previous session to compare" : `(${deltaEvents > 0 ? "↑ +" : deltaEvents < 0 ? "↓ " : ""}${deltaEvents} vs. previous session)`}</p>
-          <p className="mt-1 text-[10px] text-slate-400">Seeded demo events plus measured data gaps, each counted once</p>
+          <p className="mt-1 text-[12px] text-slate-400">Seeded demo events plus measured data gaps, each counted once</p>
         </Panel>
       </div>
 
@@ -148,7 +148,7 @@ function DemoAIInsights() {
           <Panel id="ai-chart" title="Knee Angle: Current vs. Personal Baseline" icon="joint" className="h-full">
             {v.chart.current.kind === "value" ? (
               <figure className="flex min-h-[260px] flex-1 flex-col rounded-md bg-black/35 p-2">
-                <figcaption className="mb-1 text-[11px] text-slate-300">
+                <figcaption className="mb-1 text-[13px] text-slate-300">
                   Peak repetition of each recording, normalised to 0&ndash;100% of that repetition. Values appear only at real samples.
                   {v.chart.baseline.kind === "unavailable" && ` Baseline: ${why(v.chart.baseline)}.`}
                 </figcaption>
@@ -156,10 +156,10 @@ function DemoAIInsights() {
                   <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 620, height: 230 }}>
                     <LineChart data={v.chart.rows} margin={{ top: 36, right: 16, bottom: 6, left: 0 }}>
                       <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                      <XAxis dataKey="pct" type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS}
-                        label={{ value: "Repetition cycle (%)", position: "insideBottom", offset: -2, fill: AXIS, fontSize: 11 }} height={34} />
-                      <YAxis domain={[0, 140]} ticks={[0, 20, 40, 60, 80, 100, 120, 140]} tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS} width={44}
-                        label={{ value: "Angle (°)", angle: -90, position: "insideLeft", fill: AXIS, fontSize: 11, dx: 8 }} />
+                      <XAxis dataKey="pct" type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS}
+                        label={{ value: "Repetition cycle (%)", position: "insideBottom", offset: -2, fill: AXIS, fontSize: 12 }} height={34} />
+                      <YAxis domain={[0, 140]} ticks={[0, 20, 40, 60, 80, 100, 120, 140]} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={44}
+                        label={{ value: "Angle (°)", angle: -90, position: "insideLeft", fill: AXIS, fontSize: 12, dx: 8 }} />
                       <Tooltip cursor={{ stroke: C.cyan, strokeOpacity: 0.4 }} content={({ active, payload }) => {
                         const r = payload?.[0]?.payload as { pct: number; current: number | null; baseline: number | null } | undefined;
                         if (!active || !r) return null;
@@ -171,16 +171,16 @@ function DemoAIInsights() {
                           </div>
                         );
                       }} />
-                      <Legend verticalAlign="top" align="right" height={30} wrapperStyle={{ fontSize: 11, color: AXIS }} />
+                      <Legend verticalAlign="top" align="right" height={30} wrapperStyle={{ fontSize: 12, color: AXIS }} />
                       <Line name={`Current (Day ${session.missionDay})`} dataKey="current" stroke={C.cyan} strokeWidth={2.2} dot={false} connectNulls isAnimationActive={false} type="monotone" />
                       {v.chart.baseline.kind === "value" && (
                         <Line name={`Personal baseline (Day ${v.baselineDay})`} dataKey="baseline" stroke={VIOLET} strokeWidth={2} strokeDasharray="6 4" dot={false} connectNulls isAnimationActive={false} type="monotone" />
                       )}
                       <ReferenceDot x={v.chart.current.value.peak.pct} y={v.chart.current.value.peak.deg} r={5} fill="#fff" stroke={C.cyan} strokeWidth={2}
-                        label={{ value: `${n1(v.chart.current.value.peak.deg)}° (Current)`, position: "bottom", fill: "#a5f3fc", fontSize: 11 }} />
+                        label={{ value: `${n1(v.chart.current.value.peak.deg)}° (Current)`, position: "bottom", fill: "#a5f3fc", fontSize: 12 }} />
                       {v.chart.baseline.kind === "value" && (
                         <ReferenceDot x={v.chart.baseline.value.peak.pct} y={v.chart.baseline.value.peak.deg} r={5} fill="#fff" stroke={VIOLET} strokeWidth={2}
-                          label={{ value: `${n1(v.chart.baseline.value.peak.deg)}° (Baseline)`, position: "top", fill: "#ddd6fe", fontSize: 11 }} />
+                          label={{ value: `${n1(v.chart.baseline.value.peak.deg)}° (Baseline)`, position: "top", fill: "#ddd6fe", fontSize: 12 }} />
                       )}
                     </LineChart>
                   </ResponsiveContainer>
@@ -192,7 +192,7 @@ function DemoAIInsights() {
         <div className="xl:col-span-3">
           <Panel id="ai-anatomy" title="Knee Anatomy" icon="joint" className="h-full">
             <KneeAnatomy angle={peakCur} thigh={astronaut.sensors.find((s) => s.site === "thigh")} shank={astronaut.sensors.find((s) => s.site === "shank")} className="mx-auto w-full max-w-[250px]" />
-            <p className="mt-1 text-center text-[10px] text-slate-400">Knee illustration is static (supplied artwork); the arc shows the session peak flexion.</p>
+            <p className="mt-1 text-center text-[12px] text-slate-400">Knee illustration is static (supplied artwork); the arc shows the session peak flexion.</p>
           </Panel>
         </div>
         <div className="xl:col-span-3">
@@ -202,7 +202,7 @@ function DemoAIInsights() {
                 <p className={`text-base font-semibold ${TONE[selectedAlert?.severity ?? "attention"].text}`}>{selected.title}</p>
                 <p className="mt-1"><Chip tone={SOURCE[selected.source].tone}>{SOURCE[selected.source].label}</Chip></p>
                 <p className="mt-2 text-sm text-slate-100">{selected.text}</p>
-                <dl className="mt-2 space-y-0.5 text-[11px]">
+                <dl className="mt-2 space-y-0.5 text-[13px]">
                   <div className="flex gap-1"><dt className="text-slate-400">Metric:</dt><dd className="text-white">{selected.metric}</dd></div>
                   <div className="flex gap-1"><dt className="text-slate-400">Session:</dt><dd className="text-white">{session.label}{selected.tSec != null ? ` · at ${mmss(selected.tSec)}` : ""}</dd></div>
                 </dl>
@@ -227,7 +227,7 @@ function DemoAIInsights() {
       <div className="grid gap-3 xl:grid-cols-12">
         <div className="xl:col-span-6">
           <Panel id="ai-timeline" title="Movement Anomaly Timeline" icon="pulse" className="h-full">
-            <div className="mb-2 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[11px] text-slate-300">
+            <div className="mb-2 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[13px] text-slate-300">
               <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-rose-400" />Seeded scenario event</span>
               <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-amber-300" />Measured data gap</span>
               <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full border-2 border-cyan-300" />Selected</span>
@@ -235,7 +235,7 @@ function DemoAIInsights() {
             <div className="relative mx-2 h-14">
               <div className="absolute inset-x-0 top-5 h-1 rounded-full bg-emerald-400/50" />
               {Array.from({ length: Math.floor(end / 300) + 1 }).map((_, i) => (
-                <span key={i} className="absolute top-9 -translate-x-1/2 text-[10px] text-slate-400" style={{ left: `${((i * 300) / end) * 100}%` }}>{i * 5} min</span>
+                <span key={i} className="absolute top-9 -translate-x-1/2 text-[12px] text-slate-400" style={{ left: `${((i * 300) / end) * 100}%` }}>{i * 5} min</span>
               ))}
               {v.events.map((e) => {
                 const isSel = selected?.id === e.id;
@@ -278,11 +278,11 @@ function DemoAIInsights() {
         </div>
         <div className="xl:col-span-6">
           <Panel id="ai-recs" title="Rehabilitation Recommendations" icon="check" className="h-full">
-            <p className="mb-2 text-[11px] text-amber-200">Demo guidance tied to the selected finding. Source: {GUIDANCE_SOURCE}. Not a clinical recommendation.</p>
+            <p className="mb-2 text-[13px] text-amber-200">Demo guidance tied to the selected finding. Source: {GUIDANCE_SOURCE}. Not a clinical recommendation.</p>
             <ul className="space-y-2 text-sm text-slate-100">
               {demoGuidance(selected?.kind ?? null, v.baselineDay, planItem, selected?.tSec ?? null).map((g) => (
                 <li key={g} className="flex items-start gap-2">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-[11px] text-emerald-300" aria-hidden="true">&#10003;</span>
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-[13px] text-emerald-300" aria-hidden="true">&#10003;</span>
                   {g}
                 </li>
               ))}
@@ -293,7 +293,7 @@ function DemoAIInsights() {
                 Open exercise: {match.name} &rarr;
               </Link>
             ) : (
-              <p className="mt-2 text-[10px] text-slate-400">No explicit exercise match for this finding, so guidance is shown as text.</p>
+              <p className="mt-2 text-[12px] text-slate-400">No explicit exercise match for this finding, so guidance is shown as text.</p>
             )}
           </Panel>
         </div>

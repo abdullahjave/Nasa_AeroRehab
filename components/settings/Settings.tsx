@@ -112,8 +112,8 @@ function SensorTable({ details, knee, selectedId, onSelect }: { details: SensorD
           );
         })}
       </ul>
-      <p role="status" aria-live="polite" className="mt-2 min-h-4 text-[11px] text-cyan-200">{msg}</p>
-      <p className="text-[10px] text-slate-400">
+      <p role="status" aria-live="polite" className="mt-2 min-h-4 text-[13px] text-cyan-200">{msg}</p>
+      <p className="text-[12px] text-slate-400">
         Battery shows Unavailable when a sensor is disconnected or has no reading; 0% would be a real empty battery.
         {!hasSignal && " The demo fixtures provide no signal-strength value, so that column is not shown."}
         {" "}IMUs are on the {knee} knee used in this session.
@@ -165,12 +165,12 @@ function PressurePanel({ details }: { details: SensorDetail[] }) {
           </dl>
         </div>
       )}
-      <ul className="mt-2 grid grid-cols-2 gap-x-3 text-[11px]">
+      <ul className="mt-2 grid grid-cols-2 gap-x-3 text-[13px]">
         {([["Left insole", left, leftUp], ["Right insole", right, rightUp]] as const).map(([l, d, up]) => (
           <li key={l} className="flex items-center gap-1.5"><span className={`led ${up ? "" : "led-off"}`} aria-hidden="true" /><span className="text-slate-300">{l}:</span> <span className={up ? "text-emerald-300" : "text-slate-300"}>{d ? statusText(d.sensor, d.reason) : "Not assigned"}</span></li>
         ))}
       </ul>
-      <p className="mt-2 text-[10px] text-slate-400">
+      <p className="mt-2 text-[12px] text-slate-400">
         Fixed 0&ndash;250 kPa scale, same as Load &amp; Pressure. Replays the selected session&rsquo;s recording{animate ? " in real time" : ""}; {reduced && playback === "running" ? "animation is off because motion is reduced. " : ""}latency and signal quality are not in the demo data, so they are not shown. A disconnected insole only affects this live view; the saved recording is unchanged.
       </p>
     </Panel>
@@ -197,18 +197,18 @@ function CalibrationPanel({ details, selected, knee }: { details: SensorDetail[]
                 <span className={`led ${busy ? "led-warn" : calLed(c.status)}`} aria-hidden="true" />
                 <span className={busy ? "text-amber-300" : calTone(c.status)}>{busy ? "Calibrating…" : CAL_TEXT[c.status]}</span>
               </span>
-              <span className="w-full text-[10px] text-slate-400">{c.at ? `Last calibrated ${fmtStamp(c.at)} (simulated)` : "Last calibration time: not provided"}</span>
+              <span className="w-full text-[12px] text-slate-400">{c.at ? `Last calibrated ${fmtStamp(c.at)} (simulated)` : "Last calibration time: not provided"}</span>
             </li>
           );
         })}
       </ul>
       <div className="mt-3 border-t border-cyan-400/15 pt-2">
-        <p className="text-[11px] text-slate-300">Target sensor: <span className="font-medium text-white">{selected ? siteLabel(selected.sensor, knee) : "none"}</span> <span className="text-slate-500">(select a row in Sensor Configuration)</span></p>
+        <p className="text-[13px] text-slate-300">Target sensor: <span className="font-medium text-white">{selected ? siteLabel(selected.sensor, knee) : "none"}</span> <span className="text-slate-500">(select a row in Sensor Configuration)</span></p>
         <button type="button" disabled={!!blocked} aria-disabled={!!blocked} onClick={() => selected && runCalibration(astronaut.id, selected.sensor.id)}
           className="mt-1.5 flex w-full items-center justify-center gap-2 rounded-md border border-cyan-400/70 bg-cyan-500/20 px-3 py-1.5 text-sm text-white hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-45">
           {pending ? "Calibrating…" : "Run Calibration"}
         </button>
-        <div role="status" aria-live="polite" className="mt-1.5 min-h-8 text-[11px]">
+        <div role="status" aria-live="polite" className="mt-1.5 min-h-8 text-[13px]">
           {pending ? <span className="text-amber-200">Calibrating {selected ? siteLabel(selected.sensor, knee) : ""} (simulated, about {Math.round(CALIBRATION_MS / 1000)} s)…</span> : (
             <>
               {result && <span className={result.ok ? "text-emerald-300" : "text-amber-200"}>{result.message}{" "}<button type="button" onClick={() => selected && clearCalibrationResult(astronaut.id, selected.sensor.id)} className="text-cyan-300 underline">Dismiss</button></span>}
@@ -216,7 +216,7 @@ function CalibrationPanel({ details, selected, knee }: { details: SensorDetail[]
             </>
           )}
         </div>
-        <p className="text-[10px] text-slate-400">Simulated. Updates the status and time above only; stored readings and assessment scores do not change.</p>
+        <p className="text-[12px] text-slate-400">Simulated. Updates the status and time above only; stored readings and assessment scores do not change.</p>
       </div>
     </Panel>
   );
@@ -237,8 +237,8 @@ function ConnectivityPanel({ details }: { details: SensorDetail[] }) {
       <button type="button" className={`${btn} mt-2 w-fit`} onClick={() => { connectHub(astronaut.id, !hubConnected); setMsg(`Hub ${hubConnected ? "disconnected" : "connected"} (simulated).`); }}>
         {hubConnected ? "Disconnect hub" : "Connect hub"}
       </button>
-      <p role="status" aria-live="polite" className="mt-1.5 min-h-4 text-[11px] text-cyan-200">{msg}</p>
-      <p className="text-[10px] text-slate-400">Uplink, downlink, packet-loss and latency values are not in the demo fixtures, so none are shown. Disconnecting the hub takes {astronaut.profile.displayName}&rsquo;s sensors offline in the live status everywhere; saved sessions stay available.</p>
+      <p role="status" aria-live="polite" className="mt-1.5 min-h-4 text-[13px] text-cyan-200">{msg}</p>
+      <p className="text-[12px] text-slate-400">Uplink, downlink, packet-loss and latency values are not in the demo fixtures, so none are shown. Disconnecting the hub takes {astronaut.profile.displayName}&rsquo;s sensors offline in the live status everywhere; saved sessions stay available.</p>
     </Panel>
   );
 }
@@ -263,7 +263,7 @@ function SystemPanel() {
             {sessions.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
         </label>
-        <p className="text-[11px] text-slate-300">Selected: <span className="text-white">{session.label}</span> &middot; Day {session.missionDay}, {session.startedAt} &middot; {session.scenarioEvents.length} seeded event{session.scenarioEvents.length === 1 ? "" : "s"} &middot; {hasRecording ? "pressure recording available" : "no pressure recording"}</p>
+        <p className="text-[13px] text-slate-300">Selected: <span className="text-white">{session.label}</span> &middot; Day {session.missionDay}, {session.startedAt} &middot; {session.scenarioEvents.length} seeded event{session.scenarioEvents.length === 1 ? "" : "s"} &middot; {hasRecording ? "pressure recording available" : "no pressure recording"}</p>
         <p className="flex items-center gap-1.5 text-white" aria-live="polite"><span className={`led ${running ? "" : "led-warn"}`} aria-hidden="true" />Playback: {running ? "Running" : "Paused"} <span className="text-slate-500">(simulated)</span></p>
         <div className="flex flex-wrap gap-2">
           <button type="button" className={btn} disabled={running} onClick={() => setPlayback("running")}>{"Start / Resume"}</button>
@@ -273,7 +273,7 @@ function SystemPanel() {
         {confirming && (
           <div role="alertdialog" aria-labelledby="reset-title" aria-describedby="reset-desc" className="rounded-md border border-amber-300/50 bg-amber-300/10 p-2">
             <p id="reset-title" className="font-semibold text-amber-100">Reset the demo?</p>
-            <div id="reset-desc" className="mt-1 space-y-1 text-[11px] text-slate-200">
+            <div id="reset-desc" className="mt-1 space-y-1 text-[13px] text-slate-200">
               <p><span className="text-amber-200">Clears:</span> playback (back to Running), the selected scenario (back to the latest session), and all simulated sensor connection, hub and calibration changes for every astronaut.</p>
               <p><span className="text-emerald-300">Keeps:</span> rehab completion, alert history (seen findings), patient notes, saved reports and display preferences.</p>
             </div>
@@ -283,7 +283,7 @@ function SystemPanel() {
             </div>
           </div>
         )}
-        <p role="status" aria-live="polite" className="min-h-4 text-[11px] text-cyan-200">{note}</p>
+        <p role="status" aria-live="polite" className="min-h-4 text-[13px] text-cyan-200">{note}</p>
       </div>
     </Panel>
   );
@@ -300,17 +300,17 @@ function DisplayPanel({ assets }: { assets: Assets }) {
     <Panel id="set-display" title="Display Settings" icon="chart" className="relative h-full overflow-hidden">
       <div className="relative z-10 space-y-2 text-xs sm:pr-24">
         <div className="flex items-center justify-between gap-3">
-          <span><span className="text-white">Reduce motion</span><span id="rm-hint" className="block text-[10px] text-slate-400">{systemReduced ? "Your system already asks for reduced motion, so it stays on." : "Stops animation and the background video."}</span></span>
+          <span><span className="text-white">Reduce motion</span><span id="rm-hint" className="block text-[12px] text-slate-400">{systemReduced ? "Your system already asks for reduced motion, so it stays on." : "Stops animation and the background video."}</span></span>
           <Switch checked={prefs.reduceMotion || systemReduced} disabled={systemReduced} label="Reduce motion" describedBy="rm-hint" onChange={(v) => patchDisplay({ reduceMotion: v })} />
         </div>
         <div className="flex items-center justify-between gap-3">
-          <span><span className="text-white">Background video</span><span id="bv-hint" className="block text-[10px] text-slate-400">Shared space loop behind every page.</span></span>
+          <span><span className="text-white">Background video</span><span id="bv-hint" className="block text-[12px] text-slate-400">Shared space loop behind every page.</span></span>
           <Switch checked={prefs.backgroundVideo} label="Background video" describedBy="bv-hint" onChange={(v) => patchDisplay({ backgroundVideo: v })} />
         </div>
-        <p role="status" aria-live="polite" className="rounded border border-cyan-400/20 bg-black/20 px-2 py-1 text-[11px] text-slate-200">
+        <p role="status" aria-live="polite" className="rounded border border-cyan-400/20 bg-black/20 px-2 py-1 text-[13px] text-slate-200">
           Backdrop now: <span className="text-white">{mode === "video" ? "video" : mode === "poster" ? "poster image" : "CSS starfield"}</span>{why && mode !== "video" ? <span className="text-slate-400"> ({why})</span> : null}
         </p>
-        <p className="text-[10px] text-slate-400">Saved in this browser. No 3D or heatmap switch is offered because no page has a view for it to control. Reset Demo does not change these.</p>
+        <p className="text-[12px] text-slate-400">Saved in this browser. No 3D or heatmap switch is offered because no page has a view for it to control. Reset Demo does not change these.</p>
       </div>
       <div aria-hidden="true" className="pointer-events-none absolute bottom-0 right-1 hidden h-28 w-20 opacity-80 sm:block">
         <AstronautImage className="h-full w-full" label="" />

@@ -54,14 +54,14 @@ function Chart({
   return (
     <Panel id={id} title={title} icon={icon} className="h-full">
       <figure className="flex min-h-[230px] flex-1 flex-col rounded-md bg-black/35 p-2">
-        <figcaption className="mb-1 text-[11px] text-slate-300">{caption}</figcaption>
+        <figcaption className="mb-1 text-[13px] text-slate-300">{caption}</figcaption>
         <div className="min-h-[190px] flex-1">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 460, height: 200 }}>
             <LineChart data={rows} margin={{ top: 4, right: 10, bottom: 2, left: 0 }}
               onClick={(s) => { const x = (s as { activeLabel?: string | number } | undefined)?.activeLabel; if (x !== undefined && !Number.isNaN(Number(x))) onPick(Number(x)); }}>
               <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-              <XAxis dataKey="t" type="number" domain={[0, rows[rows.length - 1]?.t ?? 30]} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} tickCount={7} tickFormatter={(v) => `${v}`} />
-              <YAxis domain={domain} ticks={ticks} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} width={38} allowDecimals={false} />
+              <XAxis dataKey="t" type="number" domain={[0, rows[rows.length - 1]?.t ?? 30]} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} tickCount={7} tickFormatter={(v) => `${v}`} />
+              <YAxis domain={domain} ticks={ticks} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={38} allowDecimals={false} />
               {gaps.left.map((g, i) => <ReferenceArea key={`l${i}`} x1={g.from} x2={g.to} fill="#94a3b8" fillOpacity={0.22} stroke={LEFT} strokeOpacity={0.5} strokeDasharray="3 3" />)}
               {gaps.right.map((g, i) => <ReferenceArea key={`r${i}`} x1={g.from} x2={g.to} fill="#94a3b8" fillOpacity={0.22} stroke={RIGHT} strokeOpacity={0.5} strokeDasharray="3 3" />)}
               <ReferenceLine x={t} stroke="#fff" strokeOpacity={0.85} strokeDasharray="4 3" />
@@ -77,13 +77,13 @@ function Chart({
                   </div>
                 );
               }} />
-              <Legend verticalAlign="top" align="right" height={20} iconType="circle" wrapperStyle={{ fontSize: 11, color: AXIS }} />
+              <Legend verticalAlign="top" align="right" height={20} iconType="circle" wrapperStyle={{ fontSize: 12, color: AXIS }} />
               <Line name="Left foot" dataKey={kl} stroke={LEFT} strokeWidth={1.8} dot={false} isAnimationActive={false} connectNulls={false} />
               <Line name="Right foot" dataKey={kr} stroke={RIGHT} strokeWidth={1.8} dot={false} isAnimationActive={false} connectNulls={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <p className="text-center text-[10px] text-slate-400">Time (s) &middot; shaded band = foot not reporting (Unavailable), not zero</p>
+        <p className="text-center text-[12px] text-slate-400">Time (s) &middot; shaded band = foot not reporting (Unavailable), not zero</p>
       </figure>
     </Panel>
   );
@@ -191,22 +191,22 @@ function DemoLoadPressure() {
           {sharesNow ? (
             <p className="text-2xl font-semibold tabular-nums text-white">{sharesNow.leftPct.toFixed(0)}% <span className="text-xs font-normal text-slate-400">Left</span> <span className="mx-1 text-slate-500">|</span> {sharesNow.rightPct.toFixed(0)}% <span className="text-xs font-normal text-slate-400">Right</span></p>
           ) : <Val m={an.shares as Metric<number>} unit="" big />}
-          {!sharesNow && <p className="text-[11px] text-slate-400">{why(an.shares)}</p>}
-          <p className="mt-1 text-[10px] text-slate-400">
+          {!sharesNow && <p className="text-[13px] text-slate-400">{why(an.shares)}</p>}
+          <p className="mt-1 text-[12px] text-slate-400">
             Cursor frame. Session mean:{" "}
             {sharesMean ? `${sharesMean.leftPct.toFixed(1)}% / ${sharesMean.rightPct.toFixed(1)}%` : `Unavailable (${why(S.meanShares)})`}
           </p>
         </Panel>
         <Panel id="m-peak" title="Peak Pressure" icon="chart">
           <p><Val m={an.peakKpa} unit="kPa" digits={1} big /></p>
-          {an.peakKpa.kind === "unavailable" && <p className="text-[11px] text-slate-400">{why(an.peakKpa)}</p>}
-          <p className="text-[10px] text-slate-400">Cursor frame (L {show(an.left.peakKpa, "kPa", 1).text} &middot; R {show(an.right.peakKpa, "kPa", 1).text})</p>
-          <p className="text-[10px] text-slate-400">Session peak: {show(S.peakKpa.overall, "kPa", 1).text}{S.peakKpa.overall.kind === "unavailable" ? ` (${why(S.peakKpa.overall)}); L ${show(S.peakKpa.left, "kPa", 1).text}, R ${show(S.peakKpa.right, "kPa", 1).text}` : ""}</p>
+          {an.peakKpa.kind === "unavailable" && <p className="text-[13px] text-slate-400">{why(an.peakKpa)}</p>}
+          <p className="text-[12px] text-slate-400">Cursor frame (L {show(an.left.peakKpa, "kPa", 1).text} &middot; R {show(an.right.peakKpa, "kPa", 1).text})</p>
+          <p className="text-[12px] text-slate-400">Session peak: {show(S.peakKpa.overall, "kPa", 1).text}{S.peakKpa.overall.kind === "unavailable" ? ` (${why(S.peakKpa.overall)}); L ${show(S.peakKpa.left, "kPa", 1).text}, R ${show(S.peakKpa.right, "kPa", 1).text}` : ""}</p>
         </Panel>
         <Panel id="m-diff" title="Load Difference" icon="compare">
           <p><Val m={an.differencePp} unit="pp" digits={1} big /></p>
-          {an.differencePp.kind === "unavailable" && <p className="text-[11px] text-slate-400">{why(an.differencePp)}</p>}
-          <p className="text-[10px] text-slate-400">|Left % &minus; Right %| in percentage points. Session mean: {show(S.meanDifferencePp, "pp", 1).text}</p>
+          {an.differencePp.kind === "unavailable" && <p className="text-[13px] text-slate-400">{why(an.differencePp)}</p>}
+          <p className="text-[12px] text-slate-400">|Left % &minus; Right %| in percentage points. Session mean: {show(S.meanDifferencePp, "pp", 1).text}</p>
         </Panel>
         <Panel id="m-cop" title="Center of Pressure" icon="foot">
           <div className="grid grid-cols-2 gap-2 text-xs">
@@ -222,7 +222,7 @@ function DemoLoadPressure() {
               </div>
             ))}
           </div>
-          <p className="mt-1 text-[10px] text-slate-400">Last {(TRAIL_MS / 1000).toFixed(0)} s up to the cursor. Gaps are not bridged.</p>
+          <p className="mt-1 text-[12px] text-slate-400">Last {(TRAIL_MS / 1000).toFixed(0)} s up to the cursor. Gaps are not bridged.</p>
         </Panel>
       </div>
 
@@ -234,7 +234,7 @@ function DemoLoadPressure() {
               <div role="group" aria-label="Heatmap scope" className="flex overflow-hidden rounded-md border border-cyan-400/40">
                 {([["frame", "Cursor frame"], ["peak", "Session peak"]] as const).map(([k, l]) => (
                   <button key={k} type="button" aria-pressed={heatScope === k} onClick={() => setHeatScope(k)}
-                    className={`px-2 py-0.5 text-[11px] ${heatScope === k ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{l}</button>
+                    className={`px-2 py-0.5 text-[13px] ${heatScope === k ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{l}</button>
                 ))}
               </div>
             }>
@@ -245,7 +245,7 @@ function DemoLoadPressure() {
                 <div className="mx-auto mt-1 flex max-w-[360px] justify-around text-xs"><span style={{ color: LEFT }}>Left</span><span style={{ color: RIGHT }}>Right</span></div>
               </div>
             </div>
-            <p className="mt-2 text-[10px] leading-snug text-slate-400">
+            <p className="mt-2 text-[12px] leading-snug text-slate-400">
               Fixed 0&ndash;250 kPa colour scale (does not rescale when scrubbing). White dot = measured; ring with 0 = measured zero; dashed &times; and hatching = sensor missing (Unavailable).
               {heatScope === "frame" ? ` Frame at ${tSec.toFixed(2)} s.` : " Per-sensor maximum over the whole recording."}
             </p>
@@ -255,7 +255,7 @@ function DemoLoadPressure() {
           <Panel id="cop" title="CoP Trajectory" icon="foot" className="h-full">
             <Footprints left={sensorViews(frame, "left")} right={sensorViews(frame, "right")} mode="outline"
               traces={{ left: mkTrace("left", pathL), right: mkTrace("right", pathR) }} className="mx-auto h-[24rem] w-full max-w-[440px]" />
-            <div className="mt-1 flex flex-wrap items-center justify-center gap-x-3 text-[10px] text-slate-300">
+            <div className="mt-1 flex flex-wrap items-center justify-center gap-x-3 text-[12px] text-slate-300">
               <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-400" />Start of {(TRAIL_MS / 1000).toFixed(0)} s trail</span>
               <span><span className="mr-1 inline-block h-2 w-2 rounded-full border-2 border-cyan-400" />CoP at cursor</span>
               <span><span className="mr-1 inline-block h-0.5 w-3 bg-yellow-300 align-middle" />Trajectory</span>
@@ -264,7 +264,7 @@ function DemoLoadPressure() {
               <div><dt style={{ color: LEFT }}>Left CoP</dt><dd className="tabular-nums text-white">{copText(an.left)}</dd></div>
               <div><dt style={{ color: RIGHT }}>Right CoP</dt><dd className="tabular-nums text-white">{copText(an.right)}</dd></div>
             </dl>
-            <p className="mt-1 text-[10px] text-slate-400">Foot-local frame: origin at heel centre, +y toward the toes, +x medial. Force-weighted.</p>
+            <p className="mt-1 text-[12px] text-slate-400">Foot-local frame: origin at heel centre, +y toward the toes, +x medial. Force-weighted.</p>
           </Panel>
         </div>
         <div className="xl:col-span-3">
@@ -274,7 +274,7 @@ function DemoLoadPressure() {
               <hr className="border-cyan-400/15" />
               <FootStat f={an.right} label="Right" />
             </div>
-            <p className="mt-2 text-[10px] text-slate-400">Force = pressure (kPa) &times; area (cm²) &times; 0.1 &rarr; N. Cursor frame.</p>
+            <p className="mt-2 text-[12px] text-slate-400">Force = pressure (kPa) &times; area (cm²) &times; 0.1 &rarr; N. Cursor frame.</p>
           </Panel>
         </div>
       </div>
@@ -304,7 +304,7 @@ function DemoLoadPressure() {
                 <p className="mt-1 text-xs text-slate-300">Left force {show(an.left.forceN, "N", 1).text} &middot; Right force {show(an.right.forceN, "N", 1).text}</p>
               </div>
             )}
-            <p className="mt-2 text-[10px] text-slate-400">Share = foot force &divide; (left + right force). Cursor frame at {tSec.toFixed(2)} s.</p>
+            <p className="mt-2 text-[12px] text-slate-400">Share = foot force &divide; (left + right force). Cursor frame at {tSec.toFixed(2)} s.</p>
           </Panel>
         </div>
         <div className="xl:col-span-4">
@@ -322,18 +322,18 @@ function DemoLoadPressure() {
         <div className="grid gap-3 md:grid-cols-2">
           {([["peakKpa", "Session peak pressure (kPa)", "kPa", C.cyan, [0, 250]], ["differencePp", "Mean left/right difference (percentage points)", "pp", C.amber, [0, "auto"]]] as const).map(([key, label, unit, color, dom]) => (
             <figure key={key} className="rounded-md bg-black/35 p-2">
-              <figcaption className="mb-1 text-[11px] text-slate-300">{label}</figcaption>
+              <figcaption className="mb-1 text-[13px] text-slate-300">{label}</figcaption>
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 400, height: 170 }}>
                   <LineChart data={trend} margin={{ top: 6, right: 10, bottom: 2, left: 0 }}>
                     <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} />
-                    <YAxis domain={dom as [number, number | "auto"]} ticks={key === "peakKpa" ? [0, 50, 100, 150, 200, 250] : undefined} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} width={36} allowDecimals={false} />
+                    <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} />
+                    <YAxis domain={dom as [number, number | "auto"]} ticks={key === "peakKpa" ? [0, 50, 100, 150, 200, 250] : undefined} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={36} allowDecimals={false} />
                     <Tooltip cursor={{ stroke: C.cyan, strokeOpacity: 0.4 }} content={({ active, payload }) => {
                       const r = payload?.[0]?.payload as (typeof trend)[number] | undefined;
                       if (!active || !r) return null;
                       const v = r[key];
-                      return <div className={TIP_CLASS}><p className="font-semibold text-white">{r.label}</p><p className="text-slate-300">{label.split(" (")[0]} <span className="font-semibold" style={{ color }}>{v === null ? "Unavailable" : `${v.toFixed(1)} ${unit}`}</span></p><p className="text-[10px] text-slate-400">{r.source === "session" ? "Recorded session" : r.source === "partial" ? "One insole offline: this foot only; left/right difference unavailable" : "No recording"}</p></div>;
+                      return <div className={TIP_CLASS}><p className="font-semibold text-white">{r.label}</p><p className="text-slate-300">{label.split(" (")[0]} <span className="font-semibold" style={{ color }}>{v === null ? "Unavailable" : `${v.toFixed(1)} ${unit}`}</span></p><p className="text-[12px] text-slate-400">{r.source === "session" ? "Recorded session" : r.source === "partial" ? "One insole offline: this foot only; left/right difference unavailable" : "No recording"}</p></div>;
                     }} />
                     <Line dataKey={key} stroke={color} strokeWidth={2} dot={{ r: 3, fill: color }} isAnimationActive={false} connectNulls={false} />
                   </LineChart>
@@ -342,7 +342,7 @@ function DemoLoadPressure() {
             </figure>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-slate-400">One point per simulated session with an insole recording (the last 8). Days without a session have no point. Gaps = Unavailable.</p>
+        <p className="mt-2 text-[12px] text-slate-400">One point per simulated session with an insole recording (the last 8). Days without a session have no point. Gaps = Unavailable.</p>
       </Panel>
 
       {/* Per-sensor table: also shows zero vs missing as text */}

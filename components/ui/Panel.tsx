@@ -18,7 +18,7 @@ export default function Panel({ id, title, icon, href, linkLabel = "Details", cl
   return (
     <section aria-labelledby={`${id}-title`} className={`glass flex min-w-0 flex-col rounded-lg p-3 ${className}`}>
       <header className="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-        <h2 id={`${id}-title`} className="flex items-center gap-1.5 text-[13px] font-semibold text-white">
+        <h2 id={`${id}-title`} className="flex items-center gap-1.5 text-[15px] font-semibold text-white">
           {icon && (
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-cyan-300" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d={ICONS[icon]} />
@@ -29,7 +29,7 @@ export default function Panel({ id, title, icon, href, linkLabel = "Details", cl
         <div className="flex items-center gap-2">
           {action}
           {href && (
-            <Link href={href} aria-label={`${title}: ${linkLabel}`} className="rounded px-1 text-[11px] text-cyan-300 hover:text-white hover:underline">
+            <Link href={href} aria-label={`${title}: ${linkLabel}`} className="rounded px-1 text-[13px] text-cyan-300 hover:text-white hover:underline">
               {linkLabel} &rarr;
             </Link>
           )}
@@ -46,12 +46,12 @@ export function Stat({ label, value, unit, sub, digits, big = false }: { label: 
   const text = missing ? "Unavailable" : digits !== undefined ? value.toFixed(digits) : value.toLocaleString("en-US");
   return (
     <div className="min-w-0">
-      <p className="text-[11px] text-slate-300">{label}</p>
+      <p className="text-[13px] text-slate-300">{label}</p>
       <p className={`font-semibold tabular-nums ${missing ? "text-sm text-amber-200" : big ? "text-2xl text-white" : "text-xl text-white"}`}>
         {text}
         {!missing && unit && <span className="ml-1 text-xs font-normal text-slate-300">{unit}</span>}
       </p>
-      {sub && <p className="text-[10px] text-slate-400">{sub}</p>}
+      {sub && <p className="text-[12px] text-slate-400">{sub}</p>}
     </div>
   );
 }

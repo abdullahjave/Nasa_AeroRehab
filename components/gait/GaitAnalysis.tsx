@@ -16,7 +16,7 @@ import { GAIT_PHASES, gaitCurveRows, getLatestSession, jointAnglesAt, phaseAt } 
 /**
  * Supplied pose artwork per gait phase (public/images). Each picture is static and is used only for the phase it depicts best:
  * Step1 wide stride, front heel on the ground; Step2 single support, one leg lifted; Step3 trailing heel rising;
- * Step4 weight moving onto the front foot; gait-phase-preswing rear foot at toe-off. Swing has no matching picture, so it keeps the drawn figure.
+ * Step4 rear leg lifted and bent (used for Loading and Swing); gait-phase-preswing rear foot at toe-off. The Walking Model shows the picture of the selected phase.
  */
 const PHASE_IMAGE: Partial<Record<string, { src: string; note: string }>> = {
   "heel-strike": { src: "/images/Step1.png", note: "supplied illustration" },
@@ -24,6 +24,7 @@ const PHASE_IMAGE: Partial<Record<string, { src: string; note: string }>> = {
   "mid-stance": { src: "/images/Step2.jpg", note: "supplied illustration" },
   "terminal-stance": { src: "/images/Step3.jpg", note: "supplied illustration" },
   "pre-swing": { src: "/images/gait-phase-preswing.webp", note: "supplied illustration" },
+  swing: { src: "/images/Step4.jpg", note: "supplied illustration" },
   "heel-strike-2": { src: "/images/Step1.png", note: "supplied illustration" },
 };
 
@@ -130,15 +131,16 @@ function DemoGaitAnalysis() {
         <div className="xl:col-span-3">
           <Panel id="figure" title="Walking Model" icon="walk" className="h-full">
             <div className="flex flex-1 flex-col gap-2">
-              <WalkingFigure p={p} scale={g.curveScale} className="mx-auto h-[22rem] w-full max-w-[220px]" ariaLabel={`Walking figure, ${phase.label} at ${p} percent of the cycle`} />
+              <PhotoPose key={phase.key} src={PHASE_IMAGE[phase.key]?.src ?? ""} alt={`${phase.label} pose at ${p} percent of the cycle (supplied illustration)`} className="mx-auto h-[22rem] w-full max-w-[260px]"
+                fallback={<WalkingFigure p={p} scale={g.curveScale} className="mx-auto h-[22rem] w-full max-w-[220px]" ariaLabel={`Walking figure, ${phase.label} at ${p} percent of the cycle`} />} />
               <div className="rounded-md border border-cyan-400/30 bg-black/30 p-2" aria-live="polite">
                 <p className="flex items-center justify-between text-sm font-semibold text-white">
                   {phase.label}
                   <Chip tone={phase.support === "Stance" ? "cyan" : "amber"}>{phase.support}</Chip>
                 </p>
-                <p className="text-[11px] text-slate-400">Cycle {p}% &middot; range {phase.range[0]}&ndash;{phase.range[1]}%</p>
+                <p className="text-[13px] text-slate-400">Cycle {p}% &middot; range {phase.range[0]}&ndash;{phase.range[1]}%</p>
                 <p className="mt-1 text-xs text-slate-200">{phase.detail}</p>
-                <dl className="mt-2 grid grid-cols-3 gap-1 text-center text-[11px]">
+                <dl className="mt-2 grid grid-cols-3 gap-1 text-center text-[13px]">
                   {angles && ([["Hip", angles.hip, C.cyan], ["Knee", angles.knee, C.magenta], ["Ankle", angles.ankle, C.lime]] as const).map(([n, v, col]) => (
                     <div key={n}><dt style={{ color: col }}>{n}</dt><dd className="tabular-nums text-white">{fmtSigned(v, "°", 1)}</dd></div>
                   ))}
@@ -175,14 +177,14 @@ function DemoGaitAnalysis() {
             <div className="lg:col-span-8">
               <Panel id="cycle" title="Gait Cycle (Joint Angles)" icon="pulse" className="h-full">
                 <figure className="flex min-h-[250px] flex-1 flex-col rounded-md bg-black/35 p-2">
-                  <figcaption className="mb-1 text-[11px] text-slate-300">Joint angle (°) vs gait cycle (% of stride). Click the chart or use the scrubber.</figcaption>
+                  <figcaption className="mb-1 text-[13px] text-slate-300">Joint angle (°) vs gait cycle (% of stride). Click the chart or use the scrubber.</figcaption>
                   <div className="min-h-[210px] flex-1">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 620, height: 230 }}>
                       <LineChart data={rows} margin={{ top: 6, right: 12, bottom: 4, left: 0 }}
                         onClick={(s) => { const x = (s as { activeLabel?: string | number } | undefined)?.activeLabel; if (x !== undefined && !Number.isNaN(Number(x))) setP(Math.round(Number(x))); }}>
                         <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                        <XAxis dataKey="p" type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tickFormatter={(v) => `${v}%`} tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS} />
-                        <YAxis domain={[-30, 90]} ticks={[-30, 0, 30, 60, 90]} tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS} width={36} unit="°" />
+                        <XAxis dataKey="p" type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} tickFormatter={(v) => `${v}%`} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} />
+                        <YAxis domain={[-30, 90]} ticks={[-30, 0, 30, 60, 90]} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={36} unit="°" />
                         <ReferenceArea x1={phase.range[0]} x2={phase.range[1]} fill="#22d3ee" fillOpacity={0.14} />
                         <ReferenceLine x={p} stroke="#fff" strokeOpacity={0.85} strokeDasharray="4 3" />
                         <Tooltip content={({ active, payload }) => {
@@ -193,14 +195,14 @@ function DemoGaitAnalysis() {
                             <p className="text-slate-300">Knee <span className="font-semibold text-pink-300">{fmt(r.knee, "°", 1)}</span></p>
                             <p className="text-slate-300">Ankle <span className="font-semibold text-lime-300">{fmt(r.ankle, "°", 1)}</span></p></div>;
                         }} cursor={{ stroke: C.cyan, strokeOpacity: 0.4 }} />
-                        <Legend verticalAlign="top" align="right" height={22} iconType="circle" wrapperStyle={{ fontSize: 11, color: AXIS }} />
+                        <Legend verticalAlign="top" align="right" height={22} iconType="circle" wrapperStyle={{ fontSize: 12, color: AXIS }} />
                         <Line name="Hip" dataKey="hip" stroke={C.cyan} strokeWidth={2} dot={false} isAnimationActive={false} />
                         <Line name="Knee" dataKey="knee" stroke={C.magenta} strokeWidth={2} dot={false} isAnimationActive={false} />
                         <Line name="Ankle" dataKey="ankle" stroke={C.lime} strokeWidth={2} dot={false} isAnimationActive={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                  <p className="text-center text-[11px] text-slate-300">Gait Cycle (% of Stride)</p>
+                  <p className="text-center text-[13px] text-slate-300">Gait Cycle (% of Stride)</p>
                 </figure>
               </Panel>
             </div>
@@ -251,8 +253,8 @@ function DemoGaitAnalysis() {
                     ) : (
                       <WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />
                     )}
-                    <span className="text-center text-[11px] leading-tight text-slate-100">{ph.label}</span>
-                    <span className="text-[10px] text-slate-400">{ph.p}%</span>
+                    <span className="text-center text-[13px] leading-tight text-slate-100">{ph.label}</span>
+                    <span className="text-[12px] text-slate-400">{ph.p}%</span>
                   </button>
                 );
               })}
@@ -291,21 +293,21 @@ function DemoGaitAnalysis() {
                   <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 420, height: 150 }}>
                     <LineChart data={g.strideSeries.strideLengthM.map((v, i) => ({ n: i + 1, len: v, step: g.strideSeries!.stepTimeS[i] }))} margin={{ top: 4, right: 4, bottom: 2, left: 0 }}>
                       <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                      <XAxis dataKey="n" type="number" domain={[1, 30]} ticks={[1, 5, 10, 15, 20, 25, 30]} tick={{ fill: AXIS, fontSize: 10 }} stroke={AXIS} />
-                      <YAxis yAxisId="l" domain={axisFor(g.strideSeries.strideLengthM, 0.1).domain} ticks={axisFor(g.strideSeries.strideLengthM, 0.1).ticks} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 10 }} stroke={C.cyan} width={38} />
-                      <YAxis yAxisId="r" orientation="right" domain={axisFor(g.strideSeries.stepTimeS, 0.02).domain} ticks={axisFor(g.strideSeries.stepTimeS, 0.02).ticks} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 10 }} stroke={C.magenta} width={38} />
+                      <XAxis dataKey="n" type="number" domain={[1, 30]} ticks={[1, 5, 10, 15, 20, 25, 30]} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} />
+                      <YAxis yAxisId="l" domain={axisFor(g.strideSeries.strideLengthM, 0.1).domain} ticks={axisFor(g.strideSeries.strideLengthM, 0.1).ticks} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 12 }} stroke={C.cyan} width={38} />
+                      <YAxis yAxisId="r" orientation="right" domain={axisFor(g.strideSeries.stepTimeS, 0.02).domain} ticks={axisFor(g.strideSeries.stepTimeS, 0.02).ticks} tickFormatter={(v) => Number(v).toFixed(2)} tick={{ fill: AXIS, fontSize: 12 }} stroke={C.magenta} width={38} />
                       <Tooltip content={({ active, payload }) => {
                         const r = payload?.[0]?.payload as { n: number; len: number; step: number } | undefined;
                         if (!active || !r) return null;
                         return <div className={TIP_CLASS}><p className="text-slate-300">Stride <span className="font-semibold text-white">#{r.n}</span></p><p className="text-slate-300">Length <span className="font-semibold text-cyan-300">{fmt(r.len, " m", 2)}</span></p><p className="text-slate-300">Step time <span className="font-semibold text-pink-300">{fmt(r.step, " s", 2)}</span></p></div>;
                       }} />
-                      <Legend verticalAlign="top" align="right" height={20} iconType="circle" wrapperStyle={{ fontSize: 10, color: AXIS }} />
+                      <Legend verticalAlign="top" align="right" height={20} iconType="circle" wrapperStyle={{ fontSize: 12, color: AXIS }} />
                       <Line yAxisId="l" name="Stride Length (m)" dataKey="len" stroke={C.cyan} strokeWidth={1.8} dot={false} isAnimationActive={false} />
                       <Line yAxisId="r" name="Step Time (s)" dataKey="step" stroke={C.magenta} strokeWidth={1.8} dot={false} isAnimationActive={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <p className="text-center text-[10px] text-slate-400">Stride #</p>
+                <p className="text-center text-[12px] text-slate-400">Stride #</p>
               </figure>
             ) : <p className="text-sm text-amber-200">Unavailable</p>}
           </Panel>
@@ -319,7 +321,7 @@ function DemoGaitAnalysis() {
               <div>
                 <p className="text-sm font-semibold text-emerald-200">{g.insight.title}</p>
                 <p className="mt-0.5 text-xs text-slate-200">{g.insight.text}</p>
-                <p className="mt-1 text-[10px] text-slate-400">Simulated &middot; {session.id}</p>
+                <p className="mt-1 text-[12px] text-slate-400">Simulated &middot; {session.id}</p>
               </div>
             </div>
           </Panel>

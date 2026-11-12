@@ -32,7 +32,8 @@ type Props = { hasPoster: boolean; videoSrc: string | null };
 
 /**
  * Decorative fixed backdrop, mounted once in the root layout so route changes never remount it (the video keeps
- * playing). Layers: CSS starfield (always) -> poster (if file exists) -> video -> navy overlay.
+ * playing). Layers: CSS starfield (always) -> poster (if file exists) -> video -> navy overlay. The video fills the whole
+ * viewport (object-fit: cover, never stretched); a source whose shape differs from the screen is cropped, not distorted.
  * The <video> is not rendered, so no request is made, on narrow screens, with reduced motion (system setting or the
  * Display Settings switch), when the background-video switch is off, or when no clip exists.
  */
@@ -66,10 +67,6 @@ export default function SpaceBackdrop({ hasPoster, videoSrc }: Props) {
           tabIndex={-1}
           disablePictureInPicture
           disableRemotePlayback
-          onLoadedMetadata={(e) => {
-            const v = e.currentTarget;
-            if (v.videoWidth && v.videoHeight) v.style.setProperty("--video-ar", String(v.videoWidth / v.videoHeight));
-          }}
           onPlaying={() => setPlaying(true)}
           onEmptied={() => setPlaying(false)}
           onError={() => setFailed(true)}

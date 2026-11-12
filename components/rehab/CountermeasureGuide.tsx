@@ -40,7 +40,7 @@ export default function CountermeasureGuide() {
             <article key={c.id} data-countermeasure={c.id} className="rounded-md border border-cyan-400/20 bg-black/20 p-3 text-sm">
               <header>
                 <p className="flex flex-wrap items-center gap-2 font-semibold text-white">{c.name}
-                  <span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-2 py-0.5 text-[11px] font-medium text-cyan-100">{KIND_LABEL[c.kind]}</span></p>
+                  <span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-2 py-0.5 text-[13px] font-medium text-cyan-100">{KIND_LABEL[c.kind]}</span></p>
                 <p className="text-xs text-slate-400">{c.fullName}</p>
                 <p className="mt-1 text-slate-100">{c.tagline}</p>
               </header>

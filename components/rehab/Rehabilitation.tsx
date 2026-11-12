@@ -109,24 +109,24 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
             <div>
               <p className={`font-semibold tabular-nums ${view.weeklyAdherence.kind === "value" ? "text-3xl text-white" : "text-sm text-amber-200"}`}>{pctText(view.weeklyAdherence)}</p>
               {view.weeklyAdherence.kind === "value" && <p className="text-xs text-slate-300">({view.weeklyAdherence.num} / {view.weeklyAdherence.den} sessions)</p>}
-              <p className="text-[10px] text-slate-400">Scope: sessions due this week up to Day {DEMO_DAY}</p>
+              <p className="text-[12px] text-slate-400">Scope: sessions due this week up to Day {DEMO_DAY}</p>
             </div>
           </div>
         </Panel>
         <Panel id="r-sessions" title="Total Sessions" icon="timeline">
           <p className="text-3xl font-semibold tabular-nums text-white">{t.completedSessions}</p>
-          <p className="text-[10px] text-slate-400">Completed in this program through {dayLabel(view.selected.day)}</p>
+          <p className="text-[12px] text-slate-400">Completed in this program through {dayLabel(view.selected.day)}</p>
         </Panel>
         <Panel id="r-time" title="Total Time" icon="pulse">
           <p className="text-3xl font-semibold tabular-nums text-white">{t.minutes} <span className="text-sm font-normal text-slate-300">min</span></p>
-          <p className={`text-[10px] ${t.missingDuration ? "text-amber-200" : "text-slate-400"}`}>
+          <p className={`text-[12px] ${t.missingDuration ? "text-amber-200" : "text-slate-400"}`}>
             {t.missingDuration ? `Partial: ${t.missingDuration} completed session${t.missingDuration > 1 ? "s" : ""} without a recorded duration` : "Recorded minutes of completed sessions"}
           </p>
         </Panel>
         <Panel id="r-rate" title="Completion Rate" icon="chart">
           <p className={`font-semibold tabular-nums ${view.completionRate.kind === "value" ? "text-3xl text-white" : "text-sm text-amber-200"}`}>{pctText(view.completionRate)}</p>
           {view.completionRate.kind === "value" && <p className="text-xs text-slate-300">{view.completionRate.num} / {view.completionRate.den} exercise items</p>}
-          <p className="text-[10px] text-slate-400">Scope: whole program through {dayLabel(view.selected.day)}</p>
+          <p className="text-[12px] text-slate-400">Scope: whole program through {dayLabel(view.selected.day)}</p>
         </Panel>
       </div>
 
@@ -151,25 +151,25 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
                     <div className="h-20 w-16 shrink-0 overflow-hidden rounded bg-gradient-to-b from-[#0c2347] to-[#050d1f] sm:w-24"><ExerciseVisual id={a.exerciseId} hasImage={!!assets[a.exerciseId]} /></div>
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-2 text-sm font-semibold text-white">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-cyan-300/60 text-[11px]">{i + 1}</span>
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-cyan-300/60 text-[13px]">{i + 1}</span>
                         {ex.name}
                         <button type="button" aria-expanded={infoOpen} aria-label={`About ${ex.name}`} onClick={() => setOpenInfo(infoOpen ? "none" : a.id)}
-                          className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-400/60 text-[11px] text-slate-200 hover:bg-white/10">i</button>
+                          className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-400/60 text-[13px] text-slate-200 hover:bg-white/10">i</button>
                       </p>
                       <p className="text-xs text-slate-300">{ex.prescription}</p>
-                      {infoOpen && <p className="mt-1 text-[11px] text-slate-300">{ex.info} <span className="text-slate-500">(demo content)</span></p>}
+                      {infoOpen && <p className="mt-1 text-[13px] text-slate-300">{ex.info} <span className="text-slate-500">(demo content)</span></p>}
                     </div>
                     <div className="flex shrink-0 flex-col items-end justify-center gap-1">
                       {done ? (
                         <>
-                          <span className="inline-flex items-center gap-1 rounded border border-emerald-400/70 bg-emerald-400/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300">&#10003; Completed</span>
-                          <button type="button" onClick={() => setEdit(s.id, a.id, false)} className="text-[11px] text-slate-300 underline-offset-2 hover:underline" aria-label={`Undo ${ex.name}`}>Undo</button>
+                          <span className="inline-flex items-center gap-1 rounded border border-emerald-400/70 bg-emerald-400/15 px-2 py-0.5 text-[13px] font-medium text-emerald-300">&#10003; Completed</span>
+                          <button type="button" onClick={() => setEdit(s.id, a.id, false)} className="text-[13px] text-slate-300 underline-offset-2 hover:underline" aria-label={`Undo ${ex.name}`}>Undo</button>
                         </>
                       ) : future ? (
-                        <span className="rounded border border-slate-500/60 px-2 py-0.5 text-[11px] text-slate-300">Upcoming</span>
+                        <span className="rounded border border-slate-500/60 px-2 py-0.5 text-[13px] text-slate-300">Upcoming</span>
                       ) : (
                         <button type="button" onClick={() => setEdit(s.id, a.id, true)} aria-label={`Mark ${ex.name} complete`}
-                          className="rounded border border-cyan-400/60 bg-cyan-400/10 px-2 py-0.5 text-[11px] text-cyan-100 hover:bg-cyan-400/20">Mark complete</button>
+                          className="rounded border border-cyan-400/60 bg-cyan-400/10 px-2 py-0.5 text-[13px] text-cyan-100 hover:bg-cyan-400/20">Mark complete</button>
                       )}
                     </div>
                   </li>
@@ -178,7 +178,7 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
             </ol>
           )}
           {s && <div><MilestoneBadge m={planMilestone(s.assignments.map((a) => a.id), completions)} /></div>}
-          <p className="mt-2 text-[10px] text-slate-500">Edits are saved in this browser per astronaut, session and exercise. Images: fallback pictograms where public/images/rehab/*.webp is missing.</p>
+          <p className="mt-2 text-[12px] text-slate-500">Edits are saved in this browser per astronaut, session and exercise. Images: fallback pictograms where public/images/rehab/*.webp is missing.</p>
         </Panel>
         <KnowledgeCheck astronautId={astronaut.id} />
         </div>
@@ -198,35 +198,35 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
                   <button key={d.day} type="button" onClick={() => pickDay(d.day)} aria-pressed={isSel}
                     aria-label={`${weekdayShort(d.day)} ${dayLabel(d.day)}${d.day === DEMO_DAY ? ", today" : ""}: ${st.label}${d.total ? `, ${d.done} of ${d.total} exercises` : ""}`}
                     className={`flex min-w-0 flex-col items-center gap-1 rounded-md border px-0.5 py-1.5 ${isSel ? "border-cyan-300 bg-cyan-400/15" : "border-cyan-400/15 hover:bg-white/5"}`}>
-                    <span className="text-[10px] text-slate-300">{weekdayShort(d.day)}</span>
+                    <span className="text-[12px] text-slate-300">{weekdayShort(d.day)}</span>
                     <span className="text-sm font-semibold tabular-nums text-white">{dayToDate(d.day).getUTCDate()}</span>
-                    <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${st.cls}`} aria-hidden="true">{st.icon}</span>
-                    <span className={`text-[10px] leading-none ${d.day === DEMO_DAY ? "text-cyan-200" : "text-transparent"}`}>Today</span>
+                    <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[13px] font-bold ${st.cls}`} aria-hidden="true">{st.icon}</span>
+                    <span className={`text-[12px] leading-none ${d.day === DEMO_DAY ? "text-cyan-200" : "text-transparent"}`}>Today</span>
                   </button>
                 );
               })}
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-300">
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-slate-300">
               {(["completed", "pending", "incomplete", "unscheduled"] as const).map((k) => (
-                <span key={k} className="flex items-center gap-1"><span className={`flex h-3.5 w-3.5 items-center justify-center rounded-full text-[9px] font-bold ${STATUS[k].cls}`}>{STATUS[k].icon}</span>{STATUS[k].label}</span>
+                <span key={k} className="flex items-center gap-1"><span className={`flex h-3.5 w-3.5 items-center justify-center rounded-full text-[12px] font-bold ${STATUS[k].cls}`}>{STATUS[k].icon}</span>{STATUS[k].label}</span>
               ))}
             </div>
           </Panel>
           {!recorded && <Panel id="r-trend" title="Recovery Trend" icon="chart">
             <figure className="rounded-md bg-black/35 p-2">
-              <figcaption className="mb-1 text-[11px] text-slate-300">Simulated scores (%) per program week</figcaption>
+              <figcaption className="mb-1 text-[13px] text-slate-300">Simulated scores (%) per program week</figcaption>
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 400, height: 190 }}>
                   <LineChart data={scoreRows} margin={{ top: 4, right: 12, bottom: 2, left: 0 }}>
                     <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS} />
-                    <YAxis domain={[50, 100]} ticks={[50, 60, 70, 80, 90, 100]} tickFormatter={(x) => `${x}%`} tick={{ fill: AXIS, fontSize: 11 }} stroke={AXIS} width={40} />
+                    <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} />
+                    <YAxis domain={[50, 100]} ticks={[50, 60, 70, 80, 90, 100]} tickFormatter={(x) => `${x}%`} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={40} />
                     <Tooltip cursor={{ stroke: C.cyan, strokeOpacity: 0.4 }} content={({ active, payload }) => {
                       const r = payload?.[0]?.payload as (typeof scoreRows)[number] | undefined;
                       if (!active || !r) return null;
                       return <div className={TIP_CLASS}><p className="font-semibold text-white">{r.label} &middot; Day {r.day} ({dayLabel(r.day)})</p><p className="text-slate-300">Recovery Index <span className="font-semibold text-cyan-300">{r.recovery}%</span></p><p className="text-slate-300">Readiness <span className="font-semibold text-pink-300">{r.readiness}%</span></p></div>;
                     }} />
-                    <Legend verticalAlign="top" align="right" height={22} iconType="circle" wrapperStyle={{ fontSize: 11, color: AXIS }} />
+                    <Legend verticalAlign="top" align="right" height={22} iconType="circle" wrapperStyle={{ fontSize: 12, color: AXIS }} />
                     <Line name="Recovery Index" dataKey="recovery" stroke={C.cyan} strokeWidth={2} dot={{ r: 3, fill: C.cyan }} isAnimationActive={false} />
                     <Line name="Readiness" dataKey="readiness" stroke={C.magenta} strokeWidth={2} dot={{ r: 3, fill: C.magenta }} isAnimationActive={false} />
                   </LineChart>
@@ -245,13 +245,13 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
                   <dl className="flex-1 space-y-2 text-sm">
                     {([["Muscle Recovery", view.score.muscleRecovery], ["Joint Readiness", view.score.jointReadiness], ["Fatigue Index", view.score.fatigueIndex]] as const).map(([k, val]) => (
                       <div key={k} className="flex items-center justify-between gap-2">
-                        <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[10px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
+                        <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[12px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
                         <dd className="tabular-nums text-white">{val}%</dd>
                       </div>
                     ))}
                   </dl>
                 </div>
-                <p className="mt-2 text-[10px] text-slate-400">Simulated scores dated Day {view.score.missionDay} (program week {view.score.programWeek}), same records as the trend.</p>
+                <p className="mt-2 text-[12px] text-slate-400">Simulated scores dated Day {view.score.missionDay} (program week {view.score.programWeek}), same records as the trend.</p>
               </>
             ) : <p className="text-sm text-amber-200">Unavailable: no score on or before this date</p>}
           </Panel>
@@ -261,14 +261,14 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
               <dl className="flex-1 space-y-1.5 text-sm">
                 {([["Mobility", view.progress.mobility], ["Strength", view.progress.strength], ["Balance", view.progress.balance], ["Endurance", view.progress.endurance]] as const).map(([k, val]) => (
                   <div key={k} className="flex items-center justify-between gap-2">
-                    <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[10px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
+                    <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[12px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
                     <dd className="tabular-nums text-white">{val}%</dd>
                   </div>
                 ))}
               </dl>
             </div>
             <p className="mt-2"><Chip>{program.statusLabel}</Chip></p>
-            <p className="mt-1 text-[10px] text-slate-400">Demo progress scores (program fixture). Overall = mean of the four.</p>
+            <p className="mt-1 text-[12px] text-slate-400">Demo progress scores (program fixture). Overall = mean of the four.</p>
           </Panel>
         </div>}
       </div>

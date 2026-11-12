@@ -33,7 +33,7 @@ export default function TodaysTasksCard() {
         <>
           <div className="flex flex-wrap items-baseline justify-between gap-x-3">
             <p className="text-sm font-semibold text-white" aria-live="polite">{t.done} of {t.total} complete</p>
-            <span className="text-[11px] text-slate-400">Day {t.day} &middot; {dayLabel(t.day)}</span>
+            <span className="text-[13px] text-slate-400">Day {t.day} &middot; {dayLabel(t.day)}</span>
           </div>
           <div className="mt-1.5 h-1.5 rounded-full bg-slate-700/60" role="progressbar" aria-label="Today's exercise progress" aria-valuemin={0} aria-valuemax={t.total} aria-valuenow={t.done} aria-valuetext={`${t.done} of ${t.total} complete`}>
             <div className="h-full rounded-full bg-emerald-400" style={{ width: `${t.total ? (t.done / t.total) * 100 : 0}%` }} />
@@ -42,7 +42,7 @@ export default function TodaysTasksCard() {
           <ul className="mt-2 space-y-1.5">
             {t.tasks.map((x) => (
               <li key={x.assignmentId} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
-                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] ${x.done ? "bg-emerald-400 text-[#04121f]" : "border border-slate-400/60 text-transparent"}`} aria-hidden="true">&#10003;</span>
+                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[12px] ${x.done ? "bg-emerald-400 text-[#04121f]" : "border border-slate-400/60 text-transparent"}`} aria-hidden="true">&#10003;</span>
                 <span className={x.done ? "text-slate-300" : "text-white"}>{x.name}</span>
                 <span className="text-xs text-slate-400">{x.prescription}</span>
                 <span className="sr-only">{x.done ? "completed" : "not completed yet"}</span>

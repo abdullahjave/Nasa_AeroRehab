@@ -24,11 +24,11 @@ export default function RecordedReportExtras({ range }: { range: { start: number
       <tbody>
         {list.map((r) => (
           <tr key={r.key} className="border-b border-cyan-400/10 align-top" data-report-row={r.key}>
-            <td className="py-1.5 pr-2 text-white">{r.label}<span className="block text-[10px] text-slate-400">{r.note}</span></td>
-            <td className="pr-2 tabular-nums text-white">{r.value.kind === "value" ? `${r.value.mean.toFixed(r.digits)}${r.unit} (mean)` : <span className="text-amber-200">No comparable data</span>}<span className="block text-[10px] text-slate-400 sm:hidden">n={r.value.kind === "value" ? r.value.n : 0}</span></td>
+            <td className="py-1.5 pr-2 text-white">{r.label}<span className="block text-[12px] text-slate-400">{r.note}</span></td>
+            <td className="pr-2 tabular-nums text-white">{r.value.kind === "value" ? `${r.value.mean.toFixed(r.digits)}${r.unit} (mean)` : <span className="text-amber-200">No comparable data</span>}<span className="block text-[12px] text-slate-400 sm:hidden">n={r.value.kind === "value" ? r.value.n : 0}</span></td>
             <td className="hidden pr-2 tabular-nums text-slate-200 sm:table-cell">n={r.value.kind === "value" ? r.value.n : 0}</td>
             <td>{r.points.length === 0 ? <span className="text-slate-400">&mdash;</span> : r.points.map((p, i) => (
-              <span key={p.id}>{i > 0 && ", "}<Link href={href} onClick={() => onLink(p.id)} className="text-cyan-300 hover:underline" aria-label={`Open the assessment from Day ${p.day} (${ORIGIN_LABEL[p.origin]})`}>Day {p.day}: {p.value.toFixed(r.digits)}{r.unit}</Link>{p.origin === "csv" && <span data-testid="report-origin-csv" className="ml-0.5 rounded-full border border-violet-300/40 bg-violet-400/10 px-1 text-[9px] text-violet-100">Imported CSV</span>}</span>
+              <span key={p.id}>{i > 0 && ", "}<Link href={href} onClick={() => onLink(p.id)} className="text-cyan-300 hover:underline" aria-label={`Open the assessment from Day ${p.day} (${ORIGIN_LABEL[p.origin]})`}>Day {p.day}: {p.value.toFixed(r.digits)}{r.unit}</Link>{p.origin === "csv" && <span data-testid="report-origin-csv" className="ml-0.5 rounded-full border border-violet-300/40 bg-violet-400/10 px-1 text-[12px] text-violet-100">Imported CSV</span>}</span>
             ))}</td>
           </tr>
         ))}
@@ -39,11 +39,11 @@ export default function RecordedReportExtras({ range }: { range: { start: number
     <div className={`grid gap-3 ${hasP && hasB ? "lg:grid-cols-2" : ""}`}>
       {hasP && <Panel id="rep-rec-pressure" title="Recorded load & pressure" icon="foot" href="/load-pressure" linkLabel="Load & Pressure">
         <div className="overflow-x-auto">{table(pressure, "/load-pressure", selectPressureAssessment)}</div>
-        <p className="mt-1 text-[10px] text-slate-400">Load share = foot force &divide; combined force &times; 100 (needs both forces). Peak pressure and force are separate readings. Points marked &quot;Imported CSV&quot; were calculated from an imported sensor file; unmarked points are manual entries. {SUMMARY_RULE}</p>
+        <p className="mt-1 text-[12px] text-slate-400">Load share = foot force &divide; combined force &times; 100 (needs both forces). Peak pressure and force are separate readings. Points marked &quot;Imported CSV&quot; were calculated from an imported sensor file; unmarked points are manual entries. {SUMMARY_RULE}</p>
       </Panel>}
       {hasB && <Panel id="rep-rec-balance" title="Recorded balance" icon="balance" href="/stability-balance" linkLabel="Stability & Balance">
         <div className="overflow-x-auto">{table(balance, "/stability-balance", selectBalanceTrial)}</div>
-        <p className="mt-1 text-[10px] text-slate-400">Sway RMS is the typed instrument value, or, where none was entered, calculated from the imported sensor CSV (marked &quot;Imported CSV&quot;). {SUMMARY_RULE} No Balance Index: no documented scoring method applies.</p>
+        <p className="mt-1 text-[12px] text-slate-400">Sway RMS is the typed instrument value, or, where none was entered, calculated from the imported sensor CSV (marked &quot;Imported CSV&quot;). {SUMMARY_RULE} No Balance Index: no documented scoring method applies.</p>
       </Panel>}
     </div>
   );

@@ -33,7 +33,7 @@ export default function KnowledgeCheck({ astronautId }: { astronautId: string })
       </h2>
       {open && (
         <div id="quiz-body" className="space-y-3 px-3 pb-3">
-          <p className="text-[11px] text-slate-400">Your answers are not part of any health score or exercise completion.</p>
+          <p className="text-[13px] text-slate-400">Your answers are not part of any health score or exercise completion.</p>
           {QUIZ.map((q, i) => {
             const chosen = answers[q.id];
             return (

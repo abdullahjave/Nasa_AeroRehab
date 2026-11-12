@@ -24,7 +24,7 @@ function Item({ r, href, linkLabel, children, note, extra, onLink }: { r: Pick<R
       <dd className="mt-1 text-sm text-white">{children}</dd>
       <dd className="mt-1 text-xs text-slate-300">{note}</dd>
       <dd>
-        <details className="mt-1 text-[11px] text-slate-300">
+        <details className="mt-1 text-[13px] text-slate-300">
           <summary className="inline-block cursor-pointer text-cyan-200 hover:text-white">Technical details</summary>
           <p className="mt-1">Technical name: {r.technical}.{r.shows ? ` Shown as: ${r.shows}.` : ""}</p>
           {extra}
@@ -36,10 +36,10 @@ function Item({ r, href, linkLabel, children, note, extra, onLink }: { r: Pick<R
 
 /** "From Day 42 · Quiet standing · 09:00 (manual entry)" as a link to the exact saved assessment. */
 function Source({ label, href, onOpen, imported = false }: { label: string; href: string; onOpen: () => void; imported?: boolean }) {
-  return <span className="block text-[11px] text-slate-400">From <Link href={href} onClick={onOpen} className="text-cyan-300 hover:underline" aria-label={`Open the saved entry: ${label}`}>{label}</Link> (manual entry{imported ? <> + <span data-testid="source-imported" className="text-violet-200">Imported CSV</span></> : null})</span>;
+  return <span className="block text-[13px] text-slate-400">From <Link href={href} onClick={onOpen} className="text-cyan-300 hover:underline" aria-label={`Open the saved entry: ${label}`}>{label}</Link> (manual entry{imported ? <> + <span data-testid="source-imported" className="text-violet-200">Imported CSV</span></> : null})</span>;
 }
 
-const Tag = ({ origin }: { origin: Origin | null }) => (origin === "csv" ? <span data-testid="origin-csv" className="ml-1 text-[10px] text-violet-200">[{ORIGIN_LABEL.csv}]</span> : null);
+const Tag = ({ origin }: { origin: Origin | null }) => (origin === "csv" ? <span data-testid="origin-csv" className="ml-1 text-[12px] text-violet-200">[{ORIGIN_LABEL.csv}]</span> : null);
 
 /**
  * The four main readings in plain language, used on Overview (Measurement details) and AI Insights so both say the same

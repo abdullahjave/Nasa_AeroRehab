@@ -2,10 +2,15 @@
 
 /* Design tokens. Usable as utilities (bg-navy-950, border-cyan-line, ...) and as var(--color-*). */
 @theme {
-  --color-navy-950: #040a18;
-  --color-navy-900: #071226;
-  --color-glass: rgba(8, 20, 44, 0.72);
-  --color-cyan-line: rgba(34, 211, 238, 0.35);
+  --color-navy-950: #020914;
+  --color-navy-900: #041827;
+  --color-glass: rgba(4, 24, 39, 0.9);
+  --color-bar: rgba(3, 19, 34, 0.96);
+  --color-cyan-line: rgba(34, 211, 238, 0.3);
+  --color-select: #0079c8;
+  /* Secondary text (reference: #B3C4D8). Utilities text-slate-300/400 read from these. */
+  --color-slate-300: #b3c4d8;
+  --color-slate-400: #a1b5cb;
   --color-led: #34d399;
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;
@@ -16,12 +21,14 @@
   --font-mono: var(--font-geist-mono);
 }
 
-html, body { background: var(--color-navy-950); color: #fff; overflow-x: clip; }
-body { font-family: var(--font-geist-sans), system-ui, sans-serif; }
+html { color-scheme: dark; }
+html, body { background: var(--color-navy-950); color: #f1f7ff; overflow-x: clip; }
+body { font-family: var(--font-geist-sans), system-ui, sans-serif; font-size: 1rem; line-height: 1.5; }
 
-/* One fixed backdrop, rendered once in the root layout so it never remounts. */
+/* One fixed backdrop, rendered once in the root layout so it never remounts. It covers the whole viewport,
+   behind the sidebar, top bar and content. */
 .space-backdrop {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden;
   background:
     radial-gradient(ellipse 45% 40% at 88% 105%, rgba(56, 189, 248, 0.28), transparent 70%),
     radial-gradient(ellipse 30% 25% at 90% 100%, rgba(129, 140, 248, 0.22), transparent 70%),
@@ -32,37 +39,23 @@ body { font-family: var(--font-geist-sans), system-ui, sans-serif; }
     linear-gradient(180deg, var(--color-navy-900), var(--color-navy-950));
   background-size: auto, auto, 260px 200px, 260px 200px, 260px 200px, 260px 200px, auto;
 }
-/* Poster replaces the CSS starfield when the file exists. Starts framed bottom-right. */
+/* Poster replaces the CSS starfield when the file exists: full viewport, cropped (never stretched). */
 .space-backdrop--image {
-  background: var(--color-navy-950) url("/images/space-backdrop.webp") right bottom / cover no-repeat;
+  background: var(--color-navy-950) url("/images/space-backdrop.webp") center / cover no-repeat;
 }
-/* Video layer: ~92% of the viewport, full frame (contain), anchored bottom-right.
-   --video-ar is set from the clip's real dimensions so the box hugs the picture and the
-   edge fade below blends the picture itself, not empty letterbox space. */
+/* Video layer: exactly the viewport, object-fit: cover keeps the picture's proportions and crops the overflow. */
 .space-backdrop__video {
-  position: absolute; right: 0; bottom: 0;
-  --video-ar: 1.7778;
-  aspect-ratio: var(--video-ar);
-  width: min(92vw, calc(92vh * var(--video-ar)));
-  object-fit: contain; object-position: right bottom;
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
   background: transparent;
   opacity: 0; transition: opacity 0.6s ease;
   pointer-events: none;
-  /* Feather the left and top edges into the navy starfield; no hard rectangle. */
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0, #000 22%),
-    linear-gradient(to bottom, transparent 0, #000 22%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to right, transparent 0, #000 22%),
-    linear-gradient(to bottom, transparent 0, #000 22%);
-  mask-composite: intersect;
 }
 .space-backdrop__video.is-playing { opacity: 1; }
-/* Navy overlay keeps sidebar, top bar, glass cards and labels readable. */
+/* Dark navy overlay keeps the sidebar, top bar, cards, charts and labels readable at bright and dark moments. */
 .space-backdrop__overlay {
   position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(4, 10, 24, 0.55), rgba(4, 10, 24, 0.7));
+  background: linear-gradient(180deg, rgba(2, 9, 20, 0.66), rgba(2, 9, 20, 0.8));
 }
 
 /* Reduced motion (system setting or the Display Settings switch, mirrored on <html> by SpaceBackdrop). */
@@ -71,12 +64,44 @@ html[data-reduce-motion="true"] *, html[data-reduce-motion="true"] *::before, ht
   transition-duration: 0.001ms !important; scroll-behavior: auto !important;
 }
 
+/* Cards: dark, thin cyan border, no glow. */
 @utility glass {
   background: var(--color-glass);
   border: 1px solid var(--color-cyan-line);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
+/* Sidebar, top bar and mobile drawer: nearly opaque. */
+.glass.bar { background: var(--color-bar); }
+#mobile-nav.glass.bar { background: #031322; backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* Sidebar / drawer navigation. Idle: dark, no glow. Hover: soft blue. Active (aria-current="page"): blue gradient, cyan border, restrained glow. */
+.nav-link {
+  display: flex; align-items: center; gap: 0.75rem; border: 1px solid transparent; border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem; font-size: 0.875rem; line-height: 1.25; color: #c6d5e8; background: transparent; transition: background-color .15s, color .15s, border-color .15s;
+}
+.nav-link:hover { background: rgba(0, 121, 200, 0.2); border-color: rgba(34, 211, 238, 0.22); color: #fff; }
+.nav-link[aria-current="page"] {
+  background: linear-gradient(180deg, #1590e0 0%, #0079c8 55%, #0062a3 100%);
+  border-color: #22d3ee; color: #fff; font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25), 0 0 14px rgba(34, 211, 238, 0.35);
+}
+/* Keyboard focus is a white ring, so it never looks like the active tab (blue fill, cyan border). */
+.nav-link:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Selected filters, tabs and toggles share the selected-blue treatment (picture buttons keep their own look). */
+button[aria-pressed="true"]:not(:has(img, svg[viewBox="0 0 100 100"])), [role="tab"][aria-selected="true"], button[aria-checked="true"]:not([role="switch"]) {
+  background: linear-gradient(180deg, #1590e0, #0079c8); border-color: #22d3ee; color: #fff;
+}
+/* Primary action buttons. */
+button.bg-cyan-500\/80 { background: linear-gradient(180deg, #1590e0, #0079c8); border: 1px solid #22d3ee; color: #fff; }
+button.bg-cyan-500\/80:hover { background: linear-gradient(180deg, #2aa0ee, #0a86d6); }
+
+/* Form controls: dark fills, 15px text. */
+select, textarea, input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]) {
+  font-size: 0.9375rem; background-color: var(--color-navy-900); color: #f1f7ff; border-color: rgba(34, 211, 238, 0.35);
+}
+::placeholder { color: #8da2b9; }
 
 @utility led {
   display: inline-block; height: 8px; width: 8px; border-radius: 9999px;
@@ -100,6 +125,7 @@ html[data-reduce-motion="true"] *, html[data-reduce-motion="true"] *::before, ht
   html, body { background: #fff !important; color: #0f172a !important; }
   .space-backdrop, aside, body header.glass.sticky, .no-print, nextjs-portal { display: none !important; }
   main { padding: 0 !important; }
+  * { box-shadow: none !important; text-shadow: none !important; }
   .report-doc { box-shadow: none !important; max-width: none !important; padding: 0 !important; border-radius: 0 !important; }
   .avoid-break { break-inside: avoid; }
   thead { display: table-header-group; }

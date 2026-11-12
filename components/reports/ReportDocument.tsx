@@ -95,10 +95,10 @@ export default function ReportDocument({
               ))}
             </tbody>
           </table>}
-          {rows.length > 0 && <p className="mt-1 text-[11px] text-slate-600">Values are means of valid session values (n = sessions). ROM uses only sessions with the same knee side and protocol. Missing values are excluded, never counted as 0.</p>}
+          {rows.length > 0 && <p className="mt-1 text-[13px] text-slate-600">Values are means of valid session values (n = sessions). ROM uses only sessions with the same knee side and protocol. Missing values are excluded, never counted as 0.</p>}
           {assess.pressure.length > 0 && <AssessmentTable title="Load & pressure assessments" items={assess.pressure} />}
           {assess.balance.length > 0 && <AssessmentTable title="Balance trials" items={assess.balance} />}
-          {(assess.pressure.length > 0 || assess.balance.length > 0) && <p className="mt-1 text-[11px] text-slate-600">{SUMMARY_RULE} Each value shows its source. Load share = foot force ÷ combined force × 100. No Balance Index is given for recorded balance data.</p>}
+          {(assess.pressure.length > 0 || assess.balance.length > 0) && <p className="mt-1 text-[13px] text-slate-600">{SUMMARY_RULE} Each value shows its source. Load share = foot force ÷ combined force × 100. No Balance Index is given for recorded balance data.</p>}
         </>
       )}
 
@@ -125,7 +125,7 @@ export default function ReportDocument({
           ) : <p>No findings.</p>}
         </div>}
       </section>}
-      <footer className="mt-4 border-t border-slate-300 pt-2 text-[10px] text-slate-500">
+      <footer className="mt-4 border-t border-slate-300 pt-2 text-[12px] text-slate-500">
         {recorded ? "Recorded data saved in the local AeroRehab database (manual entries and imported sensor CSV files, each labelled). Not a clinical document." : "Simulated data for demonstration. Not a clinical document."} Dates: mission Day 1 = Sep 30, 2026 (UTC). Units: degrees, m/s, steps/min, N, kPa, mm, %.
       </footer>
     </article>
@@ -147,7 +147,7 @@ function LatestSession({ a, s }: { a: AstronautRecord; s: NonNullable<Report["la
       <dl className="mt-1 grid grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-[auto_1fr]">
         {rows.map(([k, v]) => <div key={k} className="contents"><dt className="text-slate-600">{k}</dt><dd className="tabular-nums">{v}</dd></div>)}
       </dl>
-      <p className="mt-1 text-[11px] text-slate-500">{a.profile.displayName}, {a.profile.affectedLimb} side.</p>
+      <p className="mt-1 text-[13px] text-slate-500">{a.profile.displayName}, {a.profile.affectedLimb} side.</p>
     </section>
   );
 }
@@ -160,11 +160,11 @@ function AssessmentTable({ title, items }: { title: string; items: ReportAssessm
       {items.map((x) => (
         <div key={x.id} className="avoid-break mt-2 rounded border border-slate-300 p-2 text-sm" data-report-assessment={x.id}>
           <p className="font-medium">{x.label} <span className="font-normal text-slate-500">&middot; {x.startedAt}</span>
-            <span className="ml-1 rounded border border-slate-400 px-1 text-[10px] font-semibold text-slate-700">{x.csvFile ? `Manual entry + ${ORIGIN_LABEL.csv}: ${x.csvFile}` : "Manual entry"}</span></p>
+            <span className="ml-1 rounded border border-slate-400 px-1 text-[12px] font-semibold text-slate-700">{x.csvFile ? `Manual entry + ${ORIGIN_LABEL.csv}: ${x.csvFile}` : "Manual entry"}</span></p>
           <dl className="mt-1 grid grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-2">
             {x.values.map((v) => (
               <div key={v.label} className="flex justify-between gap-2"><dt className="text-slate-600">{v.label}</dt>
-                <dd className="tabular-nums">{v.text}{v.origin === "csv" && <span data-testid="doc-origin-csv" className="ml-1 text-[10px] font-semibold text-violet-800">[{ORIGIN_LABEL.csv}]</span>}</dd></div>
+                <dd className="tabular-nums">{v.text}{v.origin === "csv" && <span data-testid="doc-origin-csv" className="ml-1 text-[12px] font-semibold text-violet-800">[{ORIGIN_LABEL.csv}]</span>}</dd></div>
             ))}
           </dl>
         </div>

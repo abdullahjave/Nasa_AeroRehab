@@ -45,10 +45,10 @@ export default function AiRecommendationCard({ alert, variant, selected = false 
         <span className="inline-flex flex-wrap items-center gap-2">
           <AlertBadge severity={alert.severity} label={alert.label} simulated={!!alert.simulatedScenario} />
           {alert.severity === "good" && alert.kind === "health" && <span className="text-xs text-slate-300" data-testid="good-scope">for {/^range of motion/i.test(alert.metric) ? "knee range of motion" : alert.metric.toLowerCase()} only</span>}
-          {alert.geminiEligible && <span className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[10px] font-medium text-violet-100">AI Recommendation</span>}
+          {alert.geminiEligible && <span className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[12px] font-medium text-violet-100">AI Recommendation</span>}
         </span>
         {!overview && (
-          <button type="button" aria-pressed={selected} onClick={() => selectFinding(alert.key)} className="rounded px-1 text-[11px] text-cyan-300 hover:text-white hover:underline">{selected ? "Selected" : "Select"}</button>
+          <button type="button" aria-pressed={selected} onClick={() => selectFinding(alert.key)} className="rounded px-1 text-[13px] text-cyan-300 hover:text-white hover:underline">{selected ? "Selected" : "Select"}</button>
         )}
       </div>
       {/* The title is kept for screen readers but not repeated visually when "What changed" already starts with it. */}
@@ -58,7 +58,7 @@ export default function AiRecommendationCard({ alert, variant, selected = false 
         <p className={LABEL}>What changed</p>
         <p className="text-base leading-relaxed text-slate-100">{alert.changed}</p>
         {line && <p className="mt-0.5 text-sm tabular-nums text-slate-300">{line}</p>}
-        {alert.simulatedScenario && <p className="mt-1 text-[11px] text-cyan-100">{alert.simulatedScenario}. This is a labelled demo scenario, not a real clinical alert.</p>}
+        {alert.simulatedScenario && <p className="mt-1 text-[13px] text-cyan-100">{alert.simulatedScenario}. This is a labelled demo scenario, not a real clinical alert.</p>}
       </div>
 
       <div className="mt-2">

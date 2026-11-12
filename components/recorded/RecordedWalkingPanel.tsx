@@ -18,8 +18,8 @@ function Field({ id, label, error, hint, children }: { id: string; label: string
     <div className="min-w-0">
       <label htmlFor={id} className="mb-0.5 block text-xs text-slate-300">{label}</label>
       {children}
-      {hint && !error && <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p>}
-      {error && <p id={`${id}-err`} role="alert" className="mt-0.5 text-[11px] text-rose-300">{error}</p>}
+      {hint && !error && <p className="mt-0.5 text-[13px] text-slate-400">{hint}</p>}
+      {error && <p id={`${id}-err`} role="alert" className="mt-0.5 text-[13px] text-rose-300">{error}</p>}
     </div>
   );
 }
@@ -58,7 +58,7 @@ function WalkingForm({ a, editing, onClose }: { a: AstronautRecord; editing: Wal
   return (
     <Panel id="rw-form" title={id ? "Edit walking session" : "Add walking session"} icon="walk" action={<button type="button" className={ghost} onClick={onClose}>Close</button>}>
       <form onSubmit={save} noValidate className="space-y-2" aria-label={id ? "Edit walking session" : "Add walking session"}>
-        <p className="text-[11px] text-slate-300">Manual entry for {a.profile.displayName}. Distance in metres (m), duration in seconds (s). Times are UTC. Speed and cadence are calculated from these totals.</p>
+        <p className="text-[13px] text-slate-300">Manual entry for {a.profile.displayName}. Distance in metres (m), duration in seconds (s). Times are UTC. Speed and cadence are calculated from these totals.</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <Field id="wf-recordedAt" label="Date and time (UTC)" error={errors.recordedAt}><input type="datetime-local" {...p("recordedAt")} /></Field>
           <Field id="wf-source" label="Measurement source"><input id="wf-source" value="Manual entry" readOnly className={`${input} opacity-70`} /></Field>

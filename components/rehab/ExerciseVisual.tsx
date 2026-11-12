@@ -57,7 +57,7 @@ export default function ExerciseVisual({ id, hasImage }: { id: ExerciseId; hasIm
   return (
     <div className="relative h-full w-full">
       <Pictogram id={id} />
-      <span className="absolute bottom-0 left-0 rounded bg-black/50 px-1 text-[8px] text-slate-400">fallback</span>
+      <span className="absolute bottom-0 left-0 rounded bg-black/50 px-1 text-[12px] text-slate-400">fallback</span>
     </div>
   );
 }

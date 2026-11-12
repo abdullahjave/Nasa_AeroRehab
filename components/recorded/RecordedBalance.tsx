@@ -47,20 +47,20 @@ export default function RecordedBalance() {
       ) : (
         <>
           <div className="grid gap-3 lg:grid-cols-2">
-            <Panel id="rb-trial" title="Saved trial" icon="balance" action={<Link href="/patient-management" className="text-[11px] text-cyan-300 hover:underline">Edit trial &rarr;</Link>}>
-              <p className="text-[11px] text-slate-300">{x.startedAt} &middot; manual entry{x.csvImport ? <> plus <span data-testid="imported-badge" className="rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[10px] text-violet-100">Imported CSV</span></> : null} &middot; {x.trialSide === "left" ? "Left" : "Right"}-leg stance &middot; {BALANCE_PROTOCOL_LABEL[x.protocol]}</p>
+            <Panel id="rb-trial" title="Saved trial" icon="balance" action={<Link href="/patient-management" className="text-[13px] text-cyan-300 hover:underline">Edit trial &rarr;</Link>}>
+              <p className="text-[13px] text-slate-300">{x.startedAt} &middot; manual entry{x.csvImport ? <> plus <span data-testid="imported-badge" className="rounded-full border border-violet-300/40 bg-violet-400/10 px-1.5 py-0.5 text-[12px] text-violet-100">Imported CSV</span></> : null} &middot; {x.trialSide === "left" ? "Left" : "Right"}-leg stance &middot; {BALANCE_PROTOCOL_LABEL[x.protocol]}</p>
               <dl className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div><dt className="text-xs text-slate-400">Duration (entered by hand)</dt><dd data-metric="duration" className="text-xl font-semibold tabular-nums text-white">{r1(x.durationS)} <span className="text-sm font-normal text-slate-300">s</span></dd></div>
-                <div><dt className="text-xs text-slate-400">ML sway RMS</dt><dd data-metric="ml" className="text-xl font-semibold tabular-nums text-white">{ml.value === null ? MISSING : <>{r1(ml.value)} <span className="text-sm font-normal text-slate-300">mm</span><span data-testid="ml-origin" className="ml-1 text-[10px] font-normal text-violet-200">{ml.origin ? ORIGIN_LABEL[ml.origin] : ""}</span></>}</dd></div>
-                <div><dt className="text-xs text-slate-400">AP sway RMS</dt><dd data-metric="ap" className="text-xl font-semibold tabular-nums text-white">{ap.value === null ? MISSING : <>{r1(ap.value)} <span className="text-sm font-normal text-slate-300">mm</span><span data-testid="ap-origin" className="ml-1 text-[10px] font-normal text-violet-200">{ap.origin ? ORIGIN_LABEL[ap.origin] : ""}</span></>}</dd></div>
+                <div><dt className="text-xs text-slate-400">ML sway RMS</dt><dd data-metric="ml" className="text-xl font-semibold tabular-nums text-white">{ml.value === null ? MISSING : <>{r1(ml.value)} <span className="text-sm font-normal text-slate-300">mm</span><span data-testid="ml-origin" className="ml-1 text-[12px] font-normal text-violet-200">{ml.origin ? ORIGIN_LABEL[ml.origin] : ""}</span></>}</dd></div>
+                <div><dt className="text-xs text-slate-400">AP sway RMS</dt><dd data-metric="ap" className="text-xl font-semibold tabular-nums text-white">{ap.value === null ? MISSING : <>{r1(ap.value)} <span className="text-sm font-normal text-slate-300">mm</span><span data-testid="ap-origin" className="ml-1 text-[12px] font-normal text-violet-200">{ap.origin ? ORIGIN_LABEL[ap.origin] : ""}</span></>}</dd></div>
               </dl>
               <p className="mt-2 text-xs text-slate-200">Resultant RMS (calculated from ML and AP): {x.resultantRmsMm === null ? <span className="text-amber-200">needs both entered values</span> : <span data-metric="resultant" className="font-semibold tabular-nums text-white">{r1(x.resultantRmsMm)} mm</span>}</p>
               <p className="mt-2 text-xs text-slate-200">Balance Index: <span className="text-amber-200">Unavailable</span></p>
-              <p className="text-[11px] text-slate-400">No documented scoring method applies to these recorded inputs, so no index, risk flag or radar score is given.</p>
+              <p className="text-[13px] text-slate-400">No documented scoring method applies to these recorded inputs, so no index, risk flag or radar score is given.</p>
             </Panel>
 
             <Panel id="rb-history" title={`Comparable trials · ${x.trialSide === "left" ? "left" : "right"} leg, ${BALANCE_PROTOCOL_LABEL[x.protocol].toLowerCase()}`} icon="chart">
-              <p className="text-[11px] text-slate-300">Only trials with the same standing leg and protocol are listed ({history.length}).</p>
+              <p className="text-[13px] text-slate-300">Only trials with the same standing leg and protocol are listed ({history.length}).</p>
               <ul className="mt-1 space-y-0.5 text-xs text-slate-200" aria-label="Comparable balance trials">
                 {history.map((h) => (
                   <li key={h.id} className="tabular-nums">
