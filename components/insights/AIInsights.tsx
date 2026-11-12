@@ -16,6 +16,8 @@ import { sessionEnd } from "@/lib/demo";
 import { EXERCISES, INSIGHT_EXERCISE_MATCH, programFor } from "@/lib/rehab";
 import { GUIDANCE_SOURCE, demoGuidance, mmss } from "@/lib/alerts";
 import AiRecommendationCard from "@/components/alerts/AiRecommendationCard";
+import AlertHistory from "@/components/alerts/AlertHistory";
+import NotAssessed from "@/components/alerts/NotAssessed";
 import { TONE } from "@/components/alerts/AlertBadge";
 import { useAlerts } from "@/components/alerts/useAlerts";
 
@@ -84,6 +86,7 @@ function DemoAIInsights() {
       {/* Actionable alerts first: severity, then time. Data issues are listed separately from health findings. */}
       <Panel id="ai-alerts" title="Your alerts" icon="warn">
         <p className="mb-2 text-[11px] text-slate-300">{summary.scope}</p>
+        <NotAssessed />
         {healthAlerts.length === 0 ? (
           <p className="text-sm text-slate-200">No health check could be evaluated for this session, so nothing is shown as good or flagged.</p>
         ) : (
@@ -100,6 +103,8 @@ function DemoAIInsights() {
           </div>
         )}
       </Panel>
+
+      <AlertHistory />
 
       <Panel id="ai-readings" title="Your readings" icon="chart">
         <ReadingRows />

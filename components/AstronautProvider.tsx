@@ -90,7 +90,7 @@ export function AstronautProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<Ctx>(() => {
     // Recorded mode builds everything from database rows. Before the first load it uses the seed profiles with no sessions,
     // never the demo fixtures.
-    const seedSnap: RecordedSnapshot = { mission: SEED_MISSION, astronauts: SEED_ASTRONAUTS, sessions: [], baselines: [], walkingSessions: [], pressureAssessments: [], balanceAssessments: [], sensorImports: [] };
+    const seedSnap: RecordedSnapshot = { mission: SEED_MISSION, astronauts: SEED_ASTRONAUTS, sessions: [], baselines: [], walkingSessions: [], pressureAssessments: [], balanceAssessments: [], sensorImports: [], alertAcks: [] };
     const portraits = Object.fromEntries(ASTRONAUTS.map((a) => [a.id, a.profile.portrait]));
     const recAll = recorded ? recordedAstronauts(rec.snapshot ?? seedSnap, portraits) : [];
     const all = recorded ? recAll : ASTRONAUTS;

@@ -14,12 +14,12 @@ type State =
 
 // Plain reasons for the fallback. They never name the provider and never show raw errors.
 const REASON: Record<string, string> = {
-  "not-configured": "AI explanations are not set up on this server.",
+  "not-configured": "Recommendations are not set up on this server.",
   "rate-limited": "Too many requests just now. Try again in a minute.",
   "provider-quota": "The AI service is busy right now. Try again later.",
   "upstream-failed": "The AI service is not responding right now. Try again later.",
-  timeout: "The AI explanation took too long.",
-  "invalid-response": "The AI answer did not pass the app's checks.",
+  timeout: "The recommendation took too long.",
+  "invalid-response": "The AI recommendation did not pass the app's checks.",
 };
 
 /**
@@ -59,9 +59,9 @@ export default function AiExplain({ alert }: { alert: Alert }) {
       });
       const json = (await res.json().catch(() => null)) as { ok?: boolean; error?: string; explanation?: GeminiExplanation } | null;
       if (res.ok && json?.ok && json.explanation) done({ phase: "ai", explanation: json.explanation });
-      else done({ phase: "builtin", reason: REASON[json?.error ?? ""] ?? "An AI explanation is not available for this alert." });
+      else done({ phase: "builtin", reason: REASON[json?.error ?? ""] ?? "A recommendation is not available for this alert." });
     } catch {
-      done({ phase: "builtin", reason: timedOut ? REASON.timeout : "The AI explanation could not be reached." });
+      done({ phase: "builtin", reason: timedOut ? REASON.timeout : "The recommendation could not be reached." });
     } finally {
       clearTimeout(timer);
       if (ctl.current === c) busy.current = false;
@@ -72,18 +72,18 @@ export default function AiExplain({ alert }: { alert: Alert }) {
   return (
     <div className="mt-3 border-t border-violet-300/15 pt-3 text-xs">
       <button type="button" onClick={ask} disabled={loading} aria-busy={loading}
-        className="inline-flex items-center gap-1.5 rounded-md border border-violet-300/50 bg-violet-400/10 px-3 py-1.5 text-violet-100 hover:bg-violet-400/20 disabled:cursor-wait disabled:opacity-60">
+        className="inline-flex items-center gap-2 rounded-md border border-violet-300/50 bg-violet-400/10 px-3 py-2 text-sm font-medium text-violet-100 hover:bg-violet-400/20 disabled:cursor-wait disabled:opacity-60">
         <span aria-hidden="true">&#10024;</span>
-        {loading ? "Getting AI explanation…" : state.phase === "idle" ? "Get AI explanation" : "Get AI explanation again"}
+        {loading ? "Getting recommendation…" : state.phase === "idle" ? "Get Recommendation" : "Get Recommendation Again"}
       </button>
       <div role="status" aria-live="polite" className="mt-2">
         {state.phase === "ai" && (
           <div className="rounded-md border border-violet-300/30 bg-violet-400/10 p-2">
-            <p className="font-semibold text-violet-100">AI explanation</p>
+            <p className="text-sm font-semibold text-violet-100">AI Recommendation</p>
             <dl className="mt-1 space-y-1 text-slate-100">
               <div><dt className="text-[11px] text-slate-400">In plain words</dt><dd>{state.explanation.meaning}</dd></div>
               <div><dt className="text-[11px] text-slate-400">The numbers</dt><dd>{state.explanation.change}</dd></div>
-              <div><dt className="text-[11px] text-slate-400">Why this action</dt><dd>{state.explanation.relevance}</dd></div>
+              <div><dt className="text-[11px] text-slate-400">Why this is recommended</dt><dd>{state.explanation.relevance}</dd></div>
             </dl>
             <p className="mt-1 text-[10px] text-slate-400">Written by AI from the values above. The status, numbers and next action are set by the app.</p>
           </div>

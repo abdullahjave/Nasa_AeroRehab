@@ -107,6 +107,8 @@ export type RecordedSnapshot = {
   balanceAssessments: RecordedBalance[];
   /** Sensor CSV imports (metadata + calculated summary). The samples themselves are fetched per assessment. */
   sensorImports: import("../import/types").RecordedImport[];
+  /** "Mark as seen" history for recorded alerts (append-only). */
+  alertAcks: import("../alerts/ack").AckEntry[];
 };
 
 /** Fields the user may edit on a profile. */

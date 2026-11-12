@@ -66,3 +66,6 @@ export function loadImportData(kind: "pressure" | "balance", astronautId: string
   }
   return p;
 }
+
+// ---------------------------------------------------------------- alert acknowledgements ("Mark as seen", Recorded mode)
+export const ackAlertApi = (body: { astronautId: string; sessionId: string; alertId: string }) => call<{ duplicate: boolean }>("/api/recorded/alerts/ack", "POST", body);

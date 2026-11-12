@@ -7,18 +7,19 @@ import type { AstronautProfile } from "@/lib/demo";
  * Portrait of one crew member. Only an astronaut whose profile carries a supplied portrait shows an image; everyone
  * else gets an initials avatar, so one picture is never presented as several different people.
  */
-export default function CrewPortrait({ profile, className = "", zoom = false, fill = false }: { profile: AstronautProfile; className?: string; zoom?: boolean; fill?: boolean }) {
-  const [failed, setFailed] = useState(false);
-  if (profile.portrait && !failed) {
+export default function CrewPortrait({ profile, className = "" }: { profile: AstronautProfile; className?: string }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const src = profile.portrait;
+  if (src && src !== failedSrc) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={profile.portrait}
+        src={src}
         alt={`${profile.displayName}: astronaut portrait (supplied artwork, not a photo of the person)`}
-        className={`object-contain object-bottom ${zoom ? "origin-top scale-[2.2] object-top" : ""} ${fill ? "origin-bottom scale-[1.9]" : ""} ${className}`}
+        className={`object-contain object-center ${className}`}
         draggable={false}
-        onError={() => setFailed(true)}
-        ref={(el) => { if (el && el.complete && el.naturalWidth === 0) queueMicrotask(() => setFailed(true)); }}
+        onError={() => setFailedSrc(src)}
+        ref={(el) => { if (el && el.complete && el.naturalWidth === 0) queueMicrotask(() => setFailedSrc(src)); }}
       />
     );
   }

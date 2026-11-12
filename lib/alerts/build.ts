@@ -162,7 +162,7 @@ function eventAlert(a: AstronautRecord, s: Session, v: InsightView, f: Finding, 
   });
 }
 
-/** Live sensor state (not the saved session): a disconnected or low IMU is a data issue with a Settings link. */
+/** Simulated sensor state (Demo only; Recorded mode has no connected sensors): a disconnected or low IMU is a data issue with a Settings link. */
 function sensorAlerts(a: AstronautRecord, s: Session): Alert[] {
   const out: Alert[] = [];
   for (const sn of a.sensors) {
@@ -173,10 +173,10 @@ function sensorAlerts(a: AstronautRecord, s: Session): Alert[] {
     out.push(base(a, s, {
       id: `alert:sensor:${a.id}:${sn.id}:${off ? "offline" : "low"}`, key: `alert:sensor:${a.id}:${sn.id}`, kind: "data", severity: "neutral",
       label: "Data Unavailable", title: `${name} sensor ${off ? "is disconnected" : "battery is low"}`, metric: "Sensor status", findingId: null,
-      changed: off ? `The ${name.toLowerCase()} sensor is disconnected, so live knee data from it is unavailable. Saved sessions are not affected.` : `The ${name.toLowerCase()} sensor battery is at ${sn.battery}%.`,
+      changed: off ? `The ${name.toLowerCase()} sensor is disconnected, so its simulated knee data is unavailable. Saved sessions are not affected.` : `The ${name.toLowerCase()} sensor battery is at ${sn.battery}%.`,
       action: { label: CHECK_SENSOR, kind: "check-sensor", href: "/settings" },
-      why: ["The knee checks use the thigh and shank motion sensors.", off ? "This sensor reports as offline right now (live status), which is separate from the saved session's readings." : "This sensor reports a low battery right now (live status).", "This is a data issue, not a health finding."],
-      explanation: off ? "Live sensor is disconnected." : "Live sensor battery is low.",
+      why: ["The knee checks use the thigh and shank motion sensors.", off ? "This sensor reports as offline right now (simulated status), which is separate from the saved session's readings." : "This sensor reports a low battery right now (simulated status).", "This is a data issue, not a health finding."],
+      explanation: off ? "The simulated sensor is disconnected." : "The simulated sensor battery is low.",
     }));
   }
   return out;

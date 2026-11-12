@@ -5,6 +5,8 @@ import { useAstronaut } from "@/components/AstronautProvider";
 import Panel from "@/components/ui/Panel";
 import SessionPicker from "@/components/ui/SessionPicker";
 import AiRecommendationCard from "@/components/alerts/AiRecommendationCard";
+import AlertHistory from "@/components/alerts/AlertHistory";
+import NotAssessed from "@/components/alerts/NotAssessed";
 import { useAlerts } from "@/components/alerts/useAlerts";
 import ReadingRows from "@/components/readings/ReadingRows";
 import RecordedTrend from "./RecordedTrend";
@@ -37,6 +39,7 @@ export default function RecordedInsights() {
 
       <Panel id="ai-alerts" title="Your alerts" icon="warn">
         <p className="mb-2 text-[11px] text-slate-300">{summary.scope} Explanations here are built in; recorded values are never sent to an AI service.</p>
+        <NotAssessed />
         {health.length > 0 && <ul className="space-y-2" aria-label="Health findings">{health.map(li)}</ul>}
         {data.length > 0 && (
           <div className={health.length ? "mt-3" : ""}>
@@ -45,6 +48,8 @@ export default function RecordedInsights() {
           </div>
         )}
       </Panel>
+
+      <AlertHistory />
 
       <Panel id="ai-readings" title="Your readings" icon="chart"><ReadingRows /></Panel>
       <RecordedTrend />

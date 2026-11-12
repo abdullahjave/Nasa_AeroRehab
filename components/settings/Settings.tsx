@@ -275,7 +275,7 @@ function SystemPanel() {
             <p id="reset-title" className="font-semibold text-amber-100">Reset the demo?</p>
             <div id="reset-desc" className="mt-1 space-y-1 text-[11px] text-slate-200">
               <p><span className="text-amber-200">Clears:</span> playback (back to Running), the selected scenario (back to the latest session), and all simulated sensor connection, hub and calibration changes for every astronaut.</p>
-              <p><span className="text-emerald-300">Keeps:</span> rehab completion, patient notes, saved reports and display preferences.</p>
+              <p><span className="text-emerald-300">Keeps:</span> rehab completion, alert history (seen findings), patient notes, saved reports and display preferences.</p>
             </div>
             <div className="mt-2 flex gap-2">
               <button type="button" ref={confirmRef} className={btn} onClick={() => { resetDemoState(); resetSession(); setConfirming(false); setNote("Demo reset. Playback, scenario and simulated sensor changes were cleared."); resetRef.current?.focus(); }}>Confirm reset</button>

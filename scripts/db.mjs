@@ -25,9 +25,7 @@ function compile(dir) {
     }
   }
 }
-compile(path.join(root, "lib", "db"));
-compile(path.join(root, "lib", "recorded"));
-compile(path.join(root, "lib", "demo")); // build.ts imports only types from here, kept for safe resolution
+compile(path.join(root, "lib")); // the repository imports from several lib folders (recorded, import, alerts, demo, ...), so compile them all
 
 const cmd = process.argv[2] ?? "migrate";
 const file = process.env.AEROREHAB_DB || path.join(root, "data", "aerorehab.sqlite");
@@ -39,11 +37,14 @@ if (cmd === "reset" && fs.existsSync(file)) { fs.rmSync(file); console.log(`remo
 if (!["migrate", "status", "reset"].includes(cmd)) { console.error("usage: node scripts/db.mjs migrate|status|reset"); process.exit(2); }
 
 const db = fs.existsSync(file) ? new SQL.Database(fs.readFileSync(file)) : new SQL.Database();
+db.run("PRAGMA foreign_keys = ON");
 if (cmd !== "status") {
   const applied = migrate(db);
   const seeded = seed(db);
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, Buffer.from(db.export()));
+  const tmp = `${file}.${process.pid}.tmp`; // same as the app: temp file + rename, so a crash cannot leave a half-written database
+  fs.writeFileSync(tmp, Buffer.from(db.export()));
+  fs.renameSync(tmp, file);
   console.log(`database: ${file}`);
   console.log(`migrations applied now: ${applied.length ? applied.join(", ") : "none (already up to date)"}`);
   console.log(`seeded now: ${seeded.missions} mission(s), ${seeded.astronauts} astronaut(s)`);

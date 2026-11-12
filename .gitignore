@@ -47,3 +47,8 @@ next-env.d.ts
 
 # local SQLite database (Backend Phase 1)
 /data/
+
+# any local SQLite database or journal, wherever AEROREHAB_DB points
+*.sqlite
+*.sqlite-journal
+*.sqlite3

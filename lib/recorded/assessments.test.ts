@@ -144,7 +144,7 @@ test("migration 3 is additive: existing profiles, knee sessions, baseline and wa
   if (!k.ok) throw new Error("setup");
   setBaseline(db, k.value.id);
   createWalking(db, { astronautId: "astro-chen", recordedAt: "2026-11-10T09:00", distanceM: 60, durationS: 60, steps: 100 });
-  assert.deepEqual(migrate(db), [3, 4]);
+  assert.deepEqual(migrate(db), [3, 4, 5]);
   assert.deepEqual(migrate(db), []);
   const s = snapshot(db);
   assert.equal(s.sessions.length, 1);

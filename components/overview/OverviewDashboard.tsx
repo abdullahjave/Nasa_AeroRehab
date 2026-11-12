@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useAstronaut } from "@/components/AstronautProvider";
 import SessionPicker from "@/components/ui/SessionPicker";
 import CrewPortrait from "@/components/graphics/CrewPortrait";
@@ -36,7 +37,7 @@ function Details({ children }: { children: React.ReactNode }) {
  * Measurement details. A reader can name their status, next action and task progress without opening a graph.
  */
 export default function OverviewDashboard() {
-  const { astronaut, mission, session, dataMode } = useAstronaut();
+  const { astronaut, mission, session, dataMode, recordedStatus, refreshRecorded } = useAstronaut();
   const recorded = dataMode === "recorded";
   const p = astronaut.profile;
 
@@ -47,11 +48,20 @@ export default function OverviewDashboard() {
           <div className="h-12 w-11 shrink-0 overflow-hidden rounded-md bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/30"><CrewPortrait profile={p} className="h-full w-full text-lg" /></div>
           <div className="min-w-0">
             <h1 className="text-xl font-semibold text-white sm:text-2xl">Overview</h1>
-            <p className="text-xs text-slate-300">{p.displayName} &middot; {p.role} &middot; {mission.name}, Day {mission.day} of {mission.totalDays}</p>
-            <p className="text-[11px] text-slate-400">{session.label} &middot; {recorded ? "Recorded Data (local database)" : "Simulated Data"}</p>
+            <p className="text-sm text-slate-200">{p.displayName} &middot; {p.role}</p>
+            <p className="text-sm text-slate-300">Mission <strong className="text-white">{mission.name}</strong> &middot; Day {mission.day} of {mission.totalDays}</p>
+            <p className="text-xs text-slate-400">{recorded ? "Recorded Data (local database)" : "Simulated Data"}</p>
           </div>
         </div>
-        <SessionPicker />
+        {recorded && recordedStatus !== "ready" ? (
+          <div className="text-sm text-slate-300" role="status">
+            {recordedStatus === "error" ? (
+              <>Could not load recorded readings. <button type="button" onClick={refreshRecorded} className="text-cyan-200 underline">Retry</button></>
+            ) : "Loading recorded readings…"}
+          </div>
+        ) : recorded && session.recorded?.empty ? (
+          <p className="text-sm text-slate-300">No knee session saved. <Link href="/patient-management" className="text-cyan-200 underline">Add a session</Link></p>
+        ) : <SessionPicker />}
       </header>
 
       <YourStatusCard />
@@ -63,9 +73,10 @@ export default function OverviewDashboard() {
           <>
             <RecordedTrend id="ov-rec-trend" />
             <section className="glass rounded-lg p-3" aria-label="Sensor readings">
-              <h3 className="text-[13px] font-semibold text-white">Sensor readings</h3>
-              <p className="mt-1 text-sm text-amber-200">Unavailable for manual sessions</p>
-              <p className="text-xs text-slate-300">The knee trace, gait, foot pressure and balance charts need sensor data. Manual entries have none, so they are not drawn and nothing is filled in from demo data.</p>
+              <h3 className="text-sm font-semibold text-white">Sensor playback</h3>
+              <p className="mt-1 text-sm text-slate-300">
+                Open the recorded <Link href="/load-pressure" className="text-cyan-200 underline">pressure assessment</Link> or <Link href="/stability-balance" className="text-cyan-200 underline">balance trial</Link> to play its imported samples. Manual knee and walking entries show their recorded summaries.
+              </p>
             </section>
           </>
         ) : (

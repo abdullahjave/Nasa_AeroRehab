@@ -5,6 +5,7 @@ import { useAstronaut } from "@/components/AstronautProvider";
 import Panel from "@/components/ui/Panel";
 import AlertBadge from "./AlertBadge";
 import AiRecommendationCard from "./AiRecommendationCard";
+import NotAssessed from "./NotAssessed";
 import { useAlerts } from "./useAlerts";
 import type { Alert } from "@/lib/alerts";
 
@@ -35,6 +36,7 @@ export default function YourStatusCard() {
         <AiRecommendationCard alert={p} variant="overview" />
       )}
       <p className="mt-2 text-[11px] text-slate-300">{summary.scope}</p>
+      <NotAssessed />
       {otherHealth > 0 && (
         <p className="mt-1 text-[11px] text-slate-300">
           {otherHealth} more finding{otherHealth === 1 ? "" : "s"} in <Link href="/ai-insights" className="text-cyan-300 hover:underline">AI Insights</Link>.

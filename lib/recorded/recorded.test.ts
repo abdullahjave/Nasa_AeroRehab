@@ -78,7 +78,7 @@ test("timestamps, mission day and profile validation", () => {
 
 // ---- builder: recorded sessions become the shapes the pages read, with nothing taken from demo fixtures ----
 const row = (id: string, over: Partial<RecordedSession> = {}): RecordedSession => ({ id, astronautId: "astro-chen", recordedAt: "2026-11-02T09:30:00.000Z", activity: "Knee mobility", side: "left", movement: "knee-flexion-extension", protocol: "active-knee-flexion", source: "manual", minAngleDeg: 4, maxAngleDeg: 124, torqueNm: 60, updatedAt: "", ...over });
-const snap = (sessions: RecordedSession[], baselines: RecordedSnapshot["baselines"] = []): RecordedSnapshot => ({ mission: SEED_MISSION, astronauts: SEED_ASTRONAUTS, sessions, baselines, walkingSessions: [], pressureAssessments: [], balanceAssessments: [], sensorImports: [] });
+const snap = (sessions: RecordedSession[], baselines: RecordedSnapshot["baselines"] = []): RecordedSnapshot => ({ mission: SEED_MISSION, astronauts: SEED_ASTRONAUTS, sessions, baselines, walkingSessions: [], pressureAssessments: [], balanceAssessments: [], sensorImports: [], alertAcks: [] });
 const chenBase = row("rec-base", { recordedAt: "2026-10-20T09:00:00.000Z" }); // ROM 120
 const chenNow = row("rec-now", { recordedAt: "2026-11-05T09:00:00.000Z", minAngleDeg: 6, maxAngleDeg: 112 }); // ROM 106
 const bl = { astronautId: "astro-chen", side: "left" as const, movement: "knee-flexion-extension" as const, protocol: "active-knee-flexion" as const, sessionId: "rec-base" };

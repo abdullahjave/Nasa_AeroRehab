@@ -57,7 +57,7 @@ function DemoPatientManagement() {
         <span className="rounded-full border border-amber-300/60 bg-amber-300/10 px-2 py-0.5 text-[10px] font-medium text-amber-200">Simulated Data</span>
       </header>
 
-      <div className="grid gap-2 text-[11px] [&_.text-xs]:!text-[10.5px] [&_.text-sm]:!text-xs [&_.text-xl]:!text-base xl:grid-cols-[200px_1.25fr_1fr_170px]">
+      <div className="grid gap-2 text-xs xl:grid-cols-[200px_1.25fr_1fr_170px]">
         <div className="xl:row-span-2">
           <Roster filtered={filtered} total={astronauts.length} query={query} setQuery={setQuery} missions={missions} missionFilter={missionFilter} setMissionFilter={setMissionFilter}
             selectedId={astronaut.id} onSelect={select} />
@@ -66,7 +66,7 @@ function DemoPatientManagement() {
         <Sensors a={astronaut} session={session} />
         <aside aria-label="Astronaut portrait" className="glass relative hidden items-end justify-center overflow-hidden rounded-lg bg-gradient-to-b from-[#0c2347]/60 to-transparent p-2 xl:row-span-2 xl:flex">
           <div className="absolute bottom-3 left-1/2 h-6 w-4/5 -translate-x-1/2 rounded-[50%] border border-cyan-300/70 bg-cyan-400/20 shadow-[0_0_24px_rgba(34,211,238,0.6)]" aria-hidden="true" />
-          <CrewPortrait profile={astronaut.profile} fill className="relative h-full max-h-[560px] w-full text-6xl" />
+          <CrewPortrait profile={astronaut.profile} className="relative min-h-28 w-full max-h-64 self-center text-4xl" />
         </aside>
         <Records a={astronaut} />
         <Assessments a={astronaut} session={session} onOpen={(kneeSide, balanceSide) => { selectSession(session.id); if (kneeSide) selectKneeSide(kneeSide); if (balanceSide) selectBalanceSide(balanceSide); }} />
@@ -103,7 +103,7 @@ function Roster({ filtered, total, query, setQuery, missions, missionFilter, set
               <li key={a.id}>
                 <button type="button" aria-pressed={sel} onClick={() => onSelect(a.id)}
                   className={`flex w-full items-center gap-2 rounded-md border p-1.5 text-left ${sel ? "border-cyan-300 bg-cyan-400/15" : "border-cyan-400/15 hover:bg-white/5"}`}>
-                  <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/40"><CrewPortrait profile={a.profile} zoom className="h-full w-full text-[11px]" /></span>
+                  <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/40"><CrewPortrait profile={a.profile} className="h-full w-full text-[11px]" /></span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold leading-tight text-white">{a.profile.displayName}</span>
                     <span className="flex items-center gap-1.5 text-[11px] text-slate-400">{a.profile.crewCode}<span className="flex items-center gap-1 text-emerald-300"><span className="led" aria-hidden="true" />{a.profile.status}</span></span>

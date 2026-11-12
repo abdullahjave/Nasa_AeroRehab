@@ -21,9 +21,9 @@ const input = (over: Record<string, unknown> = {}) => ({ astronautId: "astro-che
 test("migrations are idempotent: a second run applies nothing", async () => {
   const db = await fresh();
   assert.deepEqual(migrate(db), []);
-  assert.equal(MIGRATIONS.length, 4);
+  assert.equal(MIGRATIONS.length, 5);
   const versions = db.exec("SELECT version FROM schema_migrations")[0].values.map((r) => r[0]);
-  assert.deepEqual(versions, [1, 2, 3, 4]);
+  assert.deepEqual(versions, [1, 2, 3, 4, 5]);
 });
 
 test("seed creates one mission and three profiles with EMPTY measurement history, and is idempotent", async () => {

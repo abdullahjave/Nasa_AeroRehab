@@ -22,7 +22,7 @@ function Item({ r, href, linkLabel, children, note, extra, onLink }: { r: Pick<R
       </div>
       <dd className="mt-0.5 text-xs text-slate-300">{r.meaning}</dd>
       <dd className="mt-1 text-sm text-white">{children}</dd>
-      <dd className="mt-1 text-[11px] text-slate-400">{note}</dd>
+      <dd className="mt-1 text-xs text-slate-300">{note}</dd>
       <dd>
         <details className="mt-1 text-[11px] text-slate-300">
           <summary className="inline-block cursor-pointer text-cyan-200 hover:text-white">Technical details</summary>
@@ -55,10 +55,9 @@ export default function ReadingRows() {
   const iv = insightView(astronaut, session);
   const rom = iv.rom;
   const hasBase = rom.pct.kind === "value" && rom.baseline.kind === "value" && rom.current.kind === "value";
-  const limit = Math.abs(REDUCED_ROM_DEMO.thresholdPct);
   const pct = hasBase ? (rom.pct as { value: number }).value : 0;
   const diff = rom.diff.kind === "value" ? rom.diff.value : null;
-  const within = hasBase && Math.abs(pct) <= limit;
+  const flagged = iv.romFlagged;
 
   const g = session.gait;
   const pa = useMemo(() => getPressureAnalysis(session), [session]);
@@ -80,7 +79,7 @@ export default function ReadingRows() {
           ? <>Compared with your baseline session (Day {iv.baselineDay}: {fmt((rom.baseline as { value: number }).value, "°")}). Demo rule: flagged at {REDUCED_ROM_DEMO.thresholdPct}% or lower.</>
           : <>No baseline session for this knee side and movement, so there is no comparison and no status.</>}
         extra={<p className="mt-1">Peak bend {fmt(k.peakFlexionDeg, "°", 0)}; now {fmt(k.currentAngleDeg, "°", 0)}. {hasBase && diff !== null ? `Change vs baseline: ${fmtSigned(diff, "°", 1)} (${fmtSigned(pct, "%", 1)}).` : ""}</p>}>
-        {k.romDeg === null ? NA : <><span className="font-semibold tabular-nums">{fmt(k.romDeg, "°", 0)}</span>{hasBase && <span className={within ? "text-emerald-300" : "text-amber-200"}> &middot; {within ? "in line with your baseline session" : diff !== null && diff < 0 ? `${fmt(Math.abs(diff), "°", 0)} less than your baseline session` : "outside your baseline"}</span>}</>}
+        {k.romDeg === null ? NA : <><span className="font-semibold tabular-nums">{fmt(k.romDeg, "°", 0)}</span>{hasBase && <span className={flagged ? "text-amber-200" : "text-slate-300"}> &middot; {diff === null || diff === 0 ? "matches your baseline session" : `${fmt(Math.abs(diff), "°", 0)} ${diff < 0 ? "less" : "more"} than your baseline session`}</span>}</>}
       </Item>
 
       {dataMode === "recorded" ? (

@@ -177,4 +177,32 @@ CREATE TABLE balance_samples (
 ) WITHOUT ROWID;
 `,
   },
+  {
+    version: 5,
+    name: "alert_acknowledgements",
+    // Additive: one new table. "Mark as seen" history for RECORDED alerts only (Demo keeps its own history in the browser).
+    // Append-only: a row records that a finding was seen and what it said at that moment. Alerts themselves are never stored,
+    // resolved, hidden or downgraded; they are recomputed from the data. Repeating an acknowledgement of unchanged data adds nothing.
+    sql: `
+CREATE TABLE alert_acknowledgements (
+  id               TEXT PRIMARY KEY,
+  astronaut_id     TEXT NOT NULL REFERENCES astronauts(id) ON DELETE CASCADE,
+  session_id       TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+  alert_id         TEXT NOT NULL CHECK (length(alert_id) BETWEEN 1 AND 160),
+  finding_id       TEXT,
+  acknowledged_at  TEXT NOT NULL,
+  fingerprint      TEXT NOT NULL,
+  severity         TEXT NOT NULL CHECK (severity IN ('good','attention','action','neutral')),
+  severity_label   TEXT NOT NULL,
+  title            TEXT NOT NULL,
+  metric           TEXT NOT NULL,
+  value_json       TEXT,
+  source_json      TEXT,
+  session_label    TEXT NOT NULL,
+  mission_day      INTEGER NOT NULL,
+  scenario         TEXT
+);
+CREATE INDEX alert_acks_by_finding ON alert_acknowledgements (astronaut_id, session_id, alert_id, acknowledged_at);
+`,
+  },
 ];

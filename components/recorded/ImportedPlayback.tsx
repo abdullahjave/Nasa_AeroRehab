@@ -64,7 +64,7 @@ function PressureLoader({ x, astronautId }: { x: PressureAssessmentView; astrona
   const s = useSamples("pressure", astronautId, x.id, imp.id);
   return (
     <Panel id="rl-import" title="Heatmap and centre-of-pressure playback" icon="pulse" action={<Badge />}>
-      <p className="text-[11px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {imp.template}</p>
+      <p className="text-[11px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {imp.template} &middot; an imported file, not a live sensor feed</p>
       {s.status === "loading" && <Wait text="Loading the saved sensor samples…" />}
       {s.status === "error" && <p role="alert" className="text-sm text-amber-200">The saved samples could not be loaded. Reload the page to try again.</p>}
       {s.status === "ready" && s.data.kind === "pressure" && <PressureView data={s.data} />}
@@ -189,7 +189,7 @@ function BalanceLoader({ x, astronautId }: { x: BalanceAssessmentView; astronaut
   const s = useSamples("balance", astronautId, x.id, imp.id);
   return (
     <Panel id="rb-import" title="Sway path, ellipse and replay" icon="pulse" action={<Badge />}>
-      <p className="text-[11px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {x.trialSide === "left" ? "Left" : "Right"}-leg stance (from the saved trial) &middot; {imp.template}</p>
+      <p className="text-[11px] text-slate-300" data-testid="import-source">Imported CSV: {imp.fileName} &middot; imported {utc(imp.importedAt)} &middot; {x.trialSide === "left" ? "Left" : "Right"}-leg stance (from the saved trial) &middot; {imp.template} &middot; an imported file, not a live sensor feed</p>
       {s.status === "loading" && <Wait text="Loading the saved sensor samples…" />}
       {s.status === "error" && <p role="alert" className="text-sm text-amber-200">The saved samples could not be loaded. Reload the page to try again.</p>}
       {s.status === "ready" && s.data.kind === "balance" && <BalanceView data={s.data} x={x} />}

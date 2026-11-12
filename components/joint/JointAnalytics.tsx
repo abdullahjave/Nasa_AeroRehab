@@ -206,9 +206,9 @@ function DemoJointAnalytics() {
             <div className="grid flex-1 gap-3 sm:grid-cols-2">
               <KneeAnatomy angle={angle === null ? null : Math.round(angle * 10) / 10} thigh={thighS} shank={shankS} className="mx-auto w-full max-w-[380px]" />
               <div className="flex flex-col items-center justify-center gap-2">
-                <GaugeRing value={angle} max={130} color={C.cyan} size="h-32 w-32" center={angle === null ? undefined : `${angle.toFixed(1)}°`} centerSub="Flexion now" ariaLabel={`Flexion at cursor ${angle?.toFixed(1)} degrees`} />
+                <GaugeRing value={angle} max={130} color={C.cyan} size="h-32 w-32" center={angle === null ? undefined : `${angle.toFixed(1)}°`} centerSub="Knee Flexion (°)" ariaLabel={`Flexion at cursor ${angle?.toFixed(1)} degrees`} />
                 <div className="grid w-full grid-cols-2 gap-x-3 gap-y-2">
-                  <Stat label="Extension (min)" value={live ? knee.minAngleDeg : null} unit="°" />
+                  <Stat label="Minimum Knee Angle (°)" value={live ? knee.minAngleDeg : null} unit="°" />
                   <Stat label="Peak flexion" value={live ? knee.peakFlexionDeg : null} unit="°" />
                   <Stat label="Max ROM" value={romShown} unit="°" />
                   <Stat label="Torque (sim.)" value={tq} digits={1} unit="Nm" />
@@ -319,7 +319,7 @@ function DemoJointAnalytics() {
 
       <div className="grid gap-3 xl:grid-cols-12">
         <div className="xl:col-span-4">
-          <Panel id="flex" title="Flexion Angle (Session)" icon="pulse" className="h-full">
+          <Panel id="flex" title="Knee Flexion (°) · Session" icon="pulse" className="h-full">
             {live ? (
               <figure className="flex min-h-[200px] flex-1 flex-col rounded-md bg-black/35 p-2">
                 <figcaption className="mb-1 text-[11px] text-slate-300">Click the chart or use the time cursor. Shaded band = 20 s IMU window.</figcaption>
@@ -336,7 +336,7 @@ function DemoJointAnalytics() {
                       <Tooltip content={({ active, payload }) => {
                         const p = payload?.[0]?.payload as { t: number; flexionDeg: number | null } | undefined;
                         if (!active || !p) return null;
-                        return <div className={TIP_CLASS}><p className="text-slate-300">Time <span className="font-semibold text-white">{fmtClock(p.t)}</span></p><p className="text-slate-300">Flexion <span className="font-semibold text-cyan-300">{fmt(p.flexionDeg, "°", 1)}</span></p></div>;
+                        return <div className={TIP_CLASS}><p className="text-slate-300">Time <span className="font-semibold text-white">{fmtClock(p.t)}</span></p><p className="text-slate-300">Knee Flexion (°) <span className="font-semibold text-cyan-300">{fmt(p.flexionDeg, "°", 1)}</span></p></div>;
                       }} cursor={{ stroke: C.cyan, strokeOpacity: 0.4 }} />
                       <Line dataKey="flexionDeg" stroke={C.cyan} strokeWidth={1.6} dot={false} isAnimationActive={false} connectNulls={false} />
                     </LineChart>

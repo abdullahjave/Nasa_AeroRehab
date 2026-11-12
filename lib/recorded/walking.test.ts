@@ -98,7 +98,7 @@ test("migration 2 is additive and repeatable: existing profiles, knee sessions a
   const k = createSession(db, { astronautId: "astro-chen", recordedAt: "2026-10-20T09:00", activity: "Knee mobility", side: "left", movement: "knee-flexion-extension", protocol: "active-knee-flexion", minAngleDeg: 4, maxAngleDeg: 125 });
   if (!k.ok) throw new Error("setup");
   setBaseline(db, k.value.id);
-  assert.deepEqual(migrate(db), [2, 3, 4]); // only the new migrations run
+  assert.deepEqual(migrate(db), [2, 3, 4, 5]); // only the new migrations run
   assert.deepEqual(migrate(db), []); // and never again
   const s = snapshot(db);
   assert.equal(s.astronauts.length, 3);

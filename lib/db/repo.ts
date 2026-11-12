@@ -1,6 +1,7 @@
 import type { Database, SqlValue } from "sql.js";
 import { MIGRATIONS } from "./migrations";
 import { listImports } from "./imports";
+import { listAcks } from "./acks";
 import { SEED_ASTRONAUTS, SEED_MISSION } from "./seed";
 import { computeRom } from "../recorded/build";
 import { initialsOf, validateBalance, validatePressure, validateProfile, validateSession, validateWalking, type SessionValue, type WalkingValue } from "../recorded/validate";
@@ -100,6 +101,7 @@ export function snapshot(db: Database): RecordedSnapshot {
     pressureAssessments: all(db, "SELECT * FROM pressure_assessments ORDER BY recorded_at, id").map(pressureOf),
     balanceAssessments: all(db, "SELECT * FROM balance_assessments ORDER BY recorded_at, id").map(balanceOf),
     sensorImports: listImports(db),
+    alertAcks: listAcks(db),
     baselines: all(db, "SELECT * FROM baselines").map((r): RecordedBaseline => ({ astronautId: String(r.astronaut_id), side: r.side as Side, movement: r.movement as RecordedBaseline["movement"], protocol: r.protocol as RecordedBaseline["protocol"], sessionId: String(r.session_id) })),
   };
 }

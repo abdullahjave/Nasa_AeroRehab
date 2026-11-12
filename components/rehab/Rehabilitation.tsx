@@ -10,6 +10,7 @@ import ExerciseVisual from "./ExerciseVisual";
 import { useRehab } from "./useRehab";
 import { useRehabEdits } from "./useRehabEdits";
 import KnowledgeCheck from "./KnowledgeCheck";
+import CountermeasureGuide from "./CountermeasureGuide";
 import MilestoneBadge from "./MilestoneBadge";
 import { DEMO_DAY, dayLabel, dayToDate, planMilestone, programFor, scheduleOf, weekStartOf, weekdayShort, type DayStatus, type ExerciseId, type Ratio } from "@/lib/rehab";
 
@@ -271,6 +272,8 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
           </Panel>
         </div>}
       </div>
+
+      <CountermeasureGuide />
     </div>
   );
 }

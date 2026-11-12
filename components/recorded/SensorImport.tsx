@@ -132,6 +132,8 @@ export default function SensorImport({ a, target, onClose }: { a: AstronautRecor
           <Row k="Source now" v={existing ? `Imported CSV: ${existing.fileName} (${utc(existing.importedAt)})` : "Manual entry only"} />
         </dl>
 
+        <p className="text-slate-400">A CSV is an imported file that is saved with this assessment. It is not a live sensor feed: Recorded mode has no live sensor connection.</p>
+
         <details className="rounded-md border border-cyan-400/20 p-2">
           <summary className="cursor-pointer text-slate-200">Expected file format: {specLabel}</summary>
           <p className="mt-1 text-slate-300">UTF-8 CSV, comma separated, header row exactly: <code className="rounded bg-black/40 px-1 text-cyan-200">{cols.join(",")}</code>. Limit 2 MB.</p>
