@@ -3,19 +3,22 @@
 import { useState } from "react";
 import type { AstronautProfile } from "@/lib/demo";
 
+/** The one supplied astronaut artwork, used for every crew member (including astronauts added later) unless a profile has its own. */
+export const DEFAULT_PORTRAIT = "/images/astronaut-portrait.webp";
+
 /**
- * Portrait of one crew member. Only an astronaut whose profile carries a supplied portrait shows an image; everyone
- * else gets an initials avatar, so one picture is never presented as several different people.
+ * Portrait of one crew member: the profile's own picture, else the shared supplied astronaut artwork. The alt text says it is
+ * artwork, not a photo of the person. Initials are shown only if the image file cannot be loaded.
  */
 export default function CrewPortrait({ profile, className = "" }: { profile: AstronautProfile; className?: string }) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const src = profile.portrait;
+  const src = profile.portrait ?? DEFAULT_PORTRAIT;
   if (src && src !== failedSrc) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
-        alt={`${profile.displayName}: astronaut portrait (supplied artwork, not a photo of the person)`}
+        alt={`${profile.displayName}: astronaut portrait (shared supplied artwork, not a photo of the person)`}
         className={`object-contain object-center ${className}`}
         draggable={false}
         onError={() => setFailedSrc(src)}

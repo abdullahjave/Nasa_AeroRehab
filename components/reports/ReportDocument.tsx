@@ -44,6 +44,8 @@ export default function ReportDocument({
       <dl className="avoid-break mt-3 grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
         <div><dt className="text-slate-500">Astronaut</dt><dd className="font-medium">{a.profile.fullName}</dd></div>
         <div><dt className="text-slate-500">Astronaut ID</dt><dd className="font-medium">{a.id} ({a.profile.crewCode})</dd></div>
+        <div><dt className="text-slate-500">Role</dt><dd className="font-medium">{a.profile.role}</dd></div>
+        <div><dt className="text-slate-500">Rehab focus</dt><dd className="font-medium">{a.profile.rehabFocus}</dd></div>
         <div><dt className="text-slate-500">Mission</dt><dd className="font-medium">{mission.name}</dd></div>
         <div><dt className="text-slate-500">Reporting period</dt><dd className="font-medium">Day {r.start}&ndash;{r.end} ({dayLabel(r.start)} &ndash; {dayLabel(r.end)}, inclusive)</dd></div>
         <div><dt className="text-slate-500">Comparison period</dt><dd className="font-medium">{report.prevRange.end < 1
@@ -68,7 +70,7 @@ export default function ReportDocument({
                       <CartesianGrid stroke="#e2e8f0" />
                       <XAxis dataKey="day" type="number" domain={[r.start, r.end]} ticks={ticks} tickFormatter={dayLabel} tick={{ fill: "#334155", fontSize: 9 }} stroke="#94a3b8" />
                       <YAxis domain={paddedDomain(report.series(c.key).map((d) => d.value), c.step, c.minSpan, 0, c.ceil) ?? [0, 1]} tickCount={4} tickFormatter={(v) => Number(v).toFixed(c.key === "speedMs" ? 2 : 0)} tick={{ fill: "#334155", fontSize: 9 }} stroke="#94a3b8" width={c.key === "speedMs" ? 42 : 34} />
-                      <Line dataKey="value" stroke={PRINT_COLORS[c.key]} strokeWidth={1.6} dot={{ r: 2.2, fill: PRINT_COLORS[c.key], strokeWidth: 0 }} connectNulls={false} isAnimationActive={false} />
+                      <Line dataKey="value" stroke={PRINT_COLORS[c.key]} strokeWidth={1.6} dot={{ r: 2.2, fill: PRINT_COLORS[c.key], strokeWidth: 0 }} connectNulls isAnimationActive={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -100,6 +102,8 @@ export default function ReportDocument({
         </>
       )}
 
+      {!recorded && report.latestSession && <LatestSession a={a} s={report.latestSession} />}
+
       {(!recorded || rehab || report.latestSession) && <section className="avoid-break mt-4 grid gap-3 sm:grid-cols-2">
         {(!recorded || rehab) && (rehab?.basis === "recorded" ? (
           <div className="rounded border border-slate-300 p-2 text-sm" data-testid="doc-rehab">
@@ -125,6 +129,26 @@ export default function ReportDocument({
         {recorded ? "Recorded data saved in the local AeroRehab database (manual entries and imported sensor CSV files, each labelled). Not a clinical document." : "Simulated data for demonstration. Not a clinical document."} Dates: mission Day 1 = Sep 30, 2026 (UTC). Units: degrees, m/s, steps/min, N, kPa, mm, %.
       </footer>
     </article>
+  );
+}
+
+/** The newest session in the period, read from the same session record the other pages use, so the document differs for every astronaut. */
+function LatestSession({ a, s }: { a: AstronautRecord; s: NonNullable<Report["latestSession"]> }) {
+  const base = s.joint.baseline;
+  const rom = s.knee.romDeg;
+  const rows: [string, string][] = [
+    ["Knee range of motion", rom === null ? "Unavailable" : `${rom.toFixed(0)}\u00B0${base ? ` vs ${base.romDeg.toFixed(0)}\u00B0 baseline (Day ${base.recordedMissionDay}), ${(((rom - base.romDeg) / base.romDeg) * 100).toFixed(1)}%` : " (no baseline)"}`],
+    ["Walking speed", s.gait?.speedMs == null ? "Unavailable" : `${s.gait.speedMs.toFixed(2)} m/s, cadence ${s.gait.cadenceSpm ?? "n/a"} steps/min`],
+    ["Balance Index", s.balance?.index == null ? "Unavailable" : `${s.balance.index} / 100 (${s.balance.indexStatus})`],
+  ];
+  return (
+    <section className="avoid-break mt-4 rounded border border-slate-300 p-2 text-sm" aria-label="Latest session">
+      <p className="font-semibold">Latest session in period: {s.label}</p>
+      <dl className="mt-1 grid grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-[auto_1fr]">
+        {rows.map(([k, v]) => <div key={k} className="contents"><dt className="text-slate-600">{k}</dt><dd className="tabular-nums">{v}</dd></div>)}
+      </dl>
+      <p className="mt-1 text-[11px] text-slate-500">{a.profile.displayName}, {a.profile.affectedLimb} side.</p>
+    </section>
   );
 }
 

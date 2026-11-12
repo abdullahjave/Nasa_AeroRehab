@@ -120,7 +120,9 @@ export default function ReadingRows() {
         {!pa ? NA : <>
           {showP(pa.session.peakKpa.overall, "kPa").tone === "value"
             ? <><span className="font-semibold tabular-nums">{showP(pa.session.peakKpa.overall, "kPa").text}</span> <span className="text-slate-300">highest pressure in this session</span></>
-            : <>{NA} <span className="text-slate-300">(no usable pressure value in this session)</span></>}
+            : (pa.session.peakKpa.left.kind === "value") !== (pa.session.peakKpa.right.kind === "value")
+              ? <><span className="font-semibold tabular-nums">{showP(pa.session.peakKpa.left.kind === "value" ? pa.session.peakKpa.left : pa.session.peakKpa.right, "kPa").text}</span> <span className="text-slate-300">highest pressure, {pa.session.peakKpa.left.kind === "value" ? "left foot only (right insole offline)" : "right foot only (left insole offline)"}</span></>
+              : <>{NA} <span className="text-slate-300">(no usable pressure value in this session)</span></>}
           <span className="block text-xs text-slate-200 sm:inline sm:before:content-['·'] sm:before:mx-1.5">{WEIGHT_SHARE.meaning}{" "}
             {shares ? <span className="tabular-nums text-white">Left {shares.leftPct.toFixed(0)}% &middot; Right {shares.rightPct.toFixed(0)}%</span> : NA}</span>
         </>}

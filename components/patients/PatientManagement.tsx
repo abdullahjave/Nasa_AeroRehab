@@ -239,14 +239,19 @@ function Records({ a }: { a: AstronautRecord }) {
 
 function Assessments({ a, session, onOpen }: { a: AstronautRecord; session: Session; onOpen: (knee: "left" | "right" | null, balance: "left" | "right" | null) => void }) {
   const pa = getPressureAnalysis(session);
-  const peak = pa && pa.session.peakKpa.overall.kind === "value" ? pa.session.peakKpa.overall.value : null;
+  // The session peak needs both feet. When one insole is offline, the working foot's own peak is shown and labelled, never a guessed total.
+  const pk = pa?.session.peakKpa;
+  const num = (m: { kind: string; value?: number } | undefined) => (m && m.kind === "value" ? (m.value as number) : null);
+  const [pAll, pL, pR] = [num(pk?.overall), num(pk?.left), num(pk?.right)];
+  const peakText = pAll !== null ? `Peak ${pAll.toFixed(0)} kPa` : pL !== null && pR === null ? `Left foot peak ${pL.toFixed(0)} kPa` : pR !== null && pL === null ? `Right foot peak ${pR.toFixed(0)} kPa` : null;
+  const peakNote = pAll === null && peakText ? (pL !== null ? "Right insole offline" : "Left insole offline") : null;
   // Balance: use a side that has a trial in this session, so the link opens a real trial.
   const balSide = (["left", "right"] as const).find((s) => balanceView(a, session, s).trial) ?? null;
   const idx = balSide ? balanceView(a, session, balSide).fixtures?.index ?? null : null;
-  const rows: { type: string; value: string | null; href: string; knee?: "left" | "right"; bal?: "left" | "right" | null }[] = [
+  const rows: { type: string; value: string | null; note?: string | null; href: string; knee?: "left" | "right"; bal?: "left" | "right" | null }[] = [
     { type: "Joint Analytics", value: session.knee.romDeg === null ? null : `ROM ${session.knee.romDeg.toFixed(0)}°`, href: "/joint-analytics", knee: session.joint.measurement.side },
     { type: "Gait Analysis", value: session.gait?.speedMs == null ? null : `Speed ${session.gait.speedMs.toFixed(2)} m/s`, href: "/gait-analysis" },
-    { type: "Load & Pressure", value: peak === null ? null : `Peak ${peak.toFixed(0)} kPa`, href: "/load-pressure" },
+    { type: "Load & Pressure", value: peakText, note: peakNote, href: "/load-pressure" },
     { type: "Stability & Balance", value: idx === null ? null : `Index ${idx} / 100`, href: "/stability-balance", bal: balSide },
   ];
   return (
@@ -262,7 +267,7 @@ function Assessments({ a, session, onOpen }: { a: AstronautRecord; session: Sess
                   <Link href={r.href} onClick={() => onOpen(r.knee ?? null, r.bal ?? null)} className="text-cyan-200 hover:text-white hover:underline" aria-label={`Open ${r.type} for ${a.profile.displayName}, ${session.label}`}>{r.type} &rarr;</Link>
                 </th>
                 <td className={`pr-2 tabular-nums ${r.value ? "text-white" : "text-amber-200"}`}>{r.value ?? "Unavailable"}</td>
-                <td>{r.value ? <span className="text-emerald-300">&#10003; Recorded</span> : <span className="text-amber-200">! No data</span>}</td>
+                <td>{r.value ? <span className={r.note ? "text-amber-200" : "text-emerald-300"}>{r.note ? `✓ Partial: ${r.note}` : <>&#10003; Recorded</>}</span> : <span className="text-amber-200">! No data</span>}</td>
               </tr>
             ))}
           </tbody>

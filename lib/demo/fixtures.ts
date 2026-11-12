@@ -82,6 +82,17 @@ const spec = (seed: number, left: number[], right: number[], leftBias: number, d
   seed, durationSec: 30, sampleRateHz: 20, peaksKpa: { left: peaks(left), right: peaks(right) }, leftBias, shiftAmp: 0.08, dropouts,
 });
 
+/** A history session's insole recording: the astronaut's Day 42 pattern eased by 0.6% per day back, with its own phase. Simulated, like every other value here. */
+const histPressure = (base: PressureSpec, day: number): PressureSpec => {
+  const back = 42 - day;
+  const f = 1 - 0.006 * back;
+  const scale = (v: Record<string, number>) => Object.fromEntries(Object.entries(v).map(([k, x]) => [k, Math.round(x * f * 10) / 10])) as PressureSpec["peaksKpa"]["left"];
+  return { ...base, seed: base.seed + back * 0.7, peaksKpa: { left: scale(base.peaksKpa.left), right: scale(base.peaksKpa.right) }, dropouts: undefined };
+};
+const CHEN_PRESSURE = spec(2.5, [120, 70, 150, 175, 110, 45, 198], [130, 75, 160, 185, 120, 50, 212], 0.48);
+const OKAFOR_PRESSURE = spec(3.6, [98, 58, 122, 150, 96, 38, 172], [118, 66, 148, 176, 112, 46, 205], 0.44);
+const ALVAREZ_PRESSURE = spec(5.4, [114, 66, 146, 170, 108, 44, 192], [112, 66, 144, 166, 106, 44, 190], 0.5);
+
 const cal = (temp: number, bias: [number, number, number] = [0.02, 0.01, 0.02]): ImuCalibration =>
   ({ status: "valid", biasG: bias, scaleFactor: 1.0, tempC: temp });
 
@@ -221,7 +232,7 @@ function chenHistory(): Session[] {
         stance: 63, doubleSupport: 13, stepTime: r2(60 / cadence), symmetry: Math.round(92 + 5 * f), regularity: r2(0.86 + 0.07 * f), seed: day * 0.13,
         insight: { title: "Gait pattern within nominal range", text: "Simulated history session." },
       }),
-      pressureSpec: null,
+      pressureSpec: histPressure(CHEN_PRESSURE, day),
       balance: bal(Math.round(83 + 9 * f + 1.2 * w), "Stable (demo)", null, null),
       scenarioEvents: [],
       fatigue: null,
@@ -309,6 +320,52 @@ const chen: AstronautRecord = {
   trend: trend("chen", [88, 90, 91, 92, 93, 94], [93, 94, 96, 96, 97, 98], [88, 89, 90, 91, 91, 92]),
 };
 
+// ---------- Okafor and Alvarez history ----------
+// Same builders and shape as Dr. Chen's history, so every page and every Reports trend has a real line for all three astronauts.
+// Simulated demo values with a small deterministic wobble; a few sessions have no walking recording (gait = null), which stays an explicit missing measurement.
+type HistoryCfg = {
+  code: "okafor" | "alvarez"; days: number[]; label: string; startedAt: string; side: "left" | "right"; protocol: string;
+  baseline: NonNullable<Session["joint"]["baseline"]>; repPeriodSec: number; peak: [number, number]; min: number;
+  speed: [number, number]; cadence: [number, number]; stride: [number, number]; index: [number, number]; noGait: number[]; noBalance?: number[]; pressure: PressureSpec; shape: "plateau" | "dip";
+  cal: [number, number];
+};
+function history(c: HistoryCfg): Session[] {
+  const r1 = (n: number) => Math.round(n * 10) / 10;
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+  return c.days.map((day, i) => {
+    const t = i / (c.days.length - 1);
+    // Each astronaut recovers differently: Alvarez gains fast early then levels off; Okafor dips mid-mission (a setback) and then recovers.
+    const f = c.shape === "plateau" ? 1 - (1 - t) ** 2 : t - 0.28 * Math.sin(Math.PI * t);
+    const w = Math.sin(day * 1.7 + (c.code === "okafor" ? 0.4 : 1.1));
+    const peak = Math.round(c.peak[0] + (c.peak[1] - c.peak[0]) * f + 1.5 * w);
+    const speed = r2(c.speed[0] + (c.speed[1] - c.speed[0]) * f + 0.02 * w);
+    const cadence = Math.round(c.cadence[0] + (c.cadence[1] - c.cadence[0]) * f + 1.2 * w);
+    const stride = r2(c.stride[0] + (c.stride[1] - c.stride[0]) * f + 0.01 * w);
+    const key = `${c.code}-${String(day).padStart(3, "0")}-a`;
+    return session({
+      id: `sess-${key}`, astronautId: `astro-${c.code}`, missionDay: day, label: `Day ${day} · ${c.label}`,
+      startedAt: c.startedAt, durationSec: 600, peak, min: c.min, current: r1(c.min + 0.38 * (peak - c.min)), repPeriodSec: c.repPeriodSec, peakRep: 14, phase: 0.3 + day * 0.21,
+      gait: c.noGait.includes(day) ? null : gait({
+        speed, cadence, stride, delta: 0, series: [-0.05, -0.04, -0.03, -0.02, -0.01, 0].map((d) => r2(speed + d)),
+        stance: 63, doubleSupport: 13, stepTime: r2(60 / cadence), symmetry: Math.round(90 + 5 * f), regularity: r2(0.84 + 0.06 * f), seed: day * 0.13 + (c.code === "okafor" ? 2 : 4),
+        insight: { title: "Gait pattern within nominal range", text: "Simulated history session." },
+      }),
+      pressureSpec: histPressure(c.pressure, day),
+      balance: c.noBalance?.includes(day) ? null : bal(Math.round(c.index[0] + (c.index[1] - c.index[0]) * f + 1.2 * w), "Stable (demo)", null, null),
+      scenarioEvents: [],
+      fatigue: null,
+      joint: joint({
+        measurement: { side: c.side, movement: "knee-flexion-extension", protocol: c.protocol },
+        peakTorqueNm: Math.round(33 + 6 * f), smoothnessPct: Math.round(80 + 8 * f), symmetryPct: c.code === "okafor" ? Math.round(86 + 5 * f) : null,
+        contralateral: c.code === "okafor" ? { romDeg: 112, torqueNm: 42, peakVelDegS: 18 } : null,
+        baseline: c.baseline,
+        cartilage: { peakMpa: r1(2.4 + 0.3 * f), limitMpa: 3.5, medial: r1(2.4 + 0.3 * f), lateral: r1(2.0 + 0.2 * f), patellofemoral: 1.5 },
+        imu: { thigh: cal(c.cal[0]), shank: cal(c.cal[1]) },
+      }),
+    });
+  });
+}
+
 // ---------- Cmdr. Okafor ----------
 
 const okafor: AstronautRecord = {
@@ -316,7 +373,7 @@ const okafor: AstronautRecord = {
   missionId: MISSION.id,
   profile: {
     fullName: "Cmdr. Tunde Okafor", displayName: "Cmdr. Okafor", crewCode: "A-001", status: "Active", role: "Mission Commander",
-    ageYears: 47, heightCm: 183, massKg: 84, rehabFocus: "Right knee, meniscus repair", affectedLimb: "right", initials: "TO",
+    ageYears: 47, heightCm: 183, massKg: 84, rehabFocus: "Right knee, meniscus repair", affectedLimb: "right", initials: "TO", portrait: "/images/astronaut-portrait.webp",
   },
   sensors: [
     { id: "sen-okafor-thigh", label: "Thigh IMU", site: "thigh", status: "online", battery: 64 },
@@ -325,6 +382,11 @@ const okafor: AstronautRecord = {
     { id: "sen-okafor-insole-r", label: "Right insole", site: "insole-right", status: "online", battery: 69 },
   ],
   sessions: [
+    ...history({
+      code: "okafor", days: [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40], label: "Range of motion", startedAt: "09:30 UTC", side: "right", protocol: "active-knee-flexion",
+      baseline: { side: "right", movement: "knee-flexion-extension", protocol: "active-knee-flexion", recordedMissionDay: 28, reference: { repPeriodSec: 24, phase: 2.0 }, peakFlexionDeg: 120, romDeg: 114, torqueNm: 43, smoothnessPct: 93 },
+      repPeriodSec: 24, peak: [96, 118], min: 7, speed: [1.08, 1.24], cadence: [98, 106], stride: [1.06, 1.17], index: [72, 84], noGait: [20, 32], pressure: OKAFOR_PRESSURE, shape: "dip", cal: [27.6, 27.9],
+    }),
     session({
       id: "sess-okafor-041-a", astronautId: "astro-okafor", missionDay: 41, label: "Day 41 · Range of motion (no gait)",
       startedAt: "09:40 UTC", durationSec: 900, peak: 99, min: 8, current: 38.4, repPeriodSec: 24, peakRep: 15, phase: 2.3,
@@ -350,7 +412,7 @@ const okafor: AstronautRecord = {
         scale: { hip: 0.92, knee: 0.86, ankle: 0.9 },
         insight: { title: "Mild asymmetry in loading", text: "Right-side stance is slightly longer than left. Monitor over the next three sessions." },
       }),
-      pressureSpec: spec(3.6, [98, 58, 122, 150, 96, 38, 172], [118, 66, 148, 176, 112, 46, 205], 0.44, [{ side: "right", zone: "toes", fromSec: 12, toSec: 18 }]), balance: bal(null, "Not calibrated (demo)", null, "Demo scenario: repeat the left-leg trial after the shank sensor is recharged. Not a clinical assessment."),
+      pressureSpec: spec(3.6, [98, 58, 122, 150, 96, 38, 172], [118, 66, 148, 176, 112, 46, 205], 0.44, [{ side: "right", zone: "toes", fromSec: 12, toSec: 18 }]), balance: bal(78, "Stable (demo)", [78, 74, 72, 70, 76, 71], "Demo scenario: repeat the left-leg trial after the shank sensor is recharged. Not a clinical assessment."),
       scenarioEvents: [ev("okafor-042-b", 1, 380, "Repetition hesitation"), ev("okafor-042-b", 2, 860, "Flexion plateau")],
       alertScenario: { severity: "action", label: "Simulated scenario: reduced range of motion escalated for the demo" },
       fatigue: null,
@@ -388,15 +450,20 @@ const alvarez: AstronautRecord = {
   missionId: MISSION.id,
   profile: {
     fullName: "Maj. Sofia Alvarez", displayName: "Maj. Alvarez", crewCode: "A-012", status: "Active", role: "Flight Engineer",
-    ageYears: 36, heightCm: 172, massKg: 66, rehabFocus: "Right ankle, lateral ligament sprain", affectedLimb: "right", initials: "SA",
+    ageYears: 36, heightCm: 172, massKg: 66, rehabFocus: "Right ankle, lateral ligament sprain", affectedLimb: "right", initials: "SA", portrait: "/images/astronaut-portrait.webp",
   },
   sensors: [
     { id: "sen-alvarez-thigh", label: "Thigh IMU", site: "thigh", status: "online", battery: 91 },
     { id: "sen-alvarez-shank", label: "Shank IMU", site: "shank", status: "online", battery: 85 },
     { id: "sen-alvarez-insole-l", label: "Left insole", site: "insole-left", status: "online", battery: 73 },
-    { id: "sen-alvarez-insole-r", label: "Right insole", site: "insole-right", status: "offline", battery: null },
+    { id: "sen-alvarez-insole-r", label: "Right insole", site: "insole-right", status: "online", battery: 68 },
   ],
   sessions: [
+    ...history({
+      code: "alvarez", days: [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40], label: "Balance drills", startedAt: "07:15 UTC", side: "right", protocol: "balance-drill-knee-tracking",
+      baseline: { side: "right", movement: "knee-flexion-extension", protocol: "active-knee-flexion", recordedMissionDay: 33, reference: { repPeriodSec: 18, phase: 3.1 }, peakFlexionDeg: 120, romDeg: 117, torqueNm: 43, smoothnessPct: 93 },
+      repPeriodSec: 18, peak: [100, 111], min: 3, speed: [1.16, 1.30], cadence: [100, 106], stride: [1.1, 1.2], index: [78, 87], noGait: [24], pressure: ALVAREZ_PRESSURE, shape: "plateau", cal: [28.3, 28.6],
+    }),
     session({
       id: "sess-alvarez-041-a", astronautId: "astro-alvarez", missionDay: 41, label: "Day 41 · Balance drills",
       startedAt: "07:20 UTC", durationSec: 900, peak: 110, min: 3, current: 58.0, repPeriodSec: 18, peakRep: 30, phase: 3.7,
@@ -424,9 +491,9 @@ const alvarez: AstronautRecord = {
         speed: 1.35, cadence: 108, stride: 1.22, delta: 3, series: [1.29, 1.31, 1.32, 1.34, 1.33, 1.35],
         stance: 62, doubleSupport: 12, stepTime: 0.56, symmetry: 95, regularity: 0.9, seed: 4.4,
         scale: { hip: 0.98, knee: 0.96, ankle: 0.97 },
-        insight: { title: "Gait pattern within nominal range", text: "Step timing is regular. Right insole is offline, so left/right load comparison is unavailable." },
+        insight: { title: "Gait pattern within nominal range", text: "Step timing is regular. Both insoles are connected, so the left/right load comparison is available." },
       }),
-      pressureSpec: spec(5.4, [114, 66, 146, 170, 108, 44, 192], [112, 66, 144, 166, 106, 44, 190], 0.5, [{ side: "right" }]), balance: bal(89, "Stable (demo)", [88, 84, 82, 83, 85, 81], null), dropouts: [212, 213, 214, 215],
+      pressureSpec: ALVAREZ_PRESSURE, balance: bal(89, "Stable (demo)", [88, 84, 82, 83, 85, 81], null), dropouts: [212, 213, 214, 215],
       scenarioEvents: [ev("alvarez-042-b", 1, 650, "Repetition hesitation")],
       fatigue: { pct: 46, label: "Low (demo)" },
       joint: joint({
@@ -446,9 +513,7 @@ const alvarez: AstronautRecord = {
   balanceTrials: balanceTrials({
     code: "alvarez", seed: 4.3, improve: 0.025,
     amp: { left: [2.6, 3.9], right: [3.0, 4.5] },
-    hold: { left: [28.0, 28.4, 28.8, 29.1, 29.3, 29.5, 29.7], right: [25.2, 25.9, 26.4, 26.9, 27.5, 28.0, 0] },
-    // Right-leg trial not recorded on Day 42 (insole offline).
-    skip: [{ day: 42, side: "right" }],
+    hold: { left: [28.0, 28.4, 28.8, 29.1, 29.3, 29.5, 29.7], right: [25.2, 25.9, 26.4, 26.9, 27.5, 28.0, 28.4] },
   }),
   trend: trend("alvarez", [86, 88, 90, 91, 92, 93], [90, 91, 93, 94, 95, 95], [82, 84, 85, 86, 87, 88]),
 };

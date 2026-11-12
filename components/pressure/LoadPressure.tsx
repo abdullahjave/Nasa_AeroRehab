@@ -333,7 +333,7 @@ function DemoLoadPressure() {
                       const r = payload?.[0]?.payload as (typeof trend)[number] | undefined;
                       if (!active || !r) return null;
                       const v = r[key];
-                      return <div className={TIP_CLASS}><p className="font-semibold text-white">{r.label}</p><p className="text-slate-300">{label.split(" (")[0]} <span className="font-semibold" style={{ color }}>{v === null ? "Unavailable" : `${v.toFixed(1)} ${unit}`}</span></p><p className="text-[10px] text-slate-400">{r.source === "session" ? "Recorded session" : r.source === "backfill" ? "Backfilled (same generator)" : "No recording"}</p></div>;
+                      return <div className={TIP_CLASS}><p className="font-semibold text-white">{r.label}</p><p className="text-slate-300">{label.split(" (")[0]} <span className="font-semibold" style={{ color }}>{v === null ? "Unavailable" : `${v.toFixed(1)} ${unit}`}</span></p><p className="text-[10px] text-slate-400">{r.source === "session" ? "Recorded session" : r.source === "partial" ? "One insole offline: this foot only; left/right difference unavailable" : "No recording"}</p></div>;
                     }} />
                     <Line dataKey={key} stroke={color} strokeWidth={2} dot={{ r: 3, fill: color }} isAnimationActive={false} connectNulls={false} />
                   </LineChart>
@@ -342,7 +342,7 @@ function DemoLoadPressure() {
             </figure>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-slate-400">Days with a recorded session use that session&apos;s samples; earlier days are simulated by the same generator at slightly lower amplitude (backfill). Gaps = Unavailable.</p>
+        <p className="mt-2 text-[10px] text-slate-400">One point per simulated session with an insole recording (the last 8). Days without a session have no point. Gaps = Unavailable.</p>
       </Panel>
 
       {/* Per-sensor table: also shows zero vs missing as text */}

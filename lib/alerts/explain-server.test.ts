@@ -8,7 +8,12 @@ const chen = ASTRONAUTS.find((a) => a.id === "astro-chen")!;
 const sess = chen.sessions[chen.sessions.length - 1];
 const rom = buildAlerts(chen, sess)[0];
 const ENV = { apiKey: "test-key-not-real", model: "test-model" };
-const GOOD = JSON.stringify({ meaning: "Range of motion is how far your knee moved.", change: "It was 114 degrees, 7 degrees less than the 121 degree baseline.", relevance: "Reviewing the flagged session lets you see where the movement differed." });
+const GOOD = JSON.stringify({
+  summary: "Your knee moved 114 degrees, 7 degrees less than the 121 degree baseline.",
+  risk: "The app shows Needs Attention: your movement is reduced and worth following up.",
+  actions: ["Review this session to see where the movement differed.", "Repeat the same measurement to confirm it.", "Stop and tell the flight surgeon if the knee hurts."],
+  escalate: "Tell the flight surgeon if your movement keeps dropping or the knee swells.",
+});
 const body = (over: Record<string, unknown> = {}) => ({ astronautId: chen.id, sessionId: sess.id, alertId: rom.id, ...over });
 const run = (b: unknown, generate: Generate, env: { apiKey?: string; model?: string } = ENV, extra: { timeoutMs?: number } = {}) =>
   handleExplain(b, env, { generate, state: newExplainState(), clientId: "c1", ...extra });
@@ -21,7 +26,8 @@ test("success: returns the validated explanation, resolved on the server", async
   if (out.body.ok) {
     assert.equal(out.body.source, "ai");
     assert.equal("model" in out.body, false); // provider configuration never reaches the browser
-    assert.match(out.body.explanation.meaning, /how far your knee moved/);
+    assert.match(out.body.explanation.summary, /114 degrees/);
+    assert.equal(out.body.explanation.actions.length, 3);
   }
   // Only the metric, unit, values and the app's action text were sent; no names, ids, notes or dates.
   const sent = `${seen!.system} ${seen!.prompt}`;
@@ -89,9 +95,10 @@ test("provider quota (upstream 429) -> provider-quota 503 without Retry-After; a
 
 test("malformed or unsafe model output -> 502 invalid-response", async () => {
   const replies: (string | undefined)[] = [
-    "not json", "", undefined, "[]", JSON.stringify({ meaning: "only one" }),
-    JSON.stringify({ meaning: "Range of motion is how far your knee moved.", change: "It was 114 degrees.", relevance: "You should take medication and rest." }),
-    JSON.stringify({ meaning: "Range of motion is how far your knee moved.", change: "It fell below the 5 percent limit.", relevance: "Reviewing the flagged session helps." }),
+    "not json", "", undefined, "[]", JSON.stringify({ summary: "only one" }),
+    JSON.stringify({ ...JSON.parse(GOOD), actions: ["You should take medication and rest.", "Review this session."] }),
+    JSON.stringify({ ...JSON.parse(GOOD), risk: "It fell below the 5 percent limit." }),
+    JSON.stringify({ ...JSON.parse(GOOD), actions: ["Review this session."] }),
   ];
   for (const reply of replies) {
     const out = await run(body(), async () => reply);
@@ -136,13 +143,15 @@ test("duplicate in-flight requests share one upstream call", async () => {
   assert.equal(state.inflight.size, 0);
 });
 
-test("recorded (database) sessions are never resolved or sent to the provider: unknown to the server's demo data", async () => {
+test("demo mode never resolves recorded ids, and recorded mode needs the saved snapshot", async () => {
   let called = 0;
   const g: Generate = async () => { called++; return GOOD; };
   for (const sessionId of ["rec-3f0c2a1e-1111-4222-8333-444455556666", "rec-empty-astro-chen"]) {
     const out = await run(body({ sessionId, alertId: `alert:rom-check:${sessionId}` }), g);
     assert.equal(out.status, 404);
     assert.deepEqual(out.body, { ok: false, error: "not-found" });
+    assert.equal((await run(body({ sessionId, alertId: `alert:rom-check:${sessionId}`, mode: "recorded" }), g)).status, 404); // no loader supplied
   }
+  assert.equal((await run(body({ mode: "elsewhere" }), g)).status, 400);
   assert.equal(called, 0);
 });

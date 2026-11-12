@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAstronaut } from "@/components/AstronautProvider";
 import SessionPicker from "@/components/ui/SessionPicker";
+import { progressTrend } from "@/lib/demo/progress";
 import CrewPortrait from "@/components/graphics/CrewPortrait";
 import YourStatusCard from "@/components/alerts/YourStatusCard";
 import TodaysTasksCard from "@/components/alerts/TodaysTasksCard";
@@ -88,7 +89,7 @@ export default function OverviewDashboard() {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <OverviewBalance />
-              <TrendCard trend={astronaut.trend} />
+              <TrendCard trend={progressTrend(astronaut)} />
             </div>
           </>
         )}

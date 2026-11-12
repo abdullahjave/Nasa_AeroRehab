@@ -42,41 +42,22 @@ export type TrendRow = {
   missionDay: number;
   peakKpa: number | null;
   differencePp: number | null;
-  /** "session" = a real session of this dataset; "backfill" = same generator, scaled, for a day without a session. */
-  source: "session" | "backfill" | "none";
+  /** "session" = both insoles recorded; "partial" = only one insole recorded (the peak is that foot's own peak, the left/right difference is unavailable); "none" = no insole recording. */
+  source: "session" | "partial" | "none";
 };
 
-/** Per-day peak pressure and left/right difference for the trend chart. */
-export function pressureTrend(a: AstronautRecord): TrendRow[] {
-  const withSpec = [...a.sessions].reverse().find((s) => s.pressureSpec);
-  return a.trend.map((t) => {
-    const real = a.sessions.find((s) => s.id === t.sessionId);
-    let analysis: PressureAnalysis | null = null;
-    let source: TrendRow["source"] = "none";
-    if (real) {
-      // A real session without an insole recording is a gap, never backfilled.
-      analysis = getPressureAnalysis(real);
-      source = analysis ? "session" : "none";
-    } else if (withSpec?.pressureSpec) {
-      // Earlier days: same generator, amplitude eased by 1.2% per day, different phase. Labelled as backfill.
-      const back = withSpec.missionDay - t.missionDay;
-      const base = withSpec.pressureSpec;
-      const factor = 1 - 0.012 * Math.max(0, back);
-      const scaled = (side: "left" | "right") =>
-        Object.fromEntries(Object.entries(base.peaksKpa[side]).map(([k, v]) => [k, Math.round(v * factor * 10) / 10])) as PressureSpec["peaksKpa"]["left"];
-      const key = `${a.id}-backfill-${t.missionDay}`;
-      analysis = cache.get(key) ?? analyze({ ...base, seed: base.seed + back * 0.7, peaksKpa: { left: scaled("left"), right: scaled("right") } });
-      cache.set(key, analysis);
-      source = "backfill";
-    }
-    const peak = analysis?.session.peakKpa.overall;
-    const diff = analysis?.session.meanDifferencePp;
-    return {
-      label: t.label,
-      missionDay: t.missionDay,
-      peakKpa: peak && peak.kind === "value" ? peak.value : null,
-      differencePp: diff && diff.kind === "value" ? diff.value : null,
-      source,
-    };
+/**
+ * Per-session peak pressure and left/right difference for the Load Trend: one point per session that has an insole recording, in date order
+ * (the last `max`). Nothing is invented: a day without a session has no point. When one insole is offline the point is that foot's own peak.
+ */
+export function pressureTrend(a: AstronautRecord, max = 8): TrendRow[] {
+  const sessions = [...a.sessions].filter((s) => s.pressureSpec).sort((x, y) => x.missionDay - y.missionDay).slice(-max);
+  return sessions.map((s) => {
+    const m = getPressureAnalysis(s)?.session;
+    const val = (x: { kind: string; value?: number } | undefined) => (x && x.kind === "value" ? (x.value as number) : null);
+    const [all, l, r] = [val(m?.peakKpa.overall), val(m?.peakKpa.left), val(m?.peakKpa.right)];
+    const peak = all ?? (l !== null && r === null ? l : r !== null && l === null ? r : null);
+    const diff = val(m?.meanDifferencePp);
+    return { label: `Day ${s.missionDay}`, missionDay: s.missionDay, peakKpa: peak, differencePp: diff, source: peak === null ? "none" : all !== null ? "session" : "partial" };
   });
 }

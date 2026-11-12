@@ -182,7 +182,7 @@ export default function Reports() {
                       action={<span className={`text-xs font-semibold ${row.change === null ? "text-slate-400" : row.change >= 0 ? "text-emerald-300" : "text-amber-300"}`}>{row.change === null ? "No comparison" : `${row.change >= 0 ? "\u2191" : "\u2193"} ${fmtChange(row)}`}</span>}>
                       <figure className="flex min-h-[190px] flex-1 flex-col rounded-md bg-black/35 p-2">
                         <figcaption className="mb-1 text-[11px] text-slate-300">
-                          {meta.label} ({meta.unit.trim()}) &middot; {n === 0 ? (missing ? "no values" : "no sessions") : n === 1 ? "1 session in this range" : `${n} sessions`}{missing ? ` \u00B7 ${missing} missing measurement${missing > 1 ? "s" : ""} (line break)` : ""}
+                          {meta.label} ({meta.unit.trim()}) &middot; {n === 0 ? (missing ? "no values" : "no sessions") : n === 1 ? "1 session in this range" : `${n} sessions`}{missing ? ` \u00B7 ${missing} missing measurement${missing > 1 ? "s" : ""} (line joins the neighbouring sessions)` : ""}
                         </figcaption>
                         {n === 0 || !domain ? (
                           <div className="flex min-h-[150px] flex-1 items-center justify-center rounded border border-dashed border-cyan-400/25 text-xs text-slate-300">No {meta.label.toLowerCase()} values in this range</div>
@@ -204,7 +204,7 @@ export default function Reports() {
                                   if (!active || !p) return null;
                                   return <div className={TIP_CLASS}><p className="font-semibold text-white">{fullDate(p.day)} &middot; Day {p.day}</p><p className="text-slate-300">{meta.label} <span className="font-semibold" style={{ color: c.color }}>{p.value === null ? "Missing measurement" : `${p.value.toFixed(meta.digits)}${meta.unit}`}</span></p><p className="text-[10px] text-slate-400">{p.sessionId}</p></div>;
                                 }} />
-                                <Area type="linear" dataKey="value" stroke={c.color} strokeWidth={1.6} fill={`url(#grad-${c.key})`} dot={{ r: 2.6, fill: c.color, strokeWidth: 0 }} activeDot={{ r: 4.5 }} connectNulls={false} isAnimationActive={false} />
+                                <Area type="linear" dataKey="value" stroke={c.color} strokeWidth={1.6} fill={`url(#grad-${c.key})`} dot={{ r: 2.6, fill: c.color, strokeWidth: 0 }} activeDot={{ r: 4.5 }} connectNulls isAnimationActive={false} />
                               </AreaChart>
                             </ResponsiveContainer>
                           </div>

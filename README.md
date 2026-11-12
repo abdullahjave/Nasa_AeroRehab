@@ -73,7 +73,7 @@ npm run dev          # or: npm run build && npm start
 - Add records in **Patient Management** (Recorded mode). Knee sessions take date and time (UTC), activity, knee side, movement, protocol, minimum and
   maximum knee angle in degrees, optional torque in Nm; walking, pressure and balance records have their own forms. ROM = maximum - minimum. Mark a session **Use as baseline**; later sessions for the same
   astronaut, side, movement and protocol are compared with it. Validation runs on the server.
-- Recorded sessions use built-in explanations only. They are never sent to the AI service.
+- **AI Recommendation** works for Recorded sessions too, but only when you press the button. The server rebuilds the alert from the saved records and sends the AI service just the knee numbers, the app's status and the next-action label (no names, notes or dates).
 - **Local prototype only.** There is no sign-in and no per-astronaut access control. Do not enter real patient data until authentication and
   access control exist.
 

@@ -13,7 +13,7 @@ import RecordedTrend from "./RecordedTrend";
 
 /**
  * AI Insights for recorded mode. The alert cards come from the same alert list as Overview (one selector), with the app's
- * built-in explanation and next action. Recorded data is never sent to the AI provider, so there is no AI button here.
+ * next action and the on-request AI Recommendation (the server rebuilds the alert from the saved records; no names or notes are sent).
  * Charts, anomaly timelines and anatomy panels need sensor samples and are not drawn for manual sessions.
  */
 export default function RecordedInsights() {
@@ -38,7 +38,7 @@ export default function RecordedInsights() {
       </header>
 
       <Panel id="ai-alerts" title="Your alerts" icon="warn">
-        <p className="mb-2 text-[11px] text-slate-300">{summary.scope} Explanations here are built in; recorded values are never sent to an AI service.</p>
+        <p className="mb-2 text-[11px] text-slate-300">{summary.scope} Press "Get AI Recommendation" on a card for suggested next steps; only the knee numbers and status are sent, never names or notes.</p>
         <NotAssessed />
         {health.length > 0 && <ul className="space-y-2" aria-label="Health findings">{health.map(li)}</ul>}
         {data.length > 0 && (

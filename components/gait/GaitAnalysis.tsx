@@ -13,6 +13,20 @@ import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
 import { fmt, fmtSigned } from "@/lib/format";
 import { GAIT_PHASES, gaitCurveRows, getLatestSession, jointAnglesAt, phaseAt } from "@/lib/demo";
 
+/**
+ * Supplied pose artwork per gait phase (public/images). Each picture is static and is used only for the phase it depicts best:
+ * Step1 wide stride, front heel on the ground; Step2 single support, one leg lifted; Step3 trailing heel rising;
+ * Step4 weight moving onto the front foot; gait-phase-preswing rear foot at toe-off. Swing has no matching picture, so it keeps the drawn figure.
+ */
+const PHASE_IMAGE: Partial<Record<string, { src: string; note: string }>> = {
+  "heel-strike": { src: "/images/Step1.png", note: "supplied illustration" },
+  loading: { src: "/images/Step4.jpg", note: "supplied illustration" },
+  "mid-stance": { src: "/images/Step2.jpg", note: "supplied illustration" },
+  "terminal-stance": { src: "/images/Step3.jpg", note: "supplied illustration" },
+  "pre-swing": { src: "/images/gait-phase-preswing.webp", note: "supplied illustration" },
+  "heel-strike-2": { src: "/images/Step1.png", note: "supplied illustration" },
+};
+
 function EmptyState({ onLatest, label, canSwitch }: { onLatest: () => void; label: string; canSwitch: boolean }) {
   return (
     <Panel id="empty" title="Gait Analysis" icon="walk" className="min-h-[320px]">
@@ -230,9 +244,9 @@ function DemoGaitAnalysis() {
                 return (
                   <button key={ph.key} type="button" aria-pressed={active} onClick={() => setP(ph.p)}
                     className={`flex flex-col items-center rounded-md border p-1 ${active ? "border-cyan-300 bg-cyan-400/15" : "border-cyan-400/20 hover:bg-white/5"}`}>
-                    {ph.key === "pre-swing" ? (
-                      // The only supplied walking pose that matches a phase: rear foot at toe-off, front foot flat (double support).
-                      <PhotoPose src="/images/gait-phase-preswing.webp" alt={`${ph.label} pose (supplied illustration)`} className="h-24 w-full"
+                    {PHASE_IMAGE[ph.key] ? (
+                      // Supplied walking-pose artwork, matched to the phase it shows best (see PHASE_IMAGE). Falls back to the drawn figure if a file is missing.
+                      <PhotoPose src={PHASE_IMAGE[ph.key]!.src} alt={`${ph.label} pose (${PHASE_IMAGE[ph.key]!.note})`} className="h-24 w-full"
                         fallback={<WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />} />
                     ) : (
                       <WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />

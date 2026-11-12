@@ -29,7 +29,9 @@
     --color-violet-200: oklch(89.4% 0.057 293.283);
     --color-violet-300: oklch(81.1% 0.111 293.571);
     --color-violet-400: oklch(70.2% 0.183 293.541);
+    --color-violet-500: oklch(60.6% 0.25 292.717);
     --color-violet-800: oklch(43.2% 0.232 292.759);
+    --color-violet-950: oklch(28.3% 0.141 291.089);
     --color-fuchsia-400: oklch(74% 0.238 322.16);
     --color-pink-300: oklch(82.3% 0.12 346.018);
     --color-rose-100: oklch(94.1% 0.03 12.58);
@@ -37,6 +39,7 @@
     --color-rose-300: oklch(81% 0.117 11.638);
     --color-rose-400: oklch(71.2% 0.194 13.428);
     --color-rose-500: oklch(64.5% 0.246 16.439);
+    --color-slate-50: oklch(98.4% 0.003 247.858);
     --color-slate-100: oklch(96.8% 0.007 247.896);
     --color-slate-200: oklch(92.9% 0.013 255.508);
     --color-slate-300: oklch(86.9% 0.022 252.894);
@@ -401,6 +404,9 @@
   .block {
     display: block;
   }
+  .contents {
+    display: contents;
+  }
   .flex {
     display: flex;
   }
@@ -758,6 +764,9 @@
   }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .list-decimal {
+    list-style-type: decimal;
   }
   .list-disc {
     list-style-type: disc;
@@ -1188,12 +1197,6 @@
       border-color: color-mix(in oklab, var(--color-violet-300) 15%, transparent);
     }
   }
-  .border-violet-300\/30 {
-    border-color: color-mix(in srgb, oklch(81.1% 0.111 293.571) 30%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      border-color: color-mix(in oklab, var(--color-violet-300) 30%, transparent);
-    }
-  }
   .border-violet-300\/40 {
     border-color: color-mix(in srgb, oklch(81.1% 0.111 293.571) 40%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1204,6 +1207,12 @@
     border-color: color-mix(in srgb, oklch(81.1% 0.111 293.571) 50%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       border-color: color-mix(in oklab, var(--color-violet-300) 50%, transparent);
+    }
+  }
+  .border-violet-300\/60 {
+    border-color: color-mix(in srgb, oklch(81.1% 0.111 293.571) 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-violet-300) 60%, transparent);
     }
   }
   .border-white {
@@ -1464,6 +1473,24 @@
       background-color: color-mix(in oklab, var(--color-violet-400) 10%, transparent);
     }
   }
+  .bg-violet-400\/20 {
+    background-color: color-mix(in srgb, oklch(70.2% 0.183 293.541) 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-violet-400) 20%, transparent);
+    }
+  }
+  .bg-violet-500\/20 {
+    background-color: color-mix(in srgb, oklch(60.6% 0.25 292.717) 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-violet-500) 20%, transparent);
+    }
+  }
+  .bg-violet-950\/60 {
+    background-color: color-mix(in srgb, oklch(28.3% 0.141 291.089) 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-violet-950) 60%, transparent);
+    }
+  }
   .bg-white {
     background-color: var(--color-white);
   }
@@ -1507,6 +1534,9 @@
   }
   .p-2 {
     padding: calc(var(--spacing) * 2);
+  }
+  .p-2\.5 {
+    padding: calc(var(--spacing) * 2.5);
   }
   .p-3 {
     padding: calc(var(--spacing) * 3);
@@ -1576,6 +1606,9 @@
   }
   .pl-4 {
     padding-left: calc(var(--spacing) * 4);
+  }
+  .pl-5 {
+    padding-left: calc(var(--spacing) * 5);
   }
   .text-center {
     text-align: center;
@@ -1760,6 +1793,9 @@
   .text-sky-300 {
     color: var(--color-sky-300);
   }
+  .text-slate-50 {
+    color: var(--color-slate-50);
+  }
   .text-slate-100 {
     color: var(--color-slate-100);
   }
@@ -1923,6 +1959,34 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  .marker\:font-semibold ::marker {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+  .marker\:font-semibold::marker {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+  .marker\:font-semibold ::-webkit-details-marker {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+  .marker\:font-semibold::-webkit-details-marker {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+  .marker\:text-violet-200 ::marker {
+    color: var(--color-violet-200);
+  }
+  .marker\:text-violet-200::marker {
+    color: var(--color-violet-200);
+  }
+  .marker\:text-violet-200 ::-webkit-details-marker {
+    color: var(--color-violet-200);
+  }
+  .marker\:text-violet-200::-webkit-details-marker {
+    color: var(--color-violet-200);
+  }
   .file\:mr-2::file-selector-button {
     margin-right: calc(var(--spacing) * 2);
   }
@@ -2001,12 +2065,12 @@
         background-color: color-mix(in oklab, var(--color-cyan-500) 30%, transparent);
       }
     }
-    .hover\:bg-violet-400\/20:hover {
-      background-color: color-mix(in srgb, oklch(70.2% 0.183 293.541) 20%, transparent);
+    .hover\:bg-violet-500\/30:hover {
+      background-color: color-mix(in srgb, oklch(60.6% 0.25 292.717) 30%, transparent);
     }
     @supports (color: color-mix(in lab, red, red)) {
-      .hover\:bg-violet-400\/20:hover {
-        background-color: color-mix(in oklab, var(--color-violet-400) 20%, transparent);
+      .hover\:bg-violet-500\/30:hover {
+        background-color: color-mix(in oklab, var(--color-violet-500) 30%, transparent);
       }
     }
     .hover\:bg-white\/5:hover {
@@ -2064,6 +2128,9 @@
   .disabled\:opacity-60:disabled {
     opacity: 60%;
   }
+  .disabled\:opacity-70:disabled {
+    opacity: 70%;
+  }
   @media (hover: hover) {
     .disabled\:hover\:bg-cyan-400\/10:disabled:hover {
       background-color: color-mix(in srgb, oklch(78.9% 0.154 211.53) 10%, transparent);
@@ -2113,6 +2180,9 @@
     }
     .sm\:grid-cols-\[1fr_auto\] {
       grid-template-columns: 1fr auto;
+    }
+    .sm\:grid-cols-\[auto_1fr\] {
+      grid-template-columns: auto 1fr;
     }
     .sm\:flex-row {
       flex-direction: row;

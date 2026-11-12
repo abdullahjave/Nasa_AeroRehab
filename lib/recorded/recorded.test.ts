@@ -116,8 +116,12 @@ test("baseline difference comes from one selector: current 106°, baseline 120°
   const alerts = buildAlerts(a, now);
   assert.equal(alerts[0].severity, "attention");
   assert.match(alerts[0].why[0], /^Your knee moved 14° less than in your baseline session/);
-  assert.equal(alerts[0].geminiEligible, false); // recorded data is never sent to the AI provider
-  assert.equal(geminiInputFor(alerts[0]), null);
+  assert.equal(alerts[0].geminiEligible, true); // on request only; the server rebuilds the alert and sends numbers + status, no names or notes
+  const input = geminiInputFor(alerts[0])!;
+  assert.equal(input.currentValue, 106);
+  assert.equal(input.baselineValue, 120);
+  assert.equal(input.status, "Needs Attention");
+  assert.equal(geminiInputFor(buildAlerts(a, a.sessions[0])[0]), null); // the baseline session itself has nothing to compare
 });
 
 test("the baseline session itself, no baseline, and a different knee/protocol never produce a comparison", () => {

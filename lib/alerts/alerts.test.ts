@@ -148,7 +148,7 @@ test("Gemini input contains only metric, unit, values and the action text", () =
   const top = buildAlerts(a, latest(a))[0];
   const sess = latest(a);
   const input = geminiInputFor(top, { rehabFocus: a.profile.rehabFocus, affectedLimb: a.profile.affectedLimb, missionDay: sess.missionDay })!;
-  assert.deepEqual(Object.keys(input).sort(), ["actionText", "baselineDay", "baselineValue", "currentValue", "difference", "metric", "missionDay", "percentChange", "rehabArea", "unit"]);
+  assert.deepEqual(Object.keys(input).sort(), ["actionText", "baselineDay", "baselineValue", "currentValue", "difference", "metric", "missionDay", "percentChange", "rehabArea", "status", "unit"]);
   assert.equal(input.rehabArea, "left knee");
   const blob = JSON.stringify(input) + userPrompt(input) + SYSTEM_INSTRUCTION;
   for (const forbidden of ["Chen", "Mei", "A-007", "astro-", "sess-", "ACL", "Artemis", "Mission Specialist"]) assert.equal(blob.includes(forbidden), false, forbidden);
@@ -157,17 +157,24 @@ test("Gemini input contains only metric, unit, values and the action text", () =
   for (const x of buildAlerts(o, latest(o))) if (x.values === null) assert.equal(geminiInputFor(x), null);
 });
 
-test("Gemini reply validation: accepts a clean explanation, rejects advice, new numbers, bad shapes", () => {
+test("Gemini reply validation: accepts a clean recommendation, rejects medication/diagnosis, new numbers, bad shapes", () => {
   const a = astro("astro-chen");
   const input = geminiInputFor(buildAlerts(a, latest(a))[0])!;
-  const good = { meaning: "Range of motion is how far your knee moved.", change: "It was 114 degrees, 7 degrees less than the 121 degree baseline.", relevance: "Reviewing the flagged session lets you see where the movement differed." };
-  assert.equal(validateExplanation(good, input).ok, true);
-  assert.equal(validateExplanation({ ...good, relevance: "You should rest and take medication." }, input).ok, false);
-  assert.equal(validateExplanation({ ...good, change: "It dropped below the 5 percent limit." }, input).ok, false);
-  assert.equal(validateExplanation({ ...good, meaning: "This could be a serious injury." }, input).ok, false);
-  assert.equal(validateExplanation({ meaning: good.meaning }, input).ok, false);
+  const good = {
+    summary: "Your knee moved 114 degrees, 7 degrees less than the 121 degree baseline.",
+    risk: "The app shows Needs Attention, so your movement is reduced and worth following up.",
+    actions: ["Review this session to see where the movement differed.", "You should stop and tell the flight surgeon if the knee hurts."],
+    escalate: "Tell the flight surgeon if your movement keeps dropping.",
+  };
+  assert.equal(validateExplanation(good, input).ok, true); // plain advice words such as "should" and "flight surgeon" are allowed
+  assert.equal(validateExplanation({ ...good, actions: ["Take medication and rest.", "Review this session."] }, input).ok, false);
+  assert.equal(validateExplanation({ ...good, summary: "It dropped below the 5 percent limit." }, input).ok, false);
+  assert.equal(validateExplanation({ ...good, risk: "This could be a torn ligament, a serious injury." }, input).ok, false);
+  assert.equal(validateExplanation({ ...good, actions: ["Do 3 sets of squats today.", "Review this session."] }, input).ok, false);
+  assert.equal(validateExplanation({ ...good, actions: ["Review this session."] }, input).ok, false);
+  assert.equal(validateExplanation({ summary: good.summary }, input).ok, false);
   assert.equal(validateExplanation("text", input).ok, false);
-  assert.equal(validateExplanation({ ...good, change: "x".repeat(400) }, input).ok, false);
+  assert.equal(validateExplanation({ ...good, summary: "x".repeat(400) }, input).ok, false);
   assert.deepEqual(parseModelJson('```json\n{"a":1}\n```'), { a: 1 });
   assert.equal(parseModelJson("not json"), null);
   assert.equal(parseModelJson(undefined), null);

@@ -1,9 +1,14 @@
 import { ASTRONAUTS } from "../demo/fixtures";
+import { recordedAstronaut } from "../recorded/build";
+import type { RecordedSnapshot } from "../recorded/types";
+import type { AstronautRecord, Session } from "../demo/types";
 import { buildAlerts } from "./build";
 import { geminiInputFor, parseModelJson, RESPONSE_SCHEMA, SYSTEM_INSTRUCTION, userPrompt, validateExplanation, type GeminiExplanation } from "./gemini";
 
 // Server-side logic behind POST /api/explain. It never imports the Gemini SDK (the route injects `generate`), so the
 // request handling, data minimisation, rate limit and output checks can be tested without a key or a network.
+// The browser sends ids and the data mode only. The alert is rebuilt HERE: from the built-in demo data ("demo") or from the saved
+// SQLite records ("recorded", through `loadSnapshot`). Only the minimal numeric input in gemini.ts is ever sent to the provider.
 
 export const TIMEOUT_MS = 25_000; // with minimal thinking, live answers take 2-8 s
 export const RATE_PER_CLIENT = 6;
@@ -45,10 +50,26 @@ const fail = (status: number, error: ExplainError, extra: { retryAfterSec?: numb
 
 export type Env = { apiKey?: string; model?: string };
 
+/** Resolves the astronaut and session for the requested data mode, or null when they are not found. */
+async function resolveSession(mode: "demo" | "recorded", astronautId: string, sessionId: string, loadSnapshot?: () => Promise<RecordedSnapshot>): Promise<{ a: AstronautRecord; s: Session } | null> {
+  if (mode === "demo") {
+    const a = ASTRONAUTS.find((x) => x.id === astronautId);
+    const s = a?.sessions.find((x) => x.id === sessionId);
+    return a && s ? { a, s } : null;
+  }
+  if (!loadSnapshot) return null;
+  const snap = await loadSnapshot();
+  const profile = snap.astronauts.find((p) => p.id === astronautId);
+  if (!profile) return null;
+  const a = recordedAstronaut(profile, snap);
+  const s = a.sessions.find((x) => x.id === sessionId);
+  return s ? { a, s } : null;
+}
+
 export async function handleExplain(
   body: unknown,
   env: Env,
-  deps: { generate: Generate; state: ExplainState; clientId: string; now?: () => number },
+  deps: { generate: Generate; state: ExplainState; clientId: string; now?: () => number; loadSnapshot?: () => Promise<RecordedSnapshot> },
 ): Promise<ExplainOutcome> {
   // 1. Validate the request shape. Only three ids are accepted; there is no free text.
   if (!body || typeof body !== "object" || Array.isArray(body)) return fail(400, "invalid-request");
@@ -56,11 +77,14 @@ export async function handleExplain(
   const { astronautId, sessionId, alertId } = b;
   if (typeof astronautId !== "string" || typeof sessionId !== "string" || typeof alertId !== "string") return fail(400, "invalid-request");
   if (![astronautId, sessionId, alertId].every((x) => ID.test(x))) return fail(400, "invalid-request");
+  const mode = b.mode === undefined ? "demo" : b.mode;
+  if (mode !== "demo" && mode !== "recorded") return fail(400, "invalid-request");
 
-  // 2. Resolve the alert on the server from the simulated data. The client cannot supply values or text.
-  const a = ASTRONAUTS.find((x) => x.id === astronautId);
-  const s = a?.sessions.find((x) => x.id === sessionId);
-  if (!a || !s) return fail(404, "not-found");
+  // 2. Resolve the alert on the server from the saved or simulated data. The client cannot supply values or text.
+  let found: { a: AstronautRecord; s: Session } | null = null;
+  try { found = await resolveSession(mode, astronautId, sessionId, deps.loadSnapshot); } catch { return fail(500, "upstream-failed"); }
+  if (!found) return fail(404, "not-found");
+  const { a, s } = found;
   const alert = buildAlerts(a, s).find((x) => x.id === alertId);
   if (!alert) return fail(404, "not-found");
   const input = geminiInputFor(alert, { rehabFocus: a.profile.rehabFocus, affectedLimb: a.profile.affectedLimb, missionDay: s.missionDay });
@@ -72,7 +96,7 @@ export async function handleExplain(
   if (!apiKey || !model) return fail(503, "not-configured");
 
   // 4. Duplicate protection: an identical request already in flight shares its result and costs nothing extra.
-  const key = `${astronautId}|${sessionId}|${alertId}`;
+  const key = `${mode}|${astronautId}|${sessionId}|${alertId}`;
   const existing = deps.state.inflight.get(key);
   if (existing) return existing;
 

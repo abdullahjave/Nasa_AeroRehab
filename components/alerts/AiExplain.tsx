@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAstronaut } from "@/components/AstronautProvider";
 import type { Alert } from "@/lib/alerts";
 import type { GeminiExplanation } from "@/lib/alerts/gemini";
 
@@ -23,12 +24,14 @@ const REASON: Record<string, string> = {
 };
 
 /**
- * On-click AI explanation for one alert. The status, measured values, next action and source link are rendered by the app
- * before and regardless of this request; this block only adds a short plain-English explanation ("AI explanation") or, when
- * it cannot, the app's own text ("Built-in guidance"). Mount it with a key of astronaut + session + alert so changing the
+ * On-click AI Recommendation for one alert. The status, measured values, next action and source link are rendered by the app
+ * before and regardless of this request; this block adds what the AI makes of those numbers: what they show, what the status
+ * means for the astronaut, concrete next steps, and when to tell the flight surgeon. When it cannot, the app's own text is shown
+ * ("Built-in guidance"). It works for Demo and Recorded data (the server rebuilds the alert from ids; no names or notes are sent). Mount it with a key of astronaut + session + alert so changing the
  * selection discards an in-flight result.
  */
 export default function AiExplain({ alert }: { alert: Alert }) {
+  const { dataMode } = useAstronaut();
   const [state, setState] = useState<State>({ phase: "idle" });
   const stamp = `${alert.astronautId}|${alert.sessionId}|${alert.id}`;
   const current = useRef(stamp);
@@ -54,7 +57,7 @@ export default function AiExplain({ alert }: { alert: Alert }) {
       const res = await fetch("/api/explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ astronautId: alert.astronautId, sessionId: alert.sessionId, alertId: alert.id }),
+        body: JSON.stringify({ astronautId: alert.astronautId, sessionId: alert.sessionId, alertId: alert.id, mode: dataMode }),
         signal: c.signal,
       });
       const json = (await res.json().catch(() => null)) as { ok?: boolean; error?: string; explanation?: GeminiExplanation } | null;
@@ -70,29 +73,48 @@ export default function AiExplain({ alert }: { alert: Alert }) {
 
   const loading = state.phase === "loading";
   return (
-    <div className="mt-3 border-t border-violet-300/15 pt-3 text-xs">
+    <div className="mt-3 border-t border-violet-300/15 pt-3" data-testid="ai-explain">
       <button type="button" onClick={ask} disabled={loading} aria-busy={loading}
-        className="inline-flex items-center gap-2 rounded-md border border-violet-300/50 bg-violet-400/10 px-3 py-2 text-sm font-medium text-violet-100 hover:bg-violet-400/20 disabled:cursor-wait disabled:opacity-60">
+        className="inline-flex items-center gap-2 rounded-md border border-violet-300/60 bg-violet-500/20 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500/30 disabled:cursor-wait disabled:opacity-70">
         <span aria-hidden="true">&#10024;</span>
-        {loading ? "Getting recommendation…" : state.phase === "idle" ? "Get Recommendation" : "Get Recommendation Again"}
+        {loading ? "Getting AI recommendation…" : state.phase === "idle" ? "Get AI Recommendation" : "Get AI Recommendation again"}
       </button>
+      {state.phase === "idle" && <p className="mt-1 text-xs text-slate-400">The AI reads the numbers and status above and suggests what to do next.</p>}
       <div role="status" aria-live="polite" className="mt-2">
+        {loading && <p className="text-sm text-violet-100" data-testid="ai-loading">Reading your numbers and status…</p>}
         {state.phase === "ai" && (
-          <div className="rounded-md border border-violet-300/30 bg-violet-400/10 p-2">
-            <p className="text-sm font-semibold text-violet-100">AI Recommendation</p>
-            <dl className="mt-1 space-y-1 text-slate-100">
-              <div><dt className="text-[11px] text-slate-400">In plain words</dt><dd>{state.explanation.meaning}</dd></div>
-              <div><dt className="text-[11px] text-slate-400">The numbers</dt><dd>{state.explanation.change}</dd></div>
-              <div><dt className="text-[11px] text-slate-400">Why this is recommended</dt><dd>{state.explanation.relevance}</dd></div>
-            </dl>
-            <p className="mt-1 text-[10px] text-slate-400">Written by AI from the values above. The status, numbers and next action are set by the app.</p>
+          <div className="space-y-3 rounded-lg border border-violet-300/50 bg-violet-950/60 p-4 text-slate-50" data-testid="ai-result">
+            <p className="flex flex-wrap items-center gap-2 text-base font-semibold text-white">
+              <span aria-hidden="true">&#10024;</span> AI Recommendation
+              <span className="rounded-full border border-violet-300/50 bg-violet-400/20 px-2 py-0.5 text-xs font-medium text-violet-100">Status: {alert.label}</span>
+            </p>
+            <section>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-violet-200">What your data shows</h4>
+              <p className="mt-0.5 text-base leading-relaxed">{state.explanation.summary}</p>
+            </section>
+            <section>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-violet-200">What it means for you</h4>
+              <p className="mt-0.5 text-base leading-relaxed">{state.explanation.risk}</p>
+            </section>
+            <section>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-violet-200">What to do next</h4>
+              <ol className="mt-1 list-decimal space-y-1.5 pl-5 text-base leading-relaxed marker:font-semibold marker:text-violet-200">
+                {state.explanation.actions.map((a) => <li key={a}>{a}</li>)}
+              </ol>
+            </section>
+            <section className="rounded-md border border-amber-300/40 bg-amber-300/10 p-2.5">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-amber-200">Tell the flight surgeon if</h4>
+              <p className="mt-0.5 text-sm leading-relaxed text-amber-50">{state.explanation.escalate}</p>
+            </section>
+            <p className="text-xs text-slate-400">Written by AI from the numbers above. The status and numbers are set by the app. This is a prototype with {alert.simulatedScenario || dataMode === "demo" ? "simulated" : "manually entered"} data, not medical advice.</p>
           </div>
         )}
         {state.phase === "builtin" && (
-          <div className="rounded-md border border-slate-400/40 bg-slate-400/10 p-2">
-            <p className="font-semibold text-slate-100">Built-in guidance</p>
-            <p className="text-[11px] text-amber-200">{state.reason}</p>
-            <p className="mt-1 text-slate-100">{alert.explanation}</p>
+          <div className="rounded-md border border-slate-400/40 bg-slate-400/10 p-3" data-testid="ai-builtin">
+            <p className="text-sm font-semibold text-slate-100">Built-in guidance</p>
+            <p className="text-xs text-amber-200">AI recommendation unavailable: {state.reason}</p>
+            <p className="mt-1 text-sm text-slate-100">{alert.explanation}</p>
+            <p className="mt-1 text-sm text-slate-100">Next step: {alert.action.label}.</p>
           </div>
         )}
       </div>

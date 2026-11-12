@@ -56,7 +56,7 @@ function romAlert(a: AstronautRecord, s: Session, v: InsightView, nextExercise: 
   const side = v.context.side;
   const rec = s.recorded;
   if (rec?.empty) return emptyAlert(a, s);
-  // Recorded sessions are typed in by hand: there is no sensor to check, and the AI provider never receives recorded values.
+  // Recorded sessions are typed in by hand: there is no sensor to check. On request, only the minimal numeric input (never names or notes) goes to the AI service.
   const manage = { label: "Edit this session", kind: "manage-records" as const, href: "/patient-management" };
   const statusSource = { label: "Status check from this session", findingSource: "status" as const, side, tSec: null, sessionId: s.id };
   const reasonOf = (m: { kind: string; reason?: string }) => (m.kind === "unavailable" && m.reason ? IREASON_TEXT[m.reason] ?? m.reason : "");
@@ -127,7 +127,7 @@ function romAlert(a: AstronautRecord, s: Session, v: InsightView, nextExercise: 
       source: calcSource,
       simulatedScenario: sc?.label ?? null,
       guidance: { items: demoGuidance("reduced-rom", v.baselineDay, nextExercise, null), sourceLabel: GUIDANCE_SOURCE, reviewed: false },
-      values, geminiEligible: !rec,
+      values, geminiEligible: true,
     });
   }
   // 3. Evaluated and within the configured demo range.
@@ -138,7 +138,7 @@ function romAlert(a: AstronautRecord, s: Session, v: InsightView, nextExercise: 
     action: { label: "Continue today's plan", kind: "continue-plan", href: "/rehabilitation" },
     why: [compareSentence, ROM_MEANING, `No finding was raised because the change (${signed(p, "%")}) does not reach the demo rule (${REDUCED_ROM_DEMO.thresholdPct}% or lower). This is a demo setting, not a clinical limit.`],
     explanation: `Your knee moved ${moved} than in your baseline session (${signed(p, "%")}), which is inside the demo range.`,
-    source: calcSource, values, geminiEligible: !rec,
+    source: calcSource, values, geminiEligible: true,
   });
 }
 
