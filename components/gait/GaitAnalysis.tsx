@@ -28,10 +28,14 @@ const PHASE_IMAGE: Partial<Record<string, { src: string; note: string }>> = {
   "heel-strike-2": { src: "/images/Step1.png", note: "supplied illustration" },
 };
 
-/** Extra zoom for pictures with a lot of empty margin, so the figure fills more of its box (still inside it). */
-const PHASE_ZOOM: Partial<Record<string, number>> = { loading: 1.5, "pre-swing": 1.15, swing: 1.3 };
-/** Sideways nudge (percent of the picture width) so a reused picture sits differently from its twin. */
-const PHASE_SHIFT: Partial<Record<string, number>> = { swing: 8 };
+/** Pixel size and figure bounding box (left, top, right, bottom) of each picture, so the phase strip can show every figure at the same height. */
+const FIGURE: Record<string, { w: number; h: number; box: [number, number, number, number] }> = {
+  "/images/Step1.png": { w: 432, h: 578, box: [99, 72, 306, 498] },
+  "/images/Step2.png": { w: 373, h: 669, box: [22, 44, 352, 622] },
+  "/images/Step3.jpg": { w: 578, h: 432, box: [185, 29, 362, 407] },
+  "/images/Step4.jpg": { w: 2400, h: 1792, box: [765, 119, 2306, 1698] },
+  "/images/gait-phase-preswing.webp": { w: 576, h: 984, box: [12, 16, 555, 968] },
+};
 
 function EmptyState({ onLatest, label, canSwitch }: { onLatest: () => void; label: string; canSwitch: boolean }) {
   return (
@@ -136,7 +140,7 @@ function DemoGaitAnalysis() {
         <div className="xl:col-span-3">
           <Panel id="figure" title="Walking Model" icon="walk" className="h-full">
             <div className="flex flex-1 flex-col gap-2">
-              <PhotoPose key={phase.key} zoom={PHASE_ZOOM[phase.key]} shiftX={PHASE_SHIFT[phase.key]} src={PHASE_IMAGE[phase.key]?.src ?? ""} alt={`${phase.label} pose at ${p} percent of the cycle (supplied illustration)`} className="mx-auto h-[22rem] w-full max-w-[260px]"
+              <PhotoPose key={phase.key} figure={FIGURE[PHASE_IMAGE[phase.key]?.src ?? ""]} src={PHASE_IMAGE[phase.key]?.src ?? ""} alt={`${phase.label} pose at ${p} percent of the cycle (supplied illustration)`} className="mx-auto h-[22rem] w-full max-w-[260px]"
                 fallback={<WalkingFigure p={p} scale={g.curveScale} className="mx-auto h-[22rem] w-full max-w-[220px]" ariaLabel={`Walking figure, ${phase.label} at ${p} percent of the cycle`} />} />
               <div className="rounded-md border border-cyan-400/30 bg-black/30 p-2" aria-live="polite">
                 <p className="flex items-center justify-between text-sm font-semibold text-white">
@@ -253,7 +257,7 @@ function DemoGaitAnalysis() {
                     className={`flex flex-col items-center rounded-md border p-1 ${active ? "border-cyan-300 bg-cyan-400/15" : "border-cyan-400/20 hover:bg-white/5"}`}>
                     {PHASE_IMAGE[ph.key] ? (
                       // Supplied walking-pose artwork, matched to the phase it shows best (see PHASE_IMAGE). Falls back to the drawn figure if a file is missing.
-                      <PhotoPose zoom={PHASE_ZOOM[ph.key]} shiftX={PHASE_SHIFT[ph.key]} src={PHASE_IMAGE[ph.key]!.src} alt={`${ph.label} pose (${PHASE_IMAGE[ph.key]!.note})`} className="h-24 w-full"
+                      <PhotoPose figure={FIGURE[PHASE_IMAGE[ph.key]!.src]} src={PHASE_IMAGE[ph.key]!.src} alt={`${ph.label} pose (${PHASE_IMAGE[ph.key]!.note})`} className="h-24 w-full"
                         fallback={<WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />} />
                     ) : (
                       <WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />
