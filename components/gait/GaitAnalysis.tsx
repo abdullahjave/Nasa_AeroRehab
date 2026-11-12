@@ -15,12 +15,12 @@ import { GAIT_PHASES, gaitCurveRows, getLatestSession, jointAnglesAt, phaseAt } 
 
 /**
  * Supplied pose artwork per gait phase (public/images). Each picture is static and is used only for the phase it depicts best:
- * Step1 wide stride, front heel on the ground; Step2 single support, one leg lifted; Step3 trailing heel rising;
- * Step4 rear leg lifted and bent (used for Loading and Swing); gait-phase-preswing rear foot at toe-off. The Walking Model shows the picture of the selected phase.
+ * Step1 wide stride, front heel on the ground; Step2 single support, one leg lifted; Step3 trailing heel rising (used for Loading and Terminal Stance);
+ * Step4 rear leg lifted and bent (used for Swing); gait-phase-preswing rear foot at toe-off. The Walking Model shows the picture of the selected phase.
  */
 const PHASE_IMAGE: Partial<Record<string, { src: string; note: string }>> = {
   "heel-strike": { src: "/images/Step1.png", note: "supplied illustration" },
-  loading: { src: "/images/Step4.jpg", note: "supplied illustration" },
+  loading: { src: "/images/Step3.jpg", note: "supplied illustration" },
   "mid-stance": { src: "/images/Step2.jpg", note: "supplied illustration" },
   "terminal-stance": { src: "/images/Step3.jpg", note: "supplied illustration" },
   "pre-swing": { src: "/images/gait-phase-preswing.webp", note: "supplied illustration" },
