@@ -15,18 +15,23 @@ import { GAIT_PHASES, gaitCurveRows, getLatestSession, jointAnglesAt, phaseAt } 
 
 /**
  * Supplied pose artwork per gait phase (public/images). Each picture is static and is used only for the phase it depicts best:
- * Step1 wide stride, front heel on the ground; Step2 single support, one leg lifted; Step3 trailing heel rising (used for Loading and Terminal Stance);
- * Step4 rear leg lifted and bent (used for Swing); gait-phase-preswing rear foot at toe-off. The Walking Model shows the picture of the selected phase.
+ * Step1 wide stride, front heel on the ground; Step2 single support, one leg lifted; Step3 trailing heel rising (used for Loading, Swing and Terminal Stance);
+ * Step4 rear leg lifted and bent (unused now); gait-phase-preswing rear foot at toe-off. The Walking Model shows the picture of the selected phase.
  */
 const PHASE_IMAGE: Partial<Record<string, { src: string; note: string }>> = {
   "heel-strike": { src: "/images/Step1.png", note: "supplied illustration" },
   loading: { src: "/images/Step3.jpg", note: "supplied illustration" },
-  "mid-stance": { src: "/images/Step2.jpg", note: "supplied illustration" },
+  "mid-stance": { src: "/images/Step2.png", note: "supplied illustration" },
   "terminal-stance": { src: "/images/Step3.jpg", note: "supplied illustration" },
-  "pre-swing": { src: "/images/gait-phase-preswing.webp", note: "supplied illustration" },
-  swing: { src: "/images/Step4.jpg", note: "supplied illustration" },
+  "pre-swing": { src: "/images/Step2.png", note: "supplied illustration" },
+  swing: { src: "/images/Step3.jpg", note: "supplied illustration" },
   "heel-strike-2": { src: "/images/Step1.png", note: "supplied illustration" },
 };
+
+/** Extra zoom for pictures with a lot of empty margin, so the figure fills more of its box (still inside it). */
+const PHASE_ZOOM: Partial<Record<string, number>> = { loading: 1.5, "pre-swing": 1.15, swing: 1.3 };
+/** Sideways nudge (percent of the picture width) so a reused picture sits differently from its twin. */
+const PHASE_SHIFT: Partial<Record<string, number>> = { swing: 8 };
 
 function EmptyState({ onLatest, label, canSwitch }: { onLatest: () => void; label: string; canSwitch: boolean }) {
   return (
@@ -131,7 +136,7 @@ function DemoGaitAnalysis() {
         <div className="xl:col-span-3">
           <Panel id="figure" title="Walking Model" icon="walk" className="h-full">
             <div className="flex flex-1 flex-col gap-2">
-              <PhotoPose key={phase.key} src={PHASE_IMAGE[phase.key]?.src ?? ""} alt={`${phase.label} pose at ${p} percent of the cycle (supplied illustration)`} className="mx-auto h-[22rem] w-full max-w-[260px]"
+              <PhotoPose key={phase.key} zoom={PHASE_ZOOM[phase.key]} shiftX={PHASE_SHIFT[phase.key]} src={PHASE_IMAGE[phase.key]?.src ?? ""} alt={`${phase.label} pose at ${p} percent of the cycle (supplied illustration)`} className="mx-auto h-[22rem] w-full max-w-[260px]"
                 fallback={<WalkingFigure p={p} scale={g.curveScale} className="mx-auto h-[22rem] w-full max-w-[220px]" ariaLabel={`Walking figure, ${phase.label} at ${p} percent of the cycle`} />} />
               <div className="rounded-md border border-cyan-400/30 bg-black/30 p-2" aria-live="polite">
                 <p className="flex items-center justify-between text-sm font-semibold text-white">
@@ -248,7 +253,7 @@ function DemoGaitAnalysis() {
                     className={`flex flex-col items-center rounded-md border p-1 ${active ? "border-cyan-300 bg-cyan-400/15" : "border-cyan-400/20 hover:bg-white/5"}`}>
                     {PHASE_IMAGE[ph.key] ? (
                       // Supplied walking-pose artwork, matched to the phase it shows best (see PHASE_IMAGE). Falls back to the drawn figure if a file is missing.
-                      <PhotoPose src={PHASE_IMAGE[ph.key]!.src} alt={`${ph.label} pose (${PHASE_IMAGE[ph.key]!.note})`} className="h-24 w-full"
+                      <PhotoPose zoom={PHASE_ZOOM[ph.key]} shiftX={PHASE_SHIFT[ph.key]} src={PHASE_IMAGE[ph.key]!.src} alt={`${ph.label} pose (${PHASE_IMAGE[ph.key]!.note})`} className="h-24 w-full"
                         fallback={<WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />} />
                     ) : (
                       <WalkingFigure p={ph.p} scale={g.curveScale} glow={false} className="h-24 w-full" ariaLabel={`${ph.label} pose`} />
