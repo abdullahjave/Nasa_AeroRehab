@@ -19,7 +19,27 @@ import { BatteryBar, CAL_TEXT, STATUS_LED, Switch, btn, calLed, calTone, fmtStam
 type Assets = { videoSrc: string | null; hasPoster: boolean };
 
 export default function Settings({ assets }: { assets: Assets }) {
-  const { astronaut, deviceState, session } = useAstronaut();
+  const { astronaut, deviceState, session, dataMode, setDataMode } = useAstronaut();
+  if (dataMode === "recorded") {
+    return (
+      <div className="space-y-3">
+        <header className="glass rounded-lg px-3 py-2">
+          <h1 className="text-xl font-semibold text-white sm:text-2xl">Settings <span className="text-base font-normal text-slate-300">&ndash; Data &amp; Display</span></h1>
+          <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; Recorded Data</p>
+        </header>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Panel id="set-data" title="Data mode" icon="chip">
+            <p className="text-sm text-white">Recorded (local database)</p>
+            <p className="mt-1 text-xs text-slate-300">Profiles and knee sessions are saved in a SQLite file on this computer. There is no sign-in or access control yet, so do not enter real patient data.</p>
+            <p className="mt-2 text-sm font-semibold text-amber-200">No sensors in recorded mode</p>
+            <p className="text-xs text-slate-300">Sensor status, calibration and connectivity apply to the simulated demo only.</p>
+            <button type="button" onClick={() => setDataMode("demo")} className="mt-3 rounded-md border border-cyan-300/70 bg-cyan-400/15 px-3 py-1.5 text-sm text-white hover:bg-cyan-400/25">Switch to demo data</button>
+          </Panel>
+          <DisplayPanel assets={assets} />
+        </div>
+      </div>
+    );
+  }
   // The context astronaut already has overrides applied; details are computed from the fixture record so the
   // reason a sensor is offline (fixture / disconnected / hub) is known.
   const details = sensorDetails(getAstronaut(astronaut.id), deviceState);

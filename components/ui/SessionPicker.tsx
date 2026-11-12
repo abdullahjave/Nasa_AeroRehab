@@ -5,6 +5,7 @@ import { useAstronaut } from "@/components/AstronautProvider";
 /** Writes to the shared session selection, so every page agrees. */
 export default function SessionPicker() {
   const { astronaut, session, selectSession } = useAstronaut();
+  if (astronaut.sessions.length === 0) return <span className="text-xs text-slate-300">Session: none saved</span>;
   return (
     <label className="flex items-center gap-1.5 text-xs text-slate-300">
       Session

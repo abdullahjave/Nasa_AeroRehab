@@ -80,7 +80,7 @@ export function metricRow(metric: MetricKey, cur: ReportPoint[], prev: ReportPoi
 
 /** Reference knee context = the latest session in the current period (the one a reader sees last). */
 export function referenceContext(cur: ReportPoint[]): Ctx | null {
-  const last = [...cur].sort((a, b) => a.missionDay - b.missionDay).pop();
+  const last = [...cur].filter((p) => p.knee.side !== "").sort((a, b) => a.missionDay - b.missionDay).pop(); // walking-only points have no knee
   return last ? last.knee : null;
 }
 

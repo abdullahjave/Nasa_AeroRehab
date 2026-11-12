@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useAstronaut } from "@/components/AstronautProvider";
+import RecordedPatients from "@/components/recorded/RecordedPatients";
 import Panel, { Chip } from "@/components/ui/Panel";
 import CrewPortrait from "@/components/graphics/CrewPortrait";
 import { useNotes } from "./useNotes";
@@ -28,7 +29,13 @@ const LED: Record<Sensor["status"], string> = { online: "", "low-battery": "led-
 const EMPTY_DRAFT: NoteDraft = { title: "", date: "", text: "" };
 const NO_SEED: ClinicalRecord[] = [];
 
+/** Demo mode keeps the simulated roster page. Recorded mode shows database-backed profiles and saved knee sessions. */
 export default function PatientManagement() {
+  const { dataMode } = useAstronaut();
+  return dataMode === "recorded" ? <RecordedPatients /> : <DemoPatientManagement />;
+}
+
+function DemoPatientManagement() {
   const { astronaut, astronauts, mission, session, select, selectSession, selectKneeSide, selectBalanceSide } = useAstronaut();
   const [query, setQuery] = useState("");
   const [missionFilter, setMissionFilter] = useState("all");

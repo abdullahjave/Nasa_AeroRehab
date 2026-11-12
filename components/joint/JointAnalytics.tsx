@@ -9,6 +9,7 @@ import GaugeRing from "@/components/ui/GaugeRing";
 import KneeAnatomy from "@/components/graphics/KneeAnatomy";
 import { ImuChip, JointLoadKnee, OrientationGizmo } from "@/components/graphics/Misc";
 import { insightView } from "@/lib/insights";
+import RecordedJoint from "@/components/recorded/RecordedJoint";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
 import { fmt, fmtClock, fmtSigned } from "@/lib/format";
 import { fmtStamp } from "@/components/settings/parts";
@@ -101,7 +102,13 @@ function BaselineRow({ label, value, base, unit, digits = 0 }: { label: string; 
   );
 }
 
+/** Demo mode keeps the simulated sensor page. Recorded mode shows entered values, the baseline comparison and the trend. */
 export default function JointAnalytics() {
+  const { dataMode } = useAstronaut();
+  return dataMode === "recorded" ? <RecordedJoint /> : <DemoJointAnalytics />;
+}
+
+function DemoJointAnalytics() {
   const { astronaut, session, kneeSide, selectKneeSide, jointFocus, deviceState } = useAstronaut();
   // Shared comparability rule (lib/insights): the baseline is used only for the same side, movement and protocol.
   const insight = useMemo(() => insightView(astronaut, session), [astronaut, session]);

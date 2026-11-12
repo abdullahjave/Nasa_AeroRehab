@@ -49,3 +49,8 @@ and terms of use before publishing. The originals are kept untouched; the files 
 
 The earlier Sketchfab bone renders (`knee-side/femur/tibia/patella.webp`) were removed from `public/images/` by the owner; the
 knee view now uses `knee-anatomy.webp`. The Terrie / CC BY 4.0 credit above only applies if those renders are restored.
+
+## Background clips (public/videos)
+- `1.mp4`, `2.mp4`, `3.mp4`, `4.mp4`: supplied by the project owner. Portrait Earth-over-moon scenes (720x1280; `2.mp4` is 540x960). No source or licence is recorded.
+- Used: `1.mp4` only, as the optional looping background (hidden on phones, off when reduced motion is set, switchable in Settings). `space-loop.mp4` would take priority if added.
+- Not used: `2.mp4`, `3.mp4`, `4.mp4`. No page-specific use was stated, so none is attached to a page.

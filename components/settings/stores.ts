@@ -11,7 +11,7 @@ import { DEFAULT_DISPLAY, parseDisplay, type DisplayPrefs } from "@/lib/settings
 // Browser-local persistence, same pattern as the notes / rehab / report stores: one JSON blob per key,
 // useSyncExternalStore with an empty server snapshot, and an in-memory fallback if storage is blocked.
 
-function createLocalStore<T>(key: string, empty: T, parse: (raw: unknown) => T) {
+export function createLocalStore<T>(key: string, empty: T, parse: (raw: unknown) => T) {
   const listeners = new Set<() => void>();
   let cacheRaw: string | null | undefined;
   let cacheVal: T = empty;

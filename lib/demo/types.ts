@@ -133,10 +133,13 @@ export type JointData = {
   baseline: (KneeMeasurementContext & {
     peakFlexionDeg: number;
     romDeg: number;
-    torqueNm: number;
-    smoothnessPct: number;
+    /** null for a recorded (manual) baseline that has no torque reading. */
+    torqueNm: number | null;
+    /** null for a recorded baseline: there is no sample trace to score. */
+    smoothnessPct: number | null;
     recordedMissionDay: number;
-    reference: { repPeriodSec: number; phase: number };
+    /** Parameters that regenerate a SIMULATED baseline trace. null for recorded baselines: no trace is invented. */
+    reference: { repPeriodSec: number; phase: number } | null;
   }) | null;
   cartilage: { peakMpa: number; limitMpa: number; medial: number; lateral: number; patellofemoral: number } | null;
   checks: string[];
@@ -180,6 +183,26 @@ export type Session = {
   scenarioEvents: ScenarioEvent[];
   /** Demo scenario fatigue output. null = no fatigue indicator for this session. */
   fatigue: { pct: number; label: string } | null;
+  /**
+   * Explicit, labelled simulated scenario that escalates this session's reduced-ROM finding to "Action Required".
+   * Without it the same finding is "Needs Attention". Not a clinical rule.
+   */
+  alertScenario?: { severity: "action"; label: string };
+  /**
+   * Present only for sessions that come from the local database ("recorded" mode). Such a session has no sensor samples:
+   * kneeSamples, gait, pressure and balance are empty or null, and nothing is filled from demo fixtures.
+   */
+  recorded?: {
+    source: "manual";
+    activity: string;
+    /** ISO 8601, UTC. */
+    recordedAt: string;
+    torqueNm: number | null;
+    /** This session is the saved baseline for its side, movement and protocol. */
+    isBaseline: boolean;
+    /** Placeholder shown for an astronaut with no saved sessions. Never listed as a session. */
+    empty?: boolean;
+  };
 };
 
 export type OverviewMetrics = {
@@ -213,6 +236,11 @@ export type AstronautRecord = {
   profile: AstronautProfile;
   sensors: Sensor[];
   sessions: Session[]; // oldest -> newest; the last one is the latest
+  /** Recorded mode only: saved manual walking sessions (oldest -> newest). Absent in demo mode. */
+  walking?: import("../recorded/types").WalkingSessionView[];
+  /** Recorded mode only: saved manual pressure and balance assessments (oldest -> newest). Absent in demo mode. */
+  pressure?: import("../recorded/types").PressureAssessmentView[];
+  balance?: import("../recorded/types").BalanceAssessmentView[];
   overview: OverviewMetrics;
   trend: TrendPoint[];
   /** Simulated balance trials (single-leg stance), linked by sessionId; includes history days. */

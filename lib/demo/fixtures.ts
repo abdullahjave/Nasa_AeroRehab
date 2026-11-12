@@ -352,6 +352,7 @@ const okafor: AstronautRecord = {
       }),
       pressureSpec: spec(3.6, [98, 58, 122, 150, 96, 38, 172], [118, 66, 148, 176, 112, 46, 205], 0.44, [{ side: "right", zone: "toes", fromSec: 12, toSec: 18 }]), balance: bal(null, "Not calibrated (demo)", null, "Demo scenario: repeat the left-leg trial after the shank sensor is recharged. Not a clinical assessment."),
       scenarioEvents: [ev("okafor-042-b", 1, 380, "Repetition hesitation"), ev("okafor-042-b", 2, 860, "Flexion plateau")],
+      alertScenario: { severity: "action", label: "Simulated scenario: reduced range of motion escalated for the demo" },
       fatigue: null,
       joint: joint({
         measurement: { side: "right", movement: "knee-flexion-extension", protocol: "active-knee-flexion" },

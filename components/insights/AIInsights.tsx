@@ -6,18 +6,23 @@ import { CartesianGrid, Legend, Line, LineChart, ReferenceDot, ResponsiveContain
 import { useAstronaut } from "@/components/AstronautProvider";
 import Panel, { Chip } from "@/components/ui/Panel";
 import SessionPicker from "@/components/ui/SessionPicker";
-import GaugeRing from "@/components/ui/GaugeRing";
 import KneeAnatomy from "@/components/graphics/KneeAnatomy";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
+import RecordedInsights from "@/components/recorded/RecordedInsights";
+import ReadingRows from "@/components/readings/ReadingRows";
+import { READINGS } from "@/lib/alerts/glossary";
 import { IREASON_TEXT, REDUCED_ROM_DEMO, insightView, type Finding, type IM } from "@/lib/insights";
 import { sessionEnd } from "@/lib/demo";
 import { EXERCISES, INSIGHT_EXERCISE_MATCH, programFor } from "@/lib/rehab";
+import { GUIDANCE_SOURCE, demoGuidance, mmss } from "@/lib/alerts";
+import AiRecommendationCard from "@/components/alerts/AiRecommendationCard";
+import { TONE } from "@/components/alerts/AlertBadge";
+import { useAlerts } from "@/components/alerts/useAlerts";
 
 const VIOLET = "#a78bfa";
 const n1 = (v: number) => v.toFixed(1).replace(/\.0$/, "");
 const signed = (v: number, unit = "") => `${v > 0 ? "+" : v < 0 ? "−" : ""}${n1(Math.abs(v))}${unit}`;
 const why = (m: IM<unknown>) => (m.kind === "unavailable" ? IREASON_TEXT[m.reason] : "");
-const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
 
 const SOURCE: Record<Finding["source"], { label: string; tone: "cyan" | "amber" | "green" }> = {
   calculated: { label: "Calculated from measurements", tone: "cyan" },
@@ -25,26 +30,23 @@ const SOURCE: Record<Finding["source"], { label: string; tone: "cyan" | "amber" 
   seeded: { label: "Seeded demo scenario event", tone: "amber" },
 };
 
-function guidance(f: Finding | null, baselineDay: number | null, nextExercise: string): string[] {
-  if (!f) return [`No finding selected. Current plan item: ${nextExercise}.`];
-  if (f.kind === "reduced-rom")
-    return [
-      "Repeat the knee mobility set and re-measure ROM in the next session.",
-      `Compare peak flexion and ROM with the Day ${baselineDay} baseline after the set.`,
-      `Current plan item: ${nextExercise}.`,
-    ];
-  if (f.kind === "data-gap")
-    return ["Check the knee sensor fit and battery before the next session.", "Repeat the repetitions that fall inside the gap."];
-  return [`Review the repetition around ${mmss(f.tSec ?? 0)} in Joint Analytics.`, "Repeat the set if the pattern appears again.", `Current plan item: ${nextExercise}.`];
+export default function AIInsights() {
+  const { dataMode } = useAstronaut();
+  return dataMode === "recorded" ? <RecordedInsights /> : <DemoAIInsights />;
 }
 
-export default function AIInsights() {
+function DemoAIInsights() {
   const { astronaut, session, findingId, selectFinding, selectKneeSide, setJointFocus, setRehabFocus } = useAstronaut();
   const program = programFor(astronaut);
   const planItem = program ? `${EXERCISES[program.exercises[0]].name}, ${EXERCISES[program.exercises[0]].prescription}` : "no active plan";
   const v = useMemo(() => insightView(astronaut, session), [astronaut, session]);
   // A selection from another session is ignored (cleared) and the first finding is used instead.
-  const selected = v.findings.find((f) => f.id === findingId) ?? v.findings[0] ?? null;
+  const { alerts, summary } = useAlerts();
+  // The alert list is the single source: Overview opens an alert by its key, and the same alert is selected here.
+  const selectedAlert = alerts.find((x) => x.key === findingId) ?? summary.primary ?? null;
+  const selected = v.findings.find((f) => f.id === selectedAlert?.findingId) ?? null;
+  const healthAlerts = alerts.filter((x) => x.kind === "health");
+  const dataAlerts = alerts.filter((x) => x.kind === "data");
   const end = sessionEnd(session);
   const peakCur = v.peak.current.kind === "value" ? v.peak.current.value : null;
 
@@ -79,9 +81,34 @@ export default function AIInsights() {
         <SessionPicker />
       </header>
 
+      {/* Actionable alerts first: severity, then time. Data issues are listed separately from health findings. */}
+      <Panel id="ai-alerts" title="Your alerts" icon="warn">
+        <p className="mb-2 text-[11px] text-slate-300">{summary.scope}</p>
+        {healthAlerts.length === 0 ? (
+          <p className="text-sm text-slate-200">No health check could be evaluated for this session, so nothing is shown as good or flagged.</p>
+        ) : (
+          <ul className="space-y-2" aria-label="Health findings">
+            {healthAlerts.map((x) => <li key={x.id} id={`alert-${x.key}`} aria-current={selectedAlert?.id === x.id ? "true" : undefined} className="list-none"><AiRecommendationCard alert={x} variant="insights" selected={selectedAlert?.id === x.id} /></li>)}
+          </ul>
+        )}
+        {dataAlerts.length > 0 && (
+          <div className="mt-3">
+            <h3 className="mb-1 text-xs font-semibold text-slate-200">Data and sensor issues <span className="font-normal text-slate-400">(measurement problems, not health findings)</span></h3>
+            <ul className="space-y-2" aria-label="Data and sensor issues">
+              {dataAlerts.map((x) => <li key={x.id} id={`alert-${x.key}`} aria-current={selectedAlert?.id === x.id ? "true" : undefined} className="list-none"><AiRecommendationCard alert={x} variant="insights" selected={selectedAlert?.id === x.id} /></li>)}
+            </ul>
+          </div>
+        )}
+      </Panel>
+
+      <Panel id="ai-readings" title="Your readings" icon="chart">
+        <ReadingRows />
+      </Panel>
+
       {/* Top row */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.6fr_1fr_1fr_1fr]">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.6fr_1fr_1fr]">
         <Panel id="ai-angle" title="Knee Angle Analysis" icon="joint">
+          <p className="mb-2 text-[11px] text-slate-300">How far your knee bent at its deepest point, next to your baseline session.</p>
           <div className="flex flex-wrap items-center gap-4">
             <div>
               <p className="text-3xl font-semibold tabular-nums text-white">{v.peak.current.kind === "value" ? `${n1(v.peak.current.value)}°` : <span className="text-sm text-amber-200">Unavailable</span>}</p>
@@ -94,27 +121,19 @@ export default function AIInsights() {
             {diffChip(v.peak.diff, v.peak.pct)}
           </div>
         </Panel>
-        <Panel id="ai-rom" title="Knee ROM" icon="compare">
+        <Panel id="ai-rom" title="Knee movement" icon="compare">
+          <p className="mb-1 text-[11px] text-slate-300">{READINGS.knee.meaning}</p>
           <p className="text-3xl font-semibold tabular-nums text-white">{v.rom.current.kind === "value" ? `${n1(v.rom.current.value)}°` : <span className="text-sm text-amber-200">Unavailable</span>}</p>
           <p className={`text-xs ${v.rom.diff.kind === "value" ? (v.rom.diff.value < 0 ? "text-rose-200" : "text-emerald-300") : "text-amber-200"}`}>
             {v.rom.diff.kind === "value" ? `(${v.rom.diff.value < 0 ? "↓" : "↑"} ${signed(v.rom.diff.value, "°")} vs. baseline${v.rom.baseline.kind === "value" ? ` ${n1(v.rom.baseline.value)}°` : ""})` : why(v.rom.diff)}
           </p>
-          <p className="mt-1 text-[10px] text-slate-400">ROM = peak flexion &minus; minimum angle (Joint Analytics convention)</p>
+          <p className="mt-1 text-[10px] text-slate-400">{READINGS.knee.technical}: {READINGS.knee.shows} (Joint Analytics convention)</p>
         </Panel>
         <Panel id="ai-events" title="Movement Anomalies" icon="pulse">
+          <p className="mb-1 text-[11px] text-slate-300">Moments the demo scenario marked as unusual movement, plus gaps in the sensor data.</p>
           <p className="text-3xl font-semibold tabular-nums text-white">{v.events.length} <span className="text-base font-normal">Event{v.events.length === 1 ? "" : "s"}</span></p>
           <p className="text-xs text-slate-300">{deltaEvents === null ? "No previous session to compare" : `(${deltaEvents > 0 ? "↑ +" : deltaEvents < 0 ? "↓ " : ""}${deltaEvents} vs. previous session)`}</p>
           <p className="mt-1 text-[10px] text-slate-400">Seeded demo events plus measured data gaps, each counted once</p>
-        </Panel>
-        <Panel id="ai-fatigue" title="Fatigue Indicator" icon="chart">
-          {v.fatigue ? (
-            <div className="flex items-center gap-3">
-              <GaugeRing value={v.fatigue.pct} max={100} color={C.green} size="h-20 w-20" center={`${v.fatigue.pct}%`} ariaLabel={`Fatigue indicator ${v.fatigue.pct} percent, demo scenario`} />
-              <div><Chip tone="amber">{v.fatigue.label}</Chip><p className="mt-1 text-[10px] text-slate-400">Demo scenario output, not a calculation</p></div>
-            </div>
-          ) : (
-            <div><p className="text-sm font-semibold text-amber-200">Unavailable</p><p className="text-[11px] text-slate-400">No fatigue indicator in this session&apos;s demo data.</p></div>
-          )}
         </Panel>
       </div>
 
@@ -174,8 +193,8 @@ export default function AIInsights() {
         <div className="xl:col-span-3">
           <Panel id="ai-key" title="Key Insight" icon="warn" className="h-full">
             {selected ? (
-              <div className={`flex flex-1 flex-col rounded-md border p-3 ${selected.kind === "reduced-rom" ? "border-rose-400/60 bg-rose-500/10" : "border-amber-300/60 bg-amber-300/10"}`} aria-live="polite">
-                <p className={`text-base font-semibold ${selected.kind === "reduced-rom" ? "text-rose-200" : "text-amber-200"}`}>{selected.title}</p>
+              <div className={`flex flex-1 flex-col rounded-md border p-3 ${TONE[selectedAlert?.severity ?? "attention"].box}`} aria-live="polite">
+                <p className={`text-base font-semibold ${TONE[selectedAlert?.severity ?? "attention"].text}`}>{selected.title}</p>
                 <p className="mt-1"><Chip tone={SOURCE[selected.source].tone}>{SOURCE[selected.source].label}</Chip></p>
                 <p className="mt-2 text-sm text-slate-100">{selected.text}</p>
                 <dl className="mt-2 space-y-0.5 text-[11px]">
@@ -254,9 +273,9 @@ export default function AIInsights() {
         </div>
         <div className="xl:col-span-6">
           <Panel id="ai-recs" title="Rehabilitation Recommendations" icon="check" className="h-full">
-            <p className="mb-2 text-[11px] text-amber-200">Demo guidance tied to the selected finding. Not a clinical recommendation.</p>
+            <p className="mb-2 text-[11px] text-amber-200">Demo guidance tied to the selected finding. Source: {GUIDANCE_SOURCE}. Not a clinical recommendation.</p>
             <ul className="space-y-2 text-sm text-slate-100">
-              {guidance(selected, v.baselineDay, planItem).map((g) => (
+              {demoGuidance(selected?.kind ?? null, v.baselineDay, planItem, selected?.tSec ?? null).map((g) => (
                 <li key={g} className="flex items-start gap-2">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-[11px] text-emerald-300" aria-hidden="true">&#10003;</span>
                   {g}

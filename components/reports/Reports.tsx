@@ -1,17 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import RecordedReportExtras from "@/components/recorded/RecordedReportExtras";
+import { useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useAstronaut } from "@/components/AstronautProvider";
 import Panel from "@/components/ui/Panel";
 import SessionPicker from "@/components/ui/SessionPicker";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
 import { useRehab } from "@/components/rehab/useRehab";
+import { useRehabEdits } from "@/components/rehab/useRehabEdits";
 import ReportDocument from "./ReportDocument";
 import { fmtAgg, fmtChange, tickDays } from "./format";
 import { useSavedReports } from "./useSavedReports";
-import { MAX_DAY, METRIC_META, MIN_DAY, buildReport, paddedDomain, validateRange, type MetricKey, type Range } from "@/lib/reports";
-import { dayLabel, dayToDate, weekStartOf } from "@/lib/rehab";
+import { MAX_DAY, METRIC_META, MIN_DAY, buildReport, latestRecordDay, paddedDomain, validateRange, visibleMetrics, type MetricKey, type Range } from "@/lib/reports";
+import { dayLabel, dayToDate, recordedRehabInScope, weekStartOf } from "@/lib/rehab";
 import { ASTRONAUTS } from "@/lib/demo";
 
 const QUICK = [7, 14, 30, 60, 90] as const;
@@ -31,26 +35,48 @@ const CHARTS: { key: MetricKey; title: string; color: string; step: number; minS
 ];
 
 export default function Reports() {
-  const { astronaut, session, mission, select, selectSession } = useAstronaut();
+  const { astronaut, session, mission, select, selectSession, dataMode } = useAstronaut();
   const [tab, setTab] = useState<"session" | "history" | "pdf">("history");
+  // The print copy is mounted only while printing (Save PDF or Ctrl+P), so hidden charts never measure a 0-size container.
+  const [printing, setPrinting] = useState(false);
+  useEffect(() => {
+    const before = () => flushSync(() => setPrinting(true));
+    const after = () => setPrinting(false);
+    window.addEventListener("beforeprint", before);
+    window.addEventListener("afterprint", after);
+    return () => { window.removeEventListener("beforeprint", before); window.removeEventListener("afterprint", after); };
+  }, []);
   const [scopeKind, setScopeKind] = useState<"session" | "history">("history");
   const [range, setRange] = useState<Range>(quickRange(30));
   const [quick, setQuick] = useState<number | null>(30);
   const { list, save, remove } = useSavedReports();
 
   const check = validateRange(range, MIN_DAY, MAX_DAY);
+  const recorded = dataMode === "recorded";
+  // An astronaut with no saved knee session still has a Session report: it covers the latest day with any recorded entry.
+  const noKnee = recorded && astronaut.sessions.length === 0;
+  const latestDay = useMemo(() => latestRecordDay(astronaut), [astronaut]);
   const scope = useMemo(
-    () => (scopeKind === "session" ? ({ kind: "session", session } as const) : ({ kind: "history", range } as const)),
-    [scopeKind, session, range],
+    () => (scopeKind === "session"
+      ? (noKnee ? ({ kind: "history", range: { start: latestDay ?? MAX_DAY, end: latestDay ?? MAX_DAY } } as const) : ({ kind: "session", session } as const))
+      : ({ kind: "history", range } as const)),
+    [scopeKind, session, range, noKnee, latestDay],
   );
   const report = useMemo(() => (scopeKind === "history" && !check.ok ? null : buildReport(astronaut, scope)), [astronaut, scope, scopeKind, check.ok]);
   const endDay = report?.range.end ?? MAX_DAY;
   const { view: rehab } = useRehab(astronaut, endDay, weekStartOf(endDay));
-  const rehabSummary = rehab ? { completion: rehab.completionRate, adherence: rehab.weeklyAdherence } : null;
+  const { edits: rehabEdits } = useRehabEdits(astronaut.id);
+  // Demo mode: the plan view through the end day. Recorded mode: only rehab with saved completion state inside the report scope; none -> no box.
+  const recordedRehab = useMemo(() => (report && recorded ? recordedRehabInScope(astronaut, rehabEdits, report.range) : null), [report, recorded, astronaut, rehabEdits]);
+  const rehabSummary = recorded
+    ? (recordedRehab ? { completion: recordedRehab.completion, adherence: recordedRehab.sessions, basis: "recorded" as const } : null)
+    : rehab ? { completion: rehab.completionRate, adherence: rehab.weeklyAdherence, basis: "plan" as const } : null;
 
   const scopeLabel = report
     ? scopeKind === "session"
-      ? `Session report · ${session.label} (${fullDate(session.missionDay)})`
+      ? noKnee
+        ? `Session report · latest recorded entries, Day ${report.range.start} (${fullDate(report.range.start)}); no knee session saved`
+        : `Session report · ${session.label} (${fullDate(session.missionDay)})`
       : `Historical trends · Day ${report.range.start}–${report.range.end} (${fullDate(report.range.start)} – ${fullDate(report.range.end)})`
     : "Invalid range";
 
@@ -64,7 +90,12 @@ export default function Reports() {
     </div>
   );
 
-  const doc = report ? <ReportDocument a={astronaut} mission={mission} report={report} scopeLabel={scopeLabel} rehab={rehabSummary} /> : null;
+  const doc = report ? <ReportDocument a={astronaut} mission={mission} report={report} scopeLabel={scopeLabel} rehab={rehabSummary} recorded={recorded} /> : null;
+  const shown = report ? visibleMetrics(report, recorded) : [];
+  const charts = CHARTS.filter((c) => shown.includes(c.key));
+  const noTable = report ? report.rows.filter((r) => shown.includes(r.metric)).length === 0 : true;
+  const chartCols = ["", "lg:grid-cols-1", "lg:grid-cols-2", "lg:grid-cols-3"][Math.min(3, charts.length)];
+  const kinds = report ? [report.kneeCount && "knee", report.walkingCount && "walking", report.pressure.length && "pressure", report.balance.length && "balance"].filter(Boolean).join(", ") : "";
   const ticks = report ? tickDays(report.range.start, report.range.end, 6) : [];
 
   return (
@@ -76,7 +107,7 @@ export default function Reports() {
             <p className="text-xs text-slate-300">{astronaut.profile.displayName} ({astronaut.id}) &middot; {scopeLabel}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">Simulated Data</span>
+            <span className="rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">{dataMode === "recorded" ? "Recorded Data" : "Simulated Data"}</span>
             {tabs}
           </div>
         </header>
@@ -84,7 +115,7 @@ export default function Reports() {
         {/* Range controls */}
         <div className="glass flex flex-wrap items-center gap-3 rounded-lg px-3 py-2 text-xs">
           {scopeKind === "session" ? (
-            <><span className="text-sm text-slate-200">Report scope</span><SessionPicker /></>
+            <><span className="text-sm text-slate-200">Report scope</span>{noKnee ? <span className="text-xs text-slate-300">Latest recorded entries{latestDay ? ` (Day ${latestDay})` : ""}; no knee session is saved</span> : <SessionPicker />}</>
           ) : (
             <>
               <span className="text-sm text-slate-200">Report Range</span>
@@ -111,9 +142,9 @@ export default function Reports() {
             </>
           )}
           <div className="ml-auto flex gap-2">
-            <button type="button" disabled={!report} onClick={() => save({ astronautId: astronaut.id, view: scopeKind, sessionId: scopeKind === "session" ? session.id : null, start: range.start, end: range.end })}
+            <button type="button" disabled={!report?.hasData} onClick={() => save({ astronautId: astronaut.id, view: scopeKind, sessionId: scopeKind === "session" ? session.id : null, start: range.start, end: range.end })}
               className="rounded border border-cyan-400/50 px-2.5 py-1 text-cyan-100 hover:bg-white/10 disabled:opacity-40">Save configuration</button>
-            <button type="button" disabled={!report} onClick={() => window.print()}
+            <button type="button" disabled={!report?.hasData} onClick={() => window.print()}
               className="rounded bg-cyan-500/80 px-3 py-1 font-semibold text-[#031022] hover:bg-cyan-400 disabled:opacity-40">Save PDF</button>
           </div>
         </div>
@@ -128,16 +159,18 @@ export default function Reports() {
       ) : (
         <>
           {/* Off-screen copy so Save PDF prints the same report from any tab */}
-          {doc && <div className="hidden print:block">{doc}</div>}
-          {report && report.cur.length === 0 ? (
-            <Panel id="rep-empty" title="No sessions" icon="chart" className="no-print">
-              <p className="text-sm text-white">No sessions for {astronaut.profile.displayName} between {fullDate(report.range.start)} and {fullDate(report.range.end)}.</p>
-              <p className="text-xs text-slate-300">Sessions for this astronaut exist on Day {astronaut.sessions[0].missionDay}&ndash;{astronaut.sessions[astronaut.sessions.length - 1].missionDay} ({astronaut.sessions.length} sessions); widen the range to include them.</p>
+          {doc && printing && <div className="hidden print:block">{doc}</div>}
+          {report && !report.hasData ? (
+            <Panel id="rep-empty" title={recorded ? "No records in this scope" : "No sessions"} icon="chart" className="no-print">
+              <p className="text-sm text-white">{recorded ? "No knee, walking, pressure or balance records" : "No sessions"} for {astronaut.profile.displayName} between {fullDate(report.range.start)} and {fullDate(report.range.end)}.</p>
+              {astronaut.sessions.length === 0
+                ? <p className="text-xs text-slate-300">{recorded ? "Nothing is saved for this astronaut in this scope." : "No sessions are saved for this astronaut yet."} <Link href="/patient-management" className="text-cyan-300 hover:underline">{recorded ? "Add a record" : "Add session"} &rarr;</Link></p>
+                : <p className="text-xs text-slate-300">Sessions for this astronaut exist on Day {astronaut.sessions[0].missionDay}&ndash;{astronaut.sessions[astronaut.sessions.length - 1].missionDay} ({astronaut.sessions.length} sessions); widen the range to include them.</p>}
             </Panel>
           ) : report && (
             <div className="no-print space-y-3">
-              <div className="grid gap-3 lg:grid-cols-3">
-                {CHARTS.map((c) => {
+              {charts.length > 0 && <div className={`grid gap-3 ${chartCols}`}>
+                {charts.map((c) => {
                   const row = report.rows.find((r) => r.metric === c.key)!;
                   const data = report.series(c.key);
                   const n = data.filter((d) => d.value !== null).length;
@@ -180,16 +213,16 @@ export default function Reports() {
                     </Panel>
                   );
                 })}
-              </div>
+              </div>}
 
               <div className="grid gap-3 xl:grid-cols-12">
-                <div className="min-w-0 xl:col-span-5">
+                {!noTable && <div className="min-w-0 xl:col-span-5">
                   <Panel id="rep-table" title={`Key Metrics Summary (vs. previous ${report.range.end - report.range.start + 1} day${report.range.end === report.range.start ? "" : "s"})`} icon="chart" className="h-full">
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[440px] text-left text-xs">
                         <thead className="text-slate-400"><tr className="border-b border-cyan-400/20"><th className="py-1 pr-2 font-normal">Metric</th><th className="pr-2 font-normal">Current</th><th className="pr-2 font-normal">Previous</th><th className="font-normal">Change</th></tr></thead>
                         <tbody>
-                          {report.rows.map((row) => (
+                          {report.rows.filter((r) => shown.includes(r.metric)).map((row) => (
                             <tr key={row.metric} className="border-b border-cyan-400/10">
                               <th scope="row" className="py-1.5 pr-2 font-normal text-white">{METRIC_META[row.metric].label}</th>
                               <td className={`pr-2 tabular-nums ${row.current.kind === "value" ? "text-white" : "text-amber-200"}`}>{fmtAgg(row.current, row.metric)}</td>
@@ -201,30 +234,30 @@ export default function Reports() {
                       </table>
                     </div>
                     <p className="mt-2 text-[10px] text-slate-400">
-                      Previous = Day {report.prevRange.start}&ndash;{report.prevRange.end} (same length, just before). Means of valid sessions; ROM only for {report.ref ? `${report.ref.side} knee, ${report.ref.protocol}` : "the reference knee context"}
+                      Previous = {report.prevRange.end < 1 ? "none (before mission start)" : report.prevRange.start < 1 ? `Day 1–${report.prevRange.end} (shorter: mission data starts at Day 1)` : `Day ${report.prevRange.start}–${report.prevRange.end} (same length, just before)`}. Means of valid sessions; ROM only for {report.ref ? `${report.ref.side} knee, ${report.ref.protocol}` : "the reference knee context"}
                       {report.rows[0].excludedCurrent + report.rows[0].excludedPrevious > 0 ? ` (${report.rows[0].excludedCurrent + report.rows[0].excludedPrevious} session(s) with a different protocol excluded)` : ""}.
                     </p>
                   </Panel>
-                </div>
-                <div className="min-w-0 xl:col-span-4">
+                </div>}
+                <div className={`min-w-0 ${noTable ? "xl:col-span-6" : "xl:col-span-4"}`}>
                   <Panel id="rep-doc" title="Report Document" icon="check" className="h-full">
                     <div className="flex flex-1 gap-3">
                       <div className="flex h-36 w-28 shrink-0 flex-col justify-between rounded border border-cyan-300/40 bg-white p-2 text-[8px] text-slate-800 shadow-lg" aria-hidden="true">
                         <p className="font-bold text-cyan-800">AeroRehab<br />Rehabilitation Report</p>
                         <div className="space-y-0.5">{[0, 1, 2, 3].map((i) => <div key={i} className="h-1 rounded bg-slate-300" style={{ width: `${90 - i * 15}%` }} />)}</div>
-                        <p className="font-bold text-amber-700">SIMULATED</p>
+                        <p className="font-bold text-amber-700">{recorded ? "RECORDED" : "SIMULATED"}</p>
                       </div>
                       <dl className="min-w-0 space-y-1 text-xs">
                         <div><dt className="text-slate-400">Type</dt><dd className="text-white">{scopeKind === "session" ? "Session report" : "Historical trends"}</dd></div>
                         <div><dt className="text-slate-400">Astronaut</dt><dd className="text-white">{astronaut.profile.fullName} &middot; {astronaut.id}</dd></div>
                         <div><dt className="text-slate-400">Period</dt><dd className="text-white">{fullDate(report.range.start)} &ndash; {fullDate(report.range.end)}</dd></div>
-                        <div><dt className="text-slate-400">Contents</dt><dd className="text-white">3 charts, metrics table, rehab and insight summary</dd></div>
+                        <div><dt className="text-slate-400">Contents</dt><dd className="text-white">{recorded ? `${kinds || "no"} records, rehab summary` : "3 charts, metrics table, rehab and insight summary"}</dd></div>
                       </dl>
                     </div>
                     <button type="button" onClick={() => setTab("pdf")} className="mt-3 w-full rounded-md border border-cyan-400/60 bg-cyan-400/10 py-1.5 text-xs text-cyan-100 hover:bg-cyan-400/20">Preview</button>
                   </Panel>
                 </div>
-                <div className="min-w-0 xl:col-span-3">
+                <div className={`min-w-0 ${noTable ? "xl:col-span-6" : "xl:col-span-3"}`}>
                   <Panel id="rep-recent" title="Recent Reports" icon="timeline" className="h-full">
                     {list.length === 0 ? (
                       <div className="rounded-md border border-dashed border-cyan-400/30 p-3 text-xs text-slate-300">
@@ -256,6 +289,7 @@ export default function Reports() {
                   </Panel>
                 </div>
               </div>
+              {dataMode === "recorded" && <RecordedReportExtras range={report.range} />}
             </div>
           )}
         </>

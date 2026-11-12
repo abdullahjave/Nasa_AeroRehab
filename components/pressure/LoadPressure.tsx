@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import RecordedPressure from "@/components/recorded/RecordedPressure";
 import { useAstronaut } from "@/components/AstronautProvider";
 import InsoleStatus from "@/components/settings/InsoleStatus";
 import Panel from "@/components/ui/Panel";
@@ -101,6 +102,11 @@ function FootStat({ f, label }: { f: FootAnalysis; label: string }) {
 }
 
 export default function LoadPressure() {
+  const { dataMode } = useAstronaut();
+  return dataMode === "recorded" ? <RecordedPressure /> : <DemoLoadPressure />;
+}
+
+function DemoLoadPressure() {
   const { astronaut, session } = useAstronaut();
   const pa = useMemo(() => getPressureAnalysis(session), [session]);
   const [cur, setCur] = useState<{ sid: string; idx: number } | null>(null);

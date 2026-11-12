@@ -37,7 +37,7 @@ const baselineCache = new Map<string, KneeSample[]>();
 /** Simulated baseline recording regenerated from the baseline fixture, for the repetition overlay only. */
 function baselineSamples(session: Session): KneeSample[] | null {
   const b = session.joint.baseline;
-  if (!b) return null;
+  if (!b || !b.reference) return null; // recorded baselines have no trace to regenerate
   const key = `${session.astronautId}-${b.recordedMissionDay}-${b.protocol}`;
   const hit = baselineCache.get(key);
   if (hit) return hit;

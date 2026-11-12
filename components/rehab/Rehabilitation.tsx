@@ -8,7 +8,10 @@ import GaugeRing from "@/components/ui/GaugeRing";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
 import ExerciseVisual from "./ExerciseVisual";
 import { useRehab } from "./useRehab";
-import { DEMO_DAY, dayLabel, dayToDate, programFor, scheduleOf, weekStartOf, weekdayShort, type DayStatus, type ExerciseId, type Ratio } from "@/lib/rehab";
+import { useRehabEdits } from "./useRehabEdits";
+import KnowledgeCheck from "./KnowledgeCheck";
+import MilestoneBadge from "./MilestoneBadge";
+import { DEMO_DAY, dayLabel, dayToDate, planMilestone, programFor, scheduleOf, weekStartOf, weekdayShort, type DayStatus, type ExerciseId, type Ratio } from "@/lib/rehab";
 
 const pctText = (r: Ratio) => (r.kind === "value" ? `${r.pct.toFixed(0)}%` : "Unavailable");
 const STATUS: Record<DayStatus, { label: string; icon: string; cls: string }> = {
@@ -29,7 +32,8 @@ export default function Rehabilitation({ assets }: { assets: Record<string, bool
 }
 
 function RehabPage({ assets }: { assets: Record<string, boolean> }) {
-  const { astronaut, rehabFocus } = useAstronaut();
+  const { astronaut, rehabFocus, dataMode } = useAstronaut();
+  const recorded = dataMode === "recorded";
   const program = programFor(astronaut);
   const focusEx = rehabFocus && rehabFocus.astronautId === astronaut.id ? (rehabFocus.exerciseId as ExerciseId) : null;
   // Selection is tagged with the astronaut, so switching astronaut never carries the previous plan selection.
@@ -41,6 +45,7 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
   const focusActive = !!focusEx && (!sel || sel.at <= (rehabFocus?.at ?? 0));
   const [openInfo, setOpenInfo] = useState<string | null>(null);
   const { view, completions, setEdit } = useRehab(astronaut, cur.day, cur.weekStart);
+  const { legacy } = useRehabEdits(astronaut.id);
 
   if (!program || !view) {
     return <Panel id="rehab-empty" title="Rehabilitation" icon="check"><p className="text-sm text-amber-200">No rehabilitation program for this astronaut.</p></Panel>;
@@ -71,8 +76,20 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Rehabilitation <span className="font-normal text-slate-300">&ndash; Exercise Plan</span></h1>
           <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {program.name} &middot; Demo date Day {DEMO_DAY} ({dayLabel(DEMO_DAY)}, {year})</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">Simulated Data</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">{recorded ? "Recorded Data" : "Simulated Data"}</span>
       </header>
+
+      {recorded && <p className="rounded-md border border-slate-400/40 bg-slate-400/10 px-3 py-2 text-xs text-slate-200">Recorded mode: the exercise plan is demo content, and only completions ticked in this browser are counted. Simulated recovery scores and progress are not shown. Demo and Recorded completions are stored separately.</p>}
+      {recorded && legacy.count > 0 && (
+        <div role="status" data-testid="legacy-rehab" className="flex flex-wrap items-center gap-2 rounded-md border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-xs text-amber-100">
+          {legacy.imported
+            ? <span>{legacy.count} earlier completion entr{legacy.count === 1 ? "y" : "ies"} (saved before Demo and Recorded were separated) {legacy.count === 1 ? "was" : "were"} imported into Recorded for {astronaut.profile.displayName}. The original entries are still kept as legacy data.</span>
+            : <>
+                <span>{legacy.count} earlier completion entr{legacy.count === 1 ? "y" : "ies"} for {astronaut.profile.displayName} {legacy.count === 1 ? "was" : "were"} saved before Demo and Recorded were separated. It is not known which mode they came from, so they are kept as legacy data and are NOT counted in Recorded (including Reports).</span>
+                <button type="button" onClick={legacy.importIntoRecorded} className="rounded border border-amber-300/60 px-2 py-0.5 text-amber-50 hover:bg-white/10">Import into Recorded</button>
+              </>}
+        </div>
+      )}
 
       {/* Top row */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_1.2fr_1fr_1fr_1fr]">
@@ -114,7 +131,8 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
 
       {/* Main grid */}
       <div className="grid gap-3 xl:grid-cols-[1.25fr_1fr_1fr]">
-        <Panel id="r-plan" title={`${view.selected.isToday ? "Today's" : `${weekdayShort(view.selected.day)} ${dayLabel(view.selected.day)}`} Exercise Plan`} icon="walk" className="h-full"
+        <div className="grid content-start gap-3">
+        <Panel id="r-plan" title={`${view.selected.isToday ? "Today's" : `${weekdayShort(view.selected.day)} ${dayLabel(view.selected.day)}`} Exercise Plan`} icon="walk"
           action={s ? <span className={`text-xs font-semibold ${doneCount === s.assignments.length ? "text-emerald-300" : "text-slate-200"}`}>({doneCount} / {s.assignments.length} Completed)</span> : undefined}>
           {!s ? (
             <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-dashed border-cyan-400/30 p-6 text-center">
@@ -158,8 +176,11 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
               })}
             </ol>
           )}
+          {s && <div><MilestoneBadge m={planMilestone(s.assignments.map((a) => a.id), completions)} /></div>}
           <p className="mt-2 text-[10px] text-slate-500">Edits are saved in this browser per astronaut, session and exercise. Images: fallback pictograms where public/images/rehab/*.webp is missing.</p>
         </Panel>
+        <KnowledgeCheck astronautId={astronaut.id} />
+        </div>
 
         <div className="grid content-start gap-3">
           <Panel id="r-cal" title="Weekly Calendar" icon="timeline">
@@ -179,18 +200,18 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
                     <span className="text-[10px] text-slate-300">{weekdayShort(d.day)}</span>
                     <span className="text-sm font-semibold tabular-nums text-white">{dayToDate(d.day).getUTCDate()}</span>
                     <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${st.cls}`} aria-hidden="true">{st.icon}</span>
-                    <span className={`text-[9px] leading-none ${d.day === DEMO_DAY ? "text-cyan-200" : "text-transparent"}`}>Today</span>
+                    <span className={`text-[10px] leading-none ${d.day === DEMO_DAY ? "text-cyan-200" : "text-transparent"}`}>Today</span>
                   </button>
                 );
               })}
             </div>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-300">
               {(["completed", "pending", "incomplete", "unscheduled"] as const).map((k) => (
-                <span key={k} className="flex items-center gap-1"><span className={`flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] font-bold ${STATUS[k].cls}`}>{STATUS[k].icon}</span>{STATUS[k].label}</span>
+                <span key={k} className="flex items-center gap-1"><span className={`flex h-3.5 w-3.5 items-center justify-center rounded-full text-[9px] font-bold ${STATUS[k].cls}`}>{STATUS[k].icon}</span>{STATUS[k].label}</span>
               ))}
             </div>
           </Panel>
-          <Panel id="r-trend" title="Recovery Trend" icon="chart">
+          {!recorded && <Panel id="r-trend" title="Recovery Trend" icon="chart">
             <figure className="rounded-md bg-black/35 p-2">
               <figcaption className="mb-1 text-[11px] text-slate-300">Simulated scores (%) per program week</figcaption>
               <div className="h-48">
@@ -211,10 +232,10 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
                 </ResponsiveContainer>
               </div>
             </figure>
-          </Panel>
+          </Panel>}
         </div>
 
-        <div className="grid content-start gap-3">
+        {!recorded && <div className="grid content-start gap-3">
           <Panel id="r-recovery" title="Recovery & Readiness" icon="walk">
             {view.score ? (
               <>
@@ -223,7 +244,7 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
                   <dl className="flex-1 space-y-2 text-sm">
                     {([["Muscle Recovery", view.score.muscleRecovery], ["Joint Readiness", view.score.jointReadiness], ["Fatigue Index", view.score.fatigueIndex]] as const).map(([k, val]) => (
                       <div key={k} className="flex items-center justify-between gap-2">
-                        <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[9px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
+                        <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[10px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
                         <dd className="tabular-nums text-white">{val}%</dd>
                       </div>
                     ))}
@@ -239,7 +260,7 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
               <dl className="flex-1 space-y-1.5 text-sm">
                 {([["Mobility", view.progress.mobility], ["Strength", view.progress.strength], ["Balance", view.progress.balance], ["Endurance", view.progress.endurance]] as const).map(([k, val]) => (
                   <div key={k} className="flex items-center justify-between gap-2">
-                    <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[9px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
+                    <dt className="flex items-center gap-2 text-slate-200"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/20 text-[10px] text-emerald-300" aria-hidden="true">&#10003;</span>{k}</dt>
                     <dd className="tabular-nums text-white">{val}%</dd>
                   </div>
                 ))}
@@ -248,7 +269,7 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
             <p className="mt-2"><Chip>{program.statusLabel}</Chip></p>
             <p className="mt-1 text-[10px] text-slate-400">Demo progress scores (program fixture). Overall = mean of the four.</p>
           </Panel>
-        </div>
+        </div>}
       </div>
     </div>
   );

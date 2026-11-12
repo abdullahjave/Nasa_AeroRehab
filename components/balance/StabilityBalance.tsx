@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import RecordedBalance from "@/components/recorded/RecordedBalance";
 import { useAstronaut } from "@/components/AstronautProvider";
 import Panel, { Chip } from "@/components/ui/Panel";
 import SessionPicker from "@/components/ui/SessionPicker";
@@ -26,6 +27,11 @@ const area = (s: TrialSummary | null): BMetric<number> =>
   !s ? { kind: "unavailable", reason: "no-trial" } : s.ellipse.kind === "value" ? { kind: "value", value: s.ellipse.value.areaMm2 } : s.ellipse;
 
 export default function StabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
+  const { dataMode } = useAstronaut();
+  return dataMode === "recorded" ? <RecordedBalance /> : <DemoStabilityBalance hasBalanceArt={hasBalanceArt} />;
+}
+
+function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
   const { astronaut, session, balanceSide, selectBalanceSide } = useAstronaut();
   const view = useMemo(() => balanceView(astronaut, session, balanceSide), [astronaut, session, balanceSide]);
   const leftView = useMemo(() => balanceView(astronaut, session, "left"), [astronaut, session]);

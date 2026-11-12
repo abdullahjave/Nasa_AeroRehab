@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import RecordedGait from "@/components/recorded/RecordedGait";
 import { useAstronaut } from "@/components/AstronautProvider";
 import Panel, { Chip, Stat } from "@/components/ui/Panel";
 import SessionPicker from "@/components/ui/SessionPicker";
@@ -71,6 +72,11 @@ function axisFor(values: number[], step: number) {
 }
 
 export default function GaitAnalysis() {
+  const { dataMode } = useAstronaut();
+  return dataMode === "recorded" ? <RecordedGait /> : <DemoGaitAnalysis />;
+}
+
+function DemoGaitAnalysis() {
   const { astronaut, session, selectSession } = useAstronaut();
   const g = session.gait;
   const [p, setP] = useState(0);

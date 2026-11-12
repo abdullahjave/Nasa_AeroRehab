@@ -1,6 +1,6 @@
 import { completionRate, isSessionComplete, sessionTotals, weeklyAdherence } from "./compute";
 import { DEMO_DAY_DONE, DURATION_GAPS, EXERCISES, PROGRAMS, SEEDED_MISSES } from "./fixtures";
-import type { Completions, DurationRecord, RecoveryScore, RehabProgram, ScheduledSession } from "./types";
+import type { Completions, DurationRecord, Ratio, RecoveryScore, RehabProgram, ScheduledSession } from "./types";
 import { MISSION } from "../demo/fixtures";
 import type { AstronautRecord } from "../demo/types";
 
@@ -123,4 +123,31 @@ export function rehabView(a: AstronautRecord, completions: Completions, selected
     progress: { ...prog, overall: (prog.mobility + prog.strength + prog.balance + prog.endurance) / 4 },
     exercises: EXERCISES,
   };
+}
+
+export type RecordedRehabScope = {
+  /** Completed / assigned items, over every assignment of the scheduled sessions in scope that have recorded completion state. */
+  completion: Extract<Ratio, { kind: "value" }>;
+  /** Sessions fully completed / sessions with recorded completion state. */
+  sessions: Extract<Ratio, { kind: "value" }>;
+};
+
+/**
+ * Recorded mode: rehab completion for a report scope, or null when nothing was recorded in it.
+ * The exercise plan is demo content in recorded mode, so a scheduled assignment alone is NOT a recorded one. A scheduled session
+ * (on or before the demo date, inside the range) counts only when the astronaut saved completion state for at least one of its
+ * assignments (a tick, or an explicit un-tick, stored as `false`). Then ALL assignments of that session are "assigned", so a
+ * session with every item un-ticked is a valid 0% (0 / assigned). `edits` is the flat assignmentId -> done map from useRehabEdits.
+ */
+export function recordedRehabInScope(a: AstronautRecord, edits: Record<string, boolean>, range: { start: number; end: number }): RecordedRehabScope | null {
+  const p = programFor(a);
+  if (!p) return null;
+  const sessions = scheduleOf(a, p).filter((s) => s.missionDay >= range.start && s.missionDay <= Math.min(range.end, DEMO_DAY));
+  const touched = sessions.filter((s) => s.assignments.some((x) => Object.prototype.hasOwnProperty.call(edits, x.id)));
+  if (touched.length === 0) return null;
+  const items = touched.flatMap((s) => s.assignments);
+  const done = items.filter((x) => edits[x.id] === true).length;
+  const fullyDone = touched.filter((s) => s.assignments.length > 0 && s.assignments.every((x) => edits[x.id] === true)).length;
+  const v = (num: number, den: number) => ({ kind: "value" as const, num, den, pct: (num / den) * 100 });
+  return { completion: v(done, items.length), sessions: v(fullyDone, touched.length) };
 }
