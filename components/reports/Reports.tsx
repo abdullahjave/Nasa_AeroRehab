@@ -15,7 +15,7 @@ import ReportDocument from "./ReportDocument";
 import { fmtAgg, fmtChange, tickDays } from "./format";
 import { useSavedReports } from "./useSavedReports";
 import { MAX_DAY, METRIC_META, MIN_DAY, buildReport, latestRecordDay, paddedDomain, validateRange, visibleMetrics, type MetricKey, type Range } from "@/lib/reports";
-import { dayLabel, dayToDate, recordedRehabInScope, weekStartOf } from "@/lib/rehab";
+import { dayLabel, dayToDate, eligibleSessions, recordedRehabInScope, weekStartOf } from "@/lib/rehab";
 import { ASTRONAUTS } from "@/lib/demo";
 
 const QUICK = [7, 14, 30, 60, 90] as const;
@@ -65,9 +65,10 @@ export default function Reports() {
   const report = useMemo(() => (scopeKind === "history" && !check.ok ? null : buildReport(astronaut, scope)), [astronaut, scope, scopeKind, check.ok]);
   const endDay = report?.range.end ?? MAX_DAY;
   const { view: rehab } = useRehab(astronaut, endDay, weekStartOf(endDay));
-  const { edits: rehabEdits } = useRehabEdits(astronaut.id);
+  const { edits: rehabEdits, legacy: rehabLegacy } = useRehabEdits(astronaut.id);
+  const excludedTicks = recorded ? Object.keys(rehabEdits).length + rehabLegacy.count : 0;
   // Demo mode: the plan view through the end day. Recorded mode: only rehab with saved completion state inside the report scope; none -> no box.
-  const recordedRehab = useMemo(() => (report && recorded ? recordedRehabInScope(astronaut, rehabEdits, report.range) : null), [report, recorded, astronaut, rehabEdits]);
+  const recordedRehab = useMemo(() => (report && recorded ? recordedRehabInScope(eligibleSessions(astronaut, "recorded", "ground"), rehabEdits, report.range) : null), [report, recorded, astronaut, rehabEdits]);
   const rehabSummary = recorded
     ? (recordedRehab ? { completion: recordedRehab.completion, adherence: recordedRehab.sessions, basis: "recorded" as const } : null)
     : rehab ? { completion: rehab.completionRate, adherence: rehab.weeklyAdherence, basis: "plan" as const } : null;
@@ -90,7 +91,7 @@ export default function Reports() {
     </div>
   );
 
-  const doc = report ? <ReportDocument a={astronaut} mission={mission} report={report} scopeLabel={scopeLabel} rehab={rehabSummary} recorded={recorded} /> : null;
+  const doc = report ? <ReportDocument a={astronaut} mission={mission} report={report} scopeLabel={scopeLabel} rehab={rehabSummary} recorded={recorded} excludedTicks={excludedTicks} /> : null;
   const shown = report ? visibleMetrics(report, recorded) : [];
   const charts = CHARTS.filter((c) => shown.includes(c.key));
   const noTable = report ? report.rows.filter((r) => shown.includes(r.metric)).length === 0 : true;

@@ -13,8 +13,8 @@ const mode = createLocalStore<DataMode>(MODE_KEY, "demo", (raw) => (raw === "rec
 export const useDataMode = mode.use;
 export const setDataMode = (m: DataMode) => mode.write(m);
 
-export type RecordedState = { status: "idle" | "loading" | "ready" | "error"; snapshot: RecordedSnapshot | null; error: string | null };
-let state: RecordedState = { status: "idle", snapshot: null, error: null };
+export type RecordedState = { status: "idle" | "loading" | "ready" | "error"; snapshot: RecordedSnapshot | null; error: string | null; loadedAt: number | null };
+let state: RecordedState = { status: "idle", snapshot: null, error: null, loadedAt: null };
 const listeners = new Set<() => void>();
 const set = (next: RecordedState) => { state = next; listeners.forEach((l) => l()); };
 
@@ -25,14 +25,14 @@ export async function loadRecorded(): Promise<void> {
     const res = await fetch("/api/recorded", { cache: "no-store" });
     const json = (await res.json()) as { ok?: boolean; snapshot?: RecordedSnapshot };
     if (!res.ok || !json.ok || !json.snapshot) throw new Error("bad response");
-    set({ status: "ready", snapshot: json.snapshot, error: null });
+    set({ status: "ready", snapshot: json.snapshot, error: null, loadedAt: Date.now() });
   } catch {
-    set({ status: "error", snapshot: state.snapshot, error: "Recorded data could not be loaded from the local database." });
+    set({ ...state, status: "error", error: "Recorded data could not be loaded from the local database." }); // keeps the last snapshot and its loadedAt so the page can label it as out of date
   }
 }
 
 /** A save returns a fresh snapshot; applying it updates every page at once. */
-export const applySnapshot = (snapshot: RecordedSnapshot) => set({ status: "ready", snapshot, error: null });
+export const applySnapshot = (snapshot: RecordedSnapshot) => set({ status: "ready", snapshot, error: null, loadedAt: Date.now() });
 
 export function useRecorded(): RecordedState {
   const s = useSyncExternalStore((cb) => { listeners.add(cb); return () => { listeners.delete(cb); }; }, () => state, () => state);

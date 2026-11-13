@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { COUNTERMEASURES, DISCLAIMER, INTRO, SOURCES, STATUS_NOTE, sourceById, type Fact } from "./content";
+import { COUNTERMEASURES, DISCLAIMER, EQUIPMENT_NOTE, INTRO, SOURCES, STATUS_NOTE, sourceById, type Fact } from "./content";
 
 const facts: Fact[] = [INTRO, STATUS_NOTE, ...COUNTERMEASURES.flatMap((c) => c.facts)];
 const words = (t: string) => t.trim().split(/\s+/).length;
@@ -37,8 +37,9 @@ test("sources are official NASA pages (https, nasa.gov or ntrs.nasa.gov), unique
 
 test("text is short and plain, and never prescribes exercise or claims current equipment status without a dated source", () => {
   for (const f of facts) assert.ok(f.text.length <= 240, `${f.text.length}: ${f.text}`);
-  for (const c of COUNTERMEASURES) { assert.ok(c.tagline.length <= 90); assert.ok(c.appNote.length <= 200); assert.match(c.appNote, /not a NASA statement/); }
-  const all = [...facts.map((f) => f.text), ...COUNTERMEASURES.flatMap((c) => [c.tagline, c.appNote]), DISCLAIMER].join(" \n ");
+  for (const c of COUNTERMEASURES) assert.ok(c.tagline.length <= 90);
+  assert.match(EQUIPMENT_NOTE, /not a NASA statement/); assert.match(EQUIPMENT_NOTE, /not an exercise assignment/); assert.match(EQUIPMENT_NOTE, /does not mean this astronaut has access/);
+  const all = [...facts.map((f) => f.text), ...COUNTERMEASURES.map((c) => c.tagline), DISCLAIMER, EQUIPMENT_NOTE].join(" \n ");
   // No load, intensity, volume, duration or advice wording.
   assert.doesNotMatch(all, /\b\d+\s?(sets?|reps?|repetitions?|minutes?|mins?|hours?|watts?|kg|lbs?|bpm)\b/i);
   assert.doesNotMatch(all, /\b(you should|you must|aim for|target heart|at \d+ ?%|per week|times a week)\b/i);
@@ -51,4 +52,11 @@ test("text is short and plain, and never prescribes exercise or claims current e
 test("the CEVIS replacement is reported as a dated 2023 statement, not as current hardware", () => {
   const f = COUNTERMEASURES[2].facts.find((x) => /Teal/.test(x.text))!;
   assert.match(f.text, /2023 NASA poster/); assert.match(f.text, /was to replace/);
+});
+
+test("equipment is information only: no demo-plan exercise is mapped onto a device, and no universal-equipment claim is made", () => {
+  const all = [INTRO.text, STATUS_NOTE.text, EQUIPMENT_NOTE, ...COUNTERMEASURES.flatMap((c) => [c.tagline, ...c.facts.map((f) => f.text)])].join(" | ");
+  assert.doesNotMatch(all, /mini squat|step-up|sit-to-stand|calf raise|single-leg|closest match/i);
+  assert.doesNotMatch(all, /(all astronauts|every mission|always available|all spaceflight exercise)/i);
+  for (const c of COUNTERMEASURES) assert.ok(c.facts.length >= 1 && c.facts[0].sources.length >= 1, c.id);
 });

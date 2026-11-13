@@ -3,7 +3,7 @@
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { METRIC_META, paddedDomain, visibleMetrics, type buildReport } from "@/lib/reports";
 import { ORIGIN_LABEL, SUMMARY_RULE, reportAssessments, type ReportAssessment } from "@/lib/recorded/assessments";
-import { dayLabel, type Ratio } from "@/lib/rehab";
+import { dayLabel, excludedTicksNote, type Ratio } from "@/lib/rehab";
 import type { AstronautRecord, Mission } from "@/lib/demo";
 import { fmtAgg, fmtChange, tickDays } from "./format";
 
@@ -13,10 +13,10 @@ const PRINT_COLORS = { romDeg: "#0e7490", speedMs: "#a21caf", balanceIndex: "#15
 
 /** Light "paper" report used for the PDF preview and for printing (Save PDF). */
 export default function ReportDocument({
-  a, mission, report, scopeLabel, rehab, className = "", recorded = false,
+  a, mission, report, scopeLabel, rehab, className = "", recorded = false, excludedTicks = 0,
 }: {
   a: AstronautRecord; mission: Mission; report: Report; scopeLabel: string;
-  rehab: { completion: Ratio; adherence: Ratio; basis: "plan" | "recorded" } | null; className?: string;
+  rehab: { completion: Ratio; adherence: Ratio; basis: "plan" | "recorded" } | null; className?: string; excludedTicks?: number;
   /** Recorded mode: only sections supported by saved records are printed, and the document is labelled Recorded Data. */
   recorded?: boolean;
 }) {
@@ -104,8 +104,8 @@ export default function ReportDocument({
 
       {!recorded && report.latestSession && <LatestSession a={a} s={report.latestSession} />}
 
-      {(!recorded || rehab || report.latestSession) && <section className="avoid-break mt-4 grid gap-3 sm:grid-cols-2">
-        {(!recorded || rehab) && (rehab?.basis === "recorded" ? (
+      <section className="avoid-break mt-3 grid gap-3 sm:grid-cols-2">
+        {(rehab?.basis === "recorded" ? (
           <div className="rounded border border-slate-300 p-2 text-sm" data-testid="doc-rehab">
             <p className="font-semibold">Rehabilitation (Day {r.start}&ndash;{r.end}, recorded completions)</p>
             <p>Completion rate: {rehab.completion.kind === "value" ? `${rehab.completion.pct.toFixed(1)}% (${rehab.completion.num}/${rehab.completion.den} assigned items completed)` : "Unavailable"}</p>
@@ -114,8 +114,13 @@ export default function ReportDocument({
         ) : (
           <div className="rounded border border-slate-300 p-2 text-sm" data-testid="doc-rehab">
             <p className="font-semibold">Rehabilitation (through Day {r.end})</p>
-            <p>Completion rate: {rehab && rehab.completion.kind === "value" ? `${rehab.completion.pct.toFixed(1)}% (${rehab.completion.num}/${rehab.completion.den} items)` : "Unavailable"}</p>
-            <p>Weekly adherence (week of Day {r.end}): {rehab && rehab.adherence.kind === "value" ? `${rehab.adherence.pct.toFixed(1)}% (${rehab.adherence.num}/${rehab.adherence.den} sessions)` : "Unavailable"}</p>
+            {rehab ? (
+              <>
+                <p className="text-slate-600">Ground / Post-flight sample plan (simulated)</p>
+                <p>Completion rate: {rehab.completion.kind === "value" ? `${rehab.completion.pct.toFixed(1)}% (${rehab.completion.num}/${rehab.completion.den} items)` : "Unavailable"}</p>
+                <p>Weekly adherence (week of Day {r.end}): {rehab.adherence.kind === "value" ? `${rehab.adherence.pct.toFixed(1)}% (${rehab.adherence.num}/${rehab.adherence.den} sessions)` : "Unavailable"}</p>
+              </>
+            ) : <><p data-testid="doc-rehab-none">No plan assigned. No completion rate is calculated.</p>{excludedTicksNote(excludedTicks) && <p className="text-slate-600" data-testid="doc-rehab-excluded">{excludedTicksNote(excludedTicks)}</p>}</>}
           </div>
         ))}
         {(!recorded || report.latestSession) && <div className="rounded border border-slate-300 p-2 text-sm">
@@ -124,8 +129,8 @@ export default function ReportDocument({
             <ul className="list-disc pl-4">{report.insights.findings.map((f) => <li key={f.id}>{f.title}{f.tSec !== null ? ` at ${Math.floor(f.tSec / 60)}:${String(Math.round(f.tSec % 60)).padStart(2, "0")}` : ""} <span className="text-slate-500">({f.source === "calculated" ? "calculated" : f.source === "measured" ? "measured" : "seeded demo"})</span></li>)}</ul>
           ) : <p>No findings.</p>}
         </div>}
-      </section>}
-      <footer className="mt-4 border-t border-slate-300 pt-2 text-[12px] text-slate-500">
+      </section>
+      <footer className="mt-2 border-t border-slate-300 pt-1 text-[12px] text-slate-500">
         {recorded ? "Recorded data saved in the local AeroRehab database (manual entries and imported sensor CSV files, each labelled). Not a clinical document." : "Simulated data for demonstration. Not a clinical document."} Dates: mission Day 1 = Sep 30, 2026 (UTC). Units: degrees, m/s, steps/min, N, kPa, mm, %.
       </footer>
     </article>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NAV_ITEMS, isActive } from "@/lib/nav";
 import { useAstronaut } from "@/components/AstronautProvider";
+import { useRecorded } from "@/components/recorded/store";
 import { getSensorSummary } from "@/lib/demo";
 import { fmt } from "@/lib/format";
 import { usePlayback } from "@/components/settings/stores";
@@ -86,7 +87,11 @@ function ConnectionStatus() {
 export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { astronauts, mission, selectedId, select, dataMode, setDataMode } = useAstronaut();
+  const { astronauts, mission, selectedId, select, dataMode, setDataMode, recordedStatus, refreshRecorded } = useAstronaut();
+  const { snapshot: recSnapshot, loadedAt: recLoadedAt } = useRecorded();
+  const recordedStale = dataMode === "recorded" && recordedStatus === "error" && !!recSnapshot;
+  // A failed first load must never look like an empty database or fall back to Demo values.
+  const recordedUnavailable = dataMode === "recorded" && recordedStatus === "error" && !recSnapshot;
   const playback = usePlayback();
 
   useEffect(() => {
@@ -197,7 +202,29 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <main className="min-w-0 flex-1 p-4 sm:p-6">{children}</main>
+        <main className="min-w-0 flex-1 p-4 sm:p-6">
+          {recordedUnavailable ? (
+            <section role="alert" data-testid="recorded-unavailable" className="glass mx-auto max-w-2xl rounded-lg border border-amber-300/50 p-4">
+              <h1 className="text-xl font-semibold text-white">Recorded mode is unavailable here</h1>
+              <p className="mt-2 text-sm text-slate-100">The saved records could not be loaded, so nothing is shown and nothing can be saved. No Demo values are substituted.</p>
+              <p className="mt-2 text-sm text-slate-300">Recorded mode stores data in a local database file on the machine running the app. A hosted deployment without persistent storage cannot provide it. Run the app locally to use Recorded mode.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={refreshRecorded} className="rounded-md border border-cyan-300/70 bg-cyan-400/15 px-3 py-2 text-sm text-white hover:bg-cyan-400/25">Retry</button>
+                <button type="button" onClick={() => setDataMode("demo")} className="rounded-md border border-slate-400/50 px-3 py-2 text-sm text-slate-100 hover:bg-white/10">Switch to Demo (simulated)</button>
+              </div>
+            </section>
+          ) : (
+            <>
+              {recordedStale && (
+                <p role="alert" data-testid="recorded-stale" className="mb-3 rounded-md border border-amber-300/60 bg-amber-300/10 p-2 text-sm text-amber-100">
+                  Recorded data could not be refreshed. Showing the records last loaded{recLoadedAt ? ` at ${new Date(recLoadedAt).toISOString().slice(11, 19)} UTC` : ""}; they may be out of date, and changes made since then are not shown.{" "}
+                  <button type="button" onClick={refreshRecorded} className="underline">Retry</button>
+                </p>
+              )}
+              {children}
+            </>
+          )}
+        </main>
       </div>
     </div>
   );

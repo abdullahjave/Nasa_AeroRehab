@@ -3,15 +3,15 @@
 import { useMemo } from "react";
 import { useAstronaut } from "@/components/AstronautProvider";
 import { buildAlerts, summarize } from "@/lib/alerts";
-import { EXERCISES, programFor } from "@/lib/rehab";
+import { planItemText } from "@/lib/rehab";
 
 /** The single alert list for the selected astronaut and session. Overview and AI Insights both read this. */
 export function useAlerts() {
-  const { astronaut, session } = useAstronaut();
+  const { astronaut, session, dataMode } = useAstronaut();
   return useMemo(() => {
-    const p = programFor(astronaut);
-    const nextExercise = p ? `${EXERCISES[p.exercises[0]].name}, ${EXERCISES[p.exercises[0]].prescription}` : "no active plan";
+    // Only the simulated sample plan item (Demo) or "no plan assigned"; an educational equipment selection never reaches here.
+    const nextExercise = planItemText(astronaut, dataMode === "recorded" ? "recorded" : "demo");
     const alerts = buildAlerts(astronaut, session, { nextExercise });
     return { alerts, summary: summarize(alerts, session), astronaut, session };
-  }, [astronaut, session]);
+  }, [astronaut, session, dataMode]);
 }

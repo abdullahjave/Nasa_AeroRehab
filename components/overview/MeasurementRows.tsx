@@ -56,8 +56,8 @@ function DemoRows() {
           {a.distanceKm === null ? NA : <span className="font-semibold tabular-nums">{a.distanceKm} km</span>}
           <span className="text-slate-300"> &middot; {a.steps === null ? "steps unavailable" : `${(a.steps / 1000).toFixed(1)}k steps`} (goal {(a.stepGoal / 1000).toFixed(0)}k)</span>
         </Row>
-        <Row label="Rehabilitation program" href="/rehabilitation" linkLabel="Exercise plan">
-          {!rehab ? NA : (
+        <Row label="Rehabilitation program (Ground / Post-flight sample plan, simulated)" href="/rehabilitation" linkLabel="Exercise plan">
+          {!rehab ? <span className="font-semibold">No plan assigned</span> : (
             <>
               <span className="font-semibold">{rehab.program.statusLabel}</span>
               <span className="text-slate-300"> &middot; completion {rate?.kind === "value" ? `${rate.pct.toFixed(0)}%` : "unavailable"} &middot; week adherence {adh?.kind === "value" ? `${adh.pct.toFixed(0)}%` : "unavailable"} &middot; Week {rehab.selected.programWeek}/{rehab.program.totalWeeks}</span>

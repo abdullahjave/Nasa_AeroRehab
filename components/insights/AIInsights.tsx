@@ -13,7 +13,7 @@ import ReadingRows from "@/components/readings/ReadingRows";
 import { READINGS } from "@/lib/alerts/glossary";
 import { IREASON_TEXT, REDUCED_ROM_DEMO, insightView, type Finding, type IM } from "@/lib/insights";
 import { sessionEnd } from "@/lib/demo";
-import { EXERCISES, INSIGHT_EXERCISE_MATCH, programFor } from "@/lib/rehab";
+import { EXERCISES, INSIGHT_EXERCISE_MATCH, planItemText, programFor } from "@/lib/rehab";
 import { GUIDANCE_SOURCE, demoGuidance, mmss } from "@/lib/alerts";
 import AiRecommendationCard from "@/components/alerts/AiRecommendationCard";
 import AlertHistory from "@/components/alerts/AlertHistory";
@@ -40,7 +40,7 @@ export default function AIInsights() {
 function DemoAIInsights() {
   const { astronaut, session, findingId, selectFinding, selectKneeSide, setJointFocus, setRehabFocus } = useAstronaut();
   const program = programFor(astronaut);
-  const planItem = program ? `${EXERCISES[program.exercises[0]].name}, ${EXERCISES[program.exercises[0]].prescription}` : "no active plan";
+  const planItem = planItemText(astronaut, "demo"); // DemoAIInsights renders in Demo mode only
   const v = useMemo(() => insightView(astronaut, session), [astronaut, session]);
   // A selection from another session is ignored (cleared) and the first finding is used instead.
   const { alerts, summary } = useAlerts();
@@ -250,6 +250,13 @@ function DemoAIInsights() {
               })}
               <span className="absolute top-3 h-5 w-5 -translate-x-1/2 rounded-full border-2 border-cyan-300/70" style={{ left: "100%" }} title="Session end" />
             </div>
+            {selected && (
+              <div className="mt-1 rounded-md border border-cyan-300/60 bg-cyan-400/10 p-2 text-sm" role="status" aria-live="polite" data-testid="timeline-selected">
+                <p className="font-semibold text-white">Selected: {selected.title}{selected.tSec != null ? ` at ${mmss(selected.tSec)}` : " (whole session)"}</p>
+                <p className="text-[13px] text-slate-200">{selected.text}</p>
+                <p className="text-[13px] text-slate-300">{SOURCE[selected.source].label} &middot; {session.label} &middot; {v.context.side === "left" ? "Left" : "Right"} knee, {v.context.protocol}. No measurement is shown for this moment; none is estimated.</p>
+              </div>
+            )}
             {v.events.length === 0 ? (
               <p className="mt-2 text-sm text-slate-300">No events in this session.</p>
             ) : (

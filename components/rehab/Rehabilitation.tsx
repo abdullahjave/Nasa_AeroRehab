@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useAstronaut } from "@/components/AstronautProvider";
 import Panel, { Chip } from "@/components/ui/Panel";
@@ -12,7 +12,7 @@ import { useRehabEdits } from "./useRehabEdits";
 import KnowledgeCheck from "./KnowledgeCheck";
 import CountermeasureGuide from "./CountermeasureGuide";
 import MilestoneBadge from "./MilestoneBadge";
-import { DEMO_DAY, dayLabel, dayToDate, planMilestone, programFor, scheduleOf, weekStartOf, weekdayShort, type DayStatus, type ExerciseId, type Ratio } from "@/lib/rehab";
+import { CONTEXTS, CONTEXT_LABEL, DEMO_DAY, NO_PLAN, NO_PLAN_CONTEXT, PLAN_SOURCE_LABEL, SAMPLE_GROUND_ACTIVITIES, dayLabel, dayToDate, eligiblePlan, excludedTicksNote, planMilestone, sampleActivity, scheduleOf, weekStartOf, weekdayShort, type DayStatus, type ExerciseContext, type ExerciseId, type Ratio } from "@/lib/rehab";
 
 const pctText = (r: Ratio) => (r.kind === "value" ? `${r.pct.toFixed(0)}%` : "Unavailable");
 const STATUS: Record<DayStatus, { label: string; icon: string; cls: string }> = {
@@ -35,7 +35,110 @@ export default function Rehabilitation({ assets }: { assets: Record<string, bool
 function RehabPage({ assets }: { assets: Record<string, boolean> }) {
   const { astronaut, rehabFocus, dataMode } = useAstronaut();
   const recorded = dataMode === "recorded";
-  const program = programFor(astronaut);
+  const mode = recorded ? "recorded" : "demo";
+  const { edits, legacy } = useRehabEdits(astronaut.id);
+  // The context is a DISPLAY choice only (not the astronaut's real environment or medical status). It defaults to Ground / Post-flight Rehab,
+  // and an "Open exercise" link from AI Insights (a sample plan item) switches back to it. Remounted per astronaut, so it is never carried over.
+  const [pick, setPick] = useState<{ ctx: ExerciseContext; at: number } | null>(null);
+  const focusAt = rehabFocus && rehabFocus.astronautId === astronaut.id ? rehabFocus.at : 0;
+  const ctx: ExerciseContext = pick && pick.at >= focusAt ? pick.ctx : "ground";
+  const plan = eligiblePlan(astronaut, mode, ctx);
+  const savedEntries = Object.keys(edits).length + legacy.count;
+
+  return (
+    <div className="space-y-3">
+      <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
+        <div>
+          <h1 className="text-xl font-semibold text-white sm:text-2xl">Rehabilitation <span className="font-normal text-slate-300">&ndash; Exercise Plan</span></h1>
+          <p className="text-sm text-slate-300">{astronaut.profile.displayName} &middot; {CONTEXT_LABEL[ctx]} &middot; {plan ? `${plan.program.name} (${PLAN_SOURCE_LABEL[plan.source].toLowerCase()})` : NO_PLAN} &middot; Demo date Day {DEMO_DAY} ({dayLabel(DEMO_DAY)}, {dayToDate(DEMO_DAY).getUTCFullYear()})</p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-sm font-medium text-amber-200">{recorded ? "Recorded Data" : "Simulated Data"}</span>
+      </header>
+
+      <ContextSelector value={ctx} onChange={(c) => setPick({ ctx: c, at: stamp() })} />
+
+      {recorded && <p className="rounded-md border border-slate-400/40 bg-slate-400/10 px-3 py-2 text-sm text-slate-200">Recorded mode: only exercise plans explicitly saved for this astronaut count here. This app cannot save a recorded plan yet, so none are shown. The simulated sample plan is Demo content and is not counted.</p>}
+      {recorded && savedEntries > 0 && (
+        <p role="status" data-testid="legacy-rehab" className="rounded-md border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-sm text-amber-100">
+          {excludedTicksNote(savedEntries)}
+        </p>
+      )}
+
+      {plan ? <SamplePlanView assets={assets} /> : <NoPlanView context={ctx} recorded={recorded} assets={assets} />}
+    </div>
+  );
+}
+
+/** Two-option context switch (radio group; arrow keys move between the options). Display only: it changes nothing about the astronaut. */
+function ContextSelector({ value, onChange }: { value: ExerciseContext; onChange: (c: ExerciseContext) => void }) {
+  const move = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(e.key)) return;
+    e.preventDefault();
+    const next = CONTEXTS[(CONTEXTS.indexOf(value) + 1) % CONTEXTS.length];
+    onChange(next);
+    queueMicrotask(() => document.getElementById(`ctx-${next}`)?.focus());
+  };
+  return (
+    <section aria-labelledby="ctx-label" className="glass rounded-lg px-3 py-2">
+      <p id="ctx-label" className="text-sm font-semibold text-white">Exercise context</p>
+      <div role="radiogroup" aria-labelledby="ctx-label" className="mt-1.5 grid gap-2 sm:grid-cols-2">
+        {CONTEXTS.map((c) => (
+          <button key={c} id={`ctx-${c}`} type="button" role="radio" aria-checked={value === c} tabIndex={value === c ? 0 : -1} onClick={() => onChange(c)} onKeyDown={move}
+            className={`rounded-md border px-3 py-2 text-left text-base font-medium ${value === c ? "border-cyan-300 bg-cyan-400/25 text-white" : "border-cyan-400/30 text-slate-200 hover:bg-white/10"}`}>
+            {CONTEXT_LABEL[c]}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1.5 text-sm text-slate-300">Changes what is shown on this page. It does not change the astronaut&rsquo;s actual mission environment or medical status.</p>
+    </section>
+  );
+}
+
+/** Nothing is assigned for this data mode and context. Equipment information (Spaceflight) or sample activities (Ground) show below, never counted. */
+function NoPlanView({ context, recorded, assets }: { context: ExerciseContext; recorded: boolean; assets: Record<string, boolean> }) {
+  const { astronaut } = useAstronaut();
+  return (
+    <div className="space-y-3">
+      <Panel id="r-plan-empty" title={`${CONTEXT_LABEL[context]} plan`} icon="walk">
+        <div className="rounded-md border border-dashed border-cyan-400/30 p-4" data-testid="no-plan">
+          <p className="text-lg font-semibold text-white">{NO_PLAN_CONTEXT}</p>
+          <p className="mt-1 text-sm text-slate-300">
+            {recorded
+              ? "Only explicitly saved assignments for this astronaut and context are shown, and none have been saved."
+              : context === "spaceflight" ? "Demo mode has no simulated spaceflight plan. The equipment guide below is information only, not assigned work." : "No simulated plan exists for this astronaut."}
+          </p>
+          <dl className="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
+            <div><dt className="text-slate-400">Scope</dt><dd className="text-white">{CONTEXT_LABEL[context]} &middot; {recorded ? "Recorded" : "Demo"} &middot; {astronaut.profile.displayName}</dd></div>
+            <div><dt className="text-slate-400">Completion</dt><dd className="font-semibold text-amber-200" data-testid="no-plan-completion">{NO_PLAN}</dd></div>
+            <div><dt className="text-slate-400">Eligible assignments</dt><dd className="text-white">0</dd></div>
+          </dl>
+        </div>
+      </Panel>
+      {context === "spaceflight" ? <CountermeasureGuide /> : (
+        <>
+          <Panel id="r-sample" title="Sample ground rehabilitation activities" icon="walk">
+            <p className="text-sm text-amber-100">Reference only. These are sample activities, not assigned to this astronaut and not a recommendation. They have no sets, repetitions, tick or completion state, and are not counted.</p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3" data-testid="sample-activities">
+              {SAMPLE_GROUND_ACTIVITIES.map(sampleActivity).map((x) => (
+                <li key={x.id} className="glass flex items-stretch gap-3 rounded-md p-2">
+                  <div className="h-20 w-16 shrink-0 overflow-hidden rounded bg-gradient-to-b from-[#0c2347] to-[#050d1f] sm:w-24"><ExerciseVisual id={x.id} hasImage={!!assets[x.id]} /></div>
+                  <div className="min-w-0"><p className="text-base font-semibold text-white">{x.name}</p><p className="text-sm text-slate-300">{x.info}</p></div>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+          <KnowledgeCheck astronautId={astronaut.id} />
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Demo + Ground / Post-flight Rehab: the simulated sample plan, the only eligible assignments today. */
+function SamplePlanView({ assets }: { assets: Record<string, boolean> }) {
+  const { astronaut, rehabFocus } = useAstronaut();
+  const program = eligiblePlan(astronaut, "demo", "ground")?.program ?? null;
+  const recorded = false;
   const focusEx = rehabFocus && rehabFocus.astronautId === astronaut.id ? (rehabFocus.exerciseId as ExerciseId) : null;
   // Selection is tagged with the astronaut, so switching astronaut never carries the previous plan selection.
   const [sel, setSel] = useState<{ aid: string; weekStart: number; day: number; at: number } | null>(null);
@@ -46,7 +149,6 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
   const focusActive = !!focusEx && (!sel || sel.at <= (rehabFocus?.at ?? 0));
   const [openInfo, setOpenInfo] = useState<string | null>(null);
   const { view, completions, setEdit } = useRehab(astronaut, cur.day, cur.weekStart);
-  const { legacy } = useRehabEdits(astronaut.id);
 
   if (!program || !view) {
     return <Panel id="rehab-empty" title="Rehabilitation" icon="check"><p className="text-sm text-amber-200">No rehabilitation program for this astronaut.</p></Panel>;
@@ -72,26 +174,6 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
 
   return (
     <div className="space-y-3">
-      <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
-        <div>
-          <h1 className="text-xl font-semibold text-white sm:text-2xl">Rehabilitation <span className="font-normal text-slate-300">&ndash; Exercise Plan</span></h1>
-          <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {program.name} &middot; Demo date Day {DEMO_DAY} ({dayLabel(DEMO_DAY)}, {year})</p>
-        </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">{recorded ? "Recorded Data" : "Simulated Data"}</span>
-      </header>
-
-      {recorded && <p className="rounded-md border border-slate-400/40 bg-slate-400/10 px-3 py-2 text-xs text-slate-200">Recorded mode: the exercise plan is demo content, and only completions ticked in this browser are counted. Simulated recovery scores and progress are not shown. Demo and Recorded completions are stored separately.</p>}
-      {recorded && legacy.count > 0 && (
-        <div role="status" data-testid="legacy-rehab" className="flex flex-wrap items-center gap-2 rounded-md border border-amber-300/40 bg-amber-300/10 px-3 py-2 text-xs text-amber-100">
-          {legacy.imported
-            ? <span>{legacy.count} earlier completion entr{legacy.count === 1 ? "y" : "ies"} (saved before Demo and Recorded were separated) {legacy.count === 1 ? "was" : "were"} imported into Recorded for {astronaut.profile.displayName}. The original entries are still kept as legacy data.</span>
-            : <>
-                <span>{legacy.count} earlier completion entr{legacy.count === 1 ? "y" : "ies"} for {astronaut.profile.displayName} {legacy.count === 1 ? "was" : "were"} saved before Demo and Recorded were separated. It is not known which mode they came from, so they are kept as legacy data and are NOT counted in Recorded (including Reports).</span>
-                <button type="button" onClick={legacy.importIntoRecorded} className="rounded border border-amber-300/60 px-2 py-0.5 text-amber-50 hover:bg-white/10">Import into Recorded</button>
-              </>}
-        </div>
-      )}
-
       {/* Top row */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_1.2fr_1fr_1fr_1fr]">
         <Panel id="r-status" title="Program Status" icon="check">
@@ -135,6 +217,7 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
         <div className="grid content-start gap-3">
         <Panel id="r-plan" title={`${view.selected.isToday ? "Today's" : `${weekdayShort(view.selected.day)} ${dayLabel(view.selected.day)}`} Exercise Plan`} icon="walk"
           action={s ? <span className={`text-xs font-semibold ${doneCount === s.assignments.length ? "text-emerald-300" : "text-slate-200"}`}>({doneCount} / {s.assignments.length} Completed)</span> : undefined}>
+          <p className="mb-2 text-sm text-amber-100" data-testid="sample-label">Sample ground rehabilitation activities from a simulated plan. They are not a recommendation for any astronaut. Scope: Ground / Post-flight Rehab &middot; Demo &middot; {astronaut.profile.displayName}.</p>
           {!s ? (
             <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-dashed border-cyan-400/30 p-6 text-center">
               <p className="text-base font-semibold text-white">No plan for this day</p>
@@ -273,7 +356,6 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
         </div>}
       </div>
 
-      <CountermeasureGuide />
     </div>
   );
 }

@@ -134,15 +134,14 @@ export type RecordedRehabScope = {
 
 /**
  * Recorded mode: rehab completion for a report scope, or null when nothing was recorded in it.
- * The exercise plan is demo content in recorded mode, so a scheduled assignment alone is NOT a recorded one. A scheduled session
- * (on or before the demo date, inside the range) counts only when the astronaut saved completion state for at least one of its
- * assignments (a tick, or an explicit un-tick, stored as `false`). Then ALL assignments of that session are "assigned", so a
- * session with every item un-ticked is a valid 0% (0 / assigned). `edits` is the flat assignmentId -> done map from useRehabEdits.
+ * `eligible` must be the sessions of an explicitly saved (recorded) plan: use eligibleSessions(a, "recorded", context). The simulated sample
+ * plan is NOT eligible in Recorded mode, so with no recorded plan this is always null and ticks stored against sample assignments are never
+ * counted (they stay in storage, untouched). A scheduled session (on or before the demo date, inside the range) counts only when the astronaut saved
+ * completion state for at least one of its assignments (a tick, or an explicit un-tick stored as `false`). Then ALL assignments of that session are
+ * "assigned", so a session with every item un-ticked is a valid 0% (0 / assigned). `edits` is the flat assignmentId -> done map from useRehabEdits.
  */
-export function recordedRehabInScope(a: AstronautRecord, edits: Record<string, boolean>, range: { start: number; end: number }): RecordedRehabScope | null {
-  const p = programFor(a);
-  if (!p) return null;
-  const sessions = scheduleOf(a, p).filter((s) => s.missionDay >= range.start && s.missionDay <= Math.min(range.end, DEMO_DAY));
+export function recordedRehabInScope(eligible: ScheduledSession[], edits: Record<string, boolean>, range: { start: number; end: number }): RecordedRehabScope | null {
+  const sessions = eligible.filter((s) => s.missionDay >= range.start && s.missionDay <= Math.min(range.end, DEMO_DAY));
   const touched = sessions.filter((s) => s.assignments.some((x) => Object.prototype.hasOwnProperty.call(edits, x.id)));
   if (touched.length === 0) return null;
   const items = touched.flatMap((s) => s.assignments);

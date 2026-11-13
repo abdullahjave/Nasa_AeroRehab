@@ -133,6 +133,7 @@ Alert rules evaluate **knee movement only**: range of motion against a personal 
 alert rule**, so Overview and AI Insights list them as **Not assessed**, and a green "All Good" is labelled "for knee range of motion only". Their values are still shown, without a status.
 
 ## Release limitations
+- **Provenance and project status:** see `docs/PROVENANCE.md` (selected challenge not yet confirmed; no datasets used; Recorded mode is local only).
 - **Not a clinical or flight tool.** Alerts use a demo rule, not clinically validated limits, and guidance is not clinician-reviewed. Do not use for medical decisions or enter real patient data: there is no sign-in or access control.
 - **No live sensors.** Demo data is simulated. Recorded data is typed in by hand or imported from CSV files (an imported file, not a live feed). There is no device or live-sensor integration.
 - **Local, single-user.** Data is in a local SQLite file and this browser's storage (Demo alert history and rehab ticks are per browser).

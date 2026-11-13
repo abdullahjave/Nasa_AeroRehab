@@ -10,8 +10,11 @@ const CLIENT_TIMEOUT_MS = 28_000; // a little longer than the server limit
 type State =
   | { phase: "idle" }
   | { phase: "loading" }
-  | { phase: "ai"; explanation: GeminiExplanation }
-  | { phase: "builtin"; reason: string };
+  | { phase: "ai"; explanation: GeminiExplanation; at: Date; ms: number }
+  | { phase: "builtin"; reason: string; at: Date; ms: number };
+
+/** "14:32:16 UTC, 3.2 s" - when the response arrived and how long the request took. */
+const stampText = (at: Date, ms: number) => `${at.toISOString().slice(11, 19)} UTC, ${(ms / 1000).toFixed(1)} s`;
 
 // Plain reasons for the fallback. They never name the provider and never show raw errors.
 const REASON: Record<string, string> = {
@@ -52,7 +55,8 @@ export default function AiExplain({ alert }: { alert: Alert }) {
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; c.abort(); }, CLIENT_TIMEOUT_MS);
     setState({ phase: "loading" });
-    const done = (s: State) => { if (current.current === mine && ctl.current === c) setState(s); };
+    const t0 = performance.now();
+    const done = (s: (at: Date, ms: number) => State) => { if (current.current === mine && ctl.current === c) setState(s(new Date(), performance.now() - t0)); };
     try {
       const res = await fetch("/api/explain", {
         method: "POST",
@@ -61,10 +65,11 @@ export default function AiExplain({ alert }: { alert: Alert }) {
         signal: c.signal,
       });
       const json = (await res.json().catch(() => null)) as { ok?: boolean; error?: string; explanation?: GeminiExplanation } | null;
-      if (res.ok && json?.ok && json.explanation) done({ phase: "ai", explanation: json.explanation });
-      else done({ phase: "builtin", reason: REASON[json?.error ?? ""] ?? "A recommendation is not available for this alert." });
+      const explanation = json?.explanation;
+      if (res.ok && json?.ok && explanation) done((at, ms) => ({ phase: "ai", explanation, at, ms }));
+      else done((at, ms) => ({ phase: "builtin", reason: REASON[json?.error ?? ""] ?? "A recommendation is not available for this alert.", at, ms }));
     } catch {
-      done({ phase: "builtin", reason: timedOut ? REASON.timeout : "The recommendation could not be reached." });
+      done((at, ms) => ({ phase: "builtin", reason: timedOut ? REASON.timeout : "The recommendation could not be reached.", at, ms }));
     } finally {
       clearTimeout(timer);
       if (ctl.current === c) busy.current = false;
@@ -85,9 +90,10 @@ export default function AiExplain({ alert }: { alert: Alert }) {
         {state.phase === "ai" && (
           <div className="space-y-3 rounded-lg border border-violet-300/50 bg-violet-950/60 p-4 text-slate-50" data-testid="ai-result">
             <p className="flex flex-wrap items-center gap-2 text-base font-semibold text-white">
-              <span aria-hidden="true">&#10024;</span> AI Recommendation
-              <span className="rounded-full border border-violet-300/50 bg-violet-400/20 px-2 py-0.5 text-xs font-medium text-violet-100">Status: {alert.label}</span>
+              <span aria-hidden="true">&#10024;</span> AI-generated recommendation
+              <span className="rounded-full border border-violet-300/50 bg-violet-400/20 px-2 py-0.5 text-xs font-medium text-violet-100">App status: {alert.label}</span>
             </p>
+            <p className="text-xs text-violet-200" data-testid="ai-generated-at">Generated {stampText(state.at, state.ms)}. The status, numbers and next action above are calculated by the app, not by the AI.</p>
             <section>
               <h4 className="text-xs font-semibold uppercase tracking-wide text-violet-200">What your data shows</h4>
               <p className="mt-0.5 text-base leading-relaxed">{state.explanation.summary}</p>
@@ -111,8 +117,9 @@ export default function AiExplain({ alert }: { alert: Alert }) {
         )}
         {state.phase === "builtin" && (
           <div className="rounded-md border border-slate-400/40 bg-slate-400/10 p-3" data-testid="ai-builtin">
-            <p className="text-sm font-semibold text-slate-100">Built-in guidance</p>
+            <p className="text-sm font-semibold text-slate-100">Built-in guidance (not AI-generated)</p>
             <p className="text-xs text-amber-200">AI recommendation unavailable: {state.reason}</p>
+            <p className="text-xs text-slate-300" data-testid="builtin-at">Tried {stampText(state.at, state.ms)}. This text is written by the app, not by an AI.</p>
             <p className="mt-1 text-sm text-slate-100">{alert.explanation}</p>
             <p className="mt-1 text-sm text-slate-100">Next step: {alert.action.label}.</p>
           </div>

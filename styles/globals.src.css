@@ -128,6 +128,11 @@ select, textarea, input:not([type="checkbox"], [type="radio"], [type="range"], [
   * { box-shadow: none !important; text-shadow: none !important; }
   .report-doc { box-shadow: none !important; max-width: none !important; padding: 0 !important; border-radius: 0 !important; }
   .avoid-break { break-inside: avoid; }
+  /* Keep a one-page report on one page: tighter vertical rhythm only; text and chart sizes are unchanged. */
+  .report-doc .mt-4 { margin-top: 0.5rem !important; }
+  .report-doc .mt-3 { margin-top: 0.4rem !important; }
+  .report-doc > header { padding-bottom: 0.4rem !important; }
+  .report-doc footer { break-inside: avoid; }
   thead { display: table-header-group; }
   tr { break-inside: avoid; }
 }

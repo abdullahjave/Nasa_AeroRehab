@@ -40,16 +40,20 @@ export default function AiRecommendationCard({ alert, variant, selected = false 
 
   return (
     <article
-      className={`glass rounded-lg border-l-4 border-l-violet-400/70 p-3 ${selected ? "ring-2 ring-violet-300/70" : ""}`}>
+      aria-label={selected ? `${alert.title} (selected)` : undefined}
+      data-selected={selected ? "true" : undefined}
+      className={`glass rounded-lg border-l-4 p-3 ${selected ? "border-l-cyan-300 bg-cyan-400/10 ring-2 ring-cyan-300" : "border-l-violet-400/70"}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="inline-flex flex-wrap items-center gap-2">
           <AlertBadge severity={alert.severity} label={alert.label} simulated={!!alert.simulatedScenario} />
           {alert.severity === "good" && alert.kind === "health" && <span className="text-xs text-slate-300" data-testid="good-scope">for {/^range of motion/i.test(alert.metric) ? "knee range of motion" : alert.metric.toLowerCase()} only</span>}
-          {alert.geminiEligible && <span className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[12px] font-medium text-violet-100">AI Recommendation</span>}
+          {alert.geminiEligible && <span className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[12px] font-medium text-violet-100">AI recommendation available on request</span>}
         </span>
-        {!overview && (
-          <button type="button" aria-pressed={selected} onClick={() => selectFinding(alert.key)} className="rounded px-1 text-[13px] text-cyan-300 hover:text-white hover:underline">{selected ? "Selected" : "Select"}</button>
-        )}
+        {!overview && (selected ? (
+          <span data-testid="selected-badge" className="rounded-full border border-cyan-300 bg-cyan-400/20 px-2.5 py-0.5 text-[13px] font-semibold text-cyan-50">&#10003; Selected &middot; details shown in Key Insight</span>
+        ) : (
+          <button type="button" onClick={() => selectFinding(alert.key)} className="rounded-md border border-cyan-400/50 px-2.5 py-0.5 text-[13px] text-cyan-200 hover:bg-cyan-400/15 hover:text-white">Select to view details</button>
+        ))}
       </div>
       {/* The title is kept for screen readers but not repeated visually when "What changed" already starts with it. */}
       <h3 className={repeats ? "sr-only" : "mt-1.5 text-base font-semibold text-white"}>{alert.title}</h3>

@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useAstronaut } from "@/components/AstronautProvider";
 import Panel from "@/components/ui/Panel";
 import { useRehab } from "@/components/rehab/useRehab";
+import { useRehabEdits } from "@/components/rehab/useRehabEdits";
 import MilestoneBadge from "@/components/rehab/MilestoneBadge";
-import { DEMO_DAY, dayLabel, todaysMilestone, todaysTasks, weekStartOf } from "@/lib/rehab";
+import { DEMO_DAY, dayLabel, excludedTicksNote, todaysMilestone, todaysTasks, weekStartOf } from "@/lib/rehab";
 
 const linkCls = "mt-3 inline-flex w-fit items-center gap-1 rounded-md border border-cyan-300/70 bg-cyan-400/15 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-400/25";
 
@@ -15,19 +16,22 @@ const linkCls = "mt-3 inline-flex w-fit items-center gap-1 rounded-md border bor
  * undo happen in the exercise plan; this card only shows progress and links there.
  */
 export default function TodaysTasksCard() {
-  const { astronaut } = useAstronaut();
+  const { astronaut, dataMode } = useAstronaut();
   const { completions } = useRehab(astronaut, DEMO_DAY, weekStartOf(DEMO_DAY));
-  const t = todaysTasks(astronaut, completions);
+  const { edits, legacy } = useRehabEdits(astronaut.id);
+  const excluded = dataMode === "recorded" ? excludedTicksNote(Object.keys(edits).length + legacy.count) : null;
+  const t = todaysTasks(astronaut, completions, DEMO_DAY, dataMode === "recorded" ? "recorded" : "demo");
   const milestone = todaysMilestone(t);
   const complete = t.kind === "tasks" && t.done === t.total;
   return (
     <Panel id="tasks" title="Today's Tasks" icon="check">
       {t.kind === "none" ? (
         <div className="rounded-md border border-dashed border-cyan-400/30 p-3">
-          <p className="text-sm font-semibold text-white">No activities scheduled today.</p>
+          <p className="text-sm font-semibold text-white">{t.reason === "no-program" ? "No plan assigned." : "No activities scheduled today."}</p>
           <p className="text-xs text-slate-300">
-            {t.reason === "no-program" ? "This astronaut has no active rehabilitation plan." : `Nothing is scheduled on Day ${t.day} (${dayLabel(t.day)}).`}
+            {t.reason === "no-program" ? (dataMode === "recorded" ? "No exercise plan has been saved for this astronaut in Recorded mode." : "This astronaut has no active rehabilitation plan.") : `Nothing is scheduled on Day ${t.day} (${dayLabel(t.day)}).`}
           </p>
+          {excluded && <p className="mt-2 text-xs text-amber-100" data-testid="tasks-excluded">{excluded}</p>}
         </div>
       ) : (
         <>
@@ -35,6 +39,7 @@ export default function TodaysTasksCard() {
             <p className="text-sm font-semibold text-white" aria-live="polite">{t.done} of {t.total} complete</p>
             <span className="text-[13px] text-slate-400">Day {t.day} &middot; {dayLabel(t.day)}</span>
           </div>
+          <p className="text-[13px] text-slate-400">Scope: {t.scope}, {dataMode === "recorded" ? "recorded plan" : "sample plan (simulated)"}</p>
           <div className="mt-1.5 h-1.5 rounded-full bg-slate-700/60" role="progressbar" aria-label="Today's exercise progress" aria-valuemin={0} aria-valuemax={t.total} aria-valuenow={t.done} aria-valuetext={`${t.done} of ${t.total} complete`}>
             <div className="h-full rounded-full bg-emerald-400" style={{ width: `${t.total ? (t.done / t.total) * 100 : 0}%` }} />
           </div>

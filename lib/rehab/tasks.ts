@@ -1,26 +1,32 @@
-import { DEMO_DAY, programFor, scheduleOf } from "./records";
+import { DEMO_DAY } from "./records";
+import { allEligibleSessions, CONTEXT_LABEL, type DataModeName, type ExerciseContext } from "./context";
 import { EXERCISES } from "./fixtures";
 import type { Completions, ExerciseId } from "./types";
 import type { AstronautRecord } from "../demo/types";
 
-export type TodayTask = { assignmentId: string; exerciseId: ExerciseId; name: string; prescription: string; done: boolean };
+export type TodayTask = { assignmentId: string; exerciseId: ExerciseId; name: string; prescription: string; done: boolean; context: ExerciseContext };
 export type TodayTasks =
-  | { kind: "tasks"; day: number; tasks: TodayTask[]; done: number; total: number }
+  | { kind: "tasks"; day: number; tasks: TodayTask[]; done: number; total: number; scope: string }
   | { kind: "none"; day: number; reason: "no-program" | "no-session-today" };
 
 /**
- * The exercises actually assigned for the demo mission day, with their current completion state. Uses the same program,
- * schedule and completion records as the Rehabilitation page; nothing is invented when there is no assignment.
+ * The ELIGIBLE assignments for the demo mission day (see lib/rehab/context.ts), with their current completion state. Uses the same eligible
+ * sessions and completion records as the Rehabilitation page; nothing is invented when there is no assignment. `mode` defaults to Demo.
+ * In Recorded mode no plan can be assigned yet, so the result is "no-program" ("No plan assigned"), not 0% or 100%.
  */
-export function todaysTasks(a: AstronautRecord, completions: Completions, day: number = DEMO_DAY): TodayTasks {
-  const p = programFor(a);
-  if (!p) return { kind: "none", day, reason: "no-program" };
-  const s = scheduleOf(a, p).find((x) => x.missionDay === day);
-  if (!s || s.assignments.length === 0) return { kind: "none", day, reason: "no-session-today" };
-  const tasks = s.assignments.map((as) => ({
-    assignmentId: as.id, exerciseId: as.exerciseId, name: EXERCISES[as.exerciseId].name, prescription: EXERCISES[as.exerciseId].prescription, done: !!completions[as.id],
-  }));
-  return { kind: "tasks", day, tasks, done: tasks.filter((t) => t.done).length, total: tasks.length };
+export function todaysTasks(a: AstronautRecord, completions: Completions, day: number = DEMO_DAY, mode: DataModeName = "demo"): TodayTasks {
+  const groups = allEligibleSessions(a, mode);
+  if (groups.length === 0) return { kind: "none", day, reason: "no-program" };
+  const tasks: TodayTask[] = [];
+  for (const g of groups) {
+    const s = g.sessions.find((x) => x.missionDay === day);
+    for (const as of s?.assignments ?? []) {
+      tasks.push({ assignmentId: as.id, exerciseId: as.exerciseId, name: EXERCISES[as.exerciseId].name, prescription: EXERCISES[as.exerciseId].prescription, done: completions[as.id] === true, context: g.context });
+    }
+  }
+  if (tasks.length === 0) return { kind: "none", day, reason: "no-session-today" };
+  const scope = [...new Set(tasks.map((t) => CONTEXT_LABEL[t.context]))].join(" + ");
+  return { kind: "tasks", day, tasks, done: tasks.filter((t) => t.done).length, total: tasks.length, scope };
 }
 
 export type Milestone = { id: "daily-plan"; label: "Daily plan complete"; done: number; total: number; earned: boolean };
