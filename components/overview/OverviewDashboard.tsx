@@ -47,7 +47,7 @@ export default function OverviewDashboard() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-4">
-      <p className="eyebrow !text-cyan-200/80">{CHALLENGE.event} &middot; {CHALLENGE.title}</p>
+      <p className="eyebrow !text-[11px] !text-cyan-200/80 sm:!text-xs">{CHALLENGE.event} &middot; {CHALLENGE.title}</p>
       <header className="!mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex min-w-0 items-center gap-3">
           <div className="h-12 w-11 shrink-0 overflow-hidden rounded-md bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/30"><CrewPortrait profile={p} className="h-full w-full text-lg" /></div>

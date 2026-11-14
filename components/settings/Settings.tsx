@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "@/components/ui/Select";
 import { useEffect, useRef, useState } from "react";
 import Panel from "@/components/ui/Panel";
 import AstronautImage from "@/components/graphics/AstronautImage";
@@ -257,12 +258,11 @@ function SystemPanel() {
   return (
     <Panel id="set-system" title="System & Demo Controls" icon="timeline" className="h-full">
       <div className="space-y-2 text-xs">
-        <label className="flex flex-col gap-1">
-          <span className="text-slate-400">Scenario (session replayed on every page)</span>
-          <select value={session.id} onChange={(e) => { selectSession(e.target.value); setNote(""); }} className="rounded border border-cyan-400/40 bg-navy-900 px-1.5 py-1 text-white">
-            {sessions.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
-          </select>
-        </label>
+        <div className="flex flex-col gap-1">
+          <span id="scenario-label" className="text-slate-400">Scenario (session replayed on every page)</span>
+          <Select ariaLabelledBy="scenario-label" value={session.id} onChange={(v) => { selectSession(v); setNote(""); }}
+            options={sessions.map((s) => ({ value: s.id, label: s.label }))} />
+        </div>
         <p className="text-[13px] text-slate-300">Selected: <span className="text-white">{session.label}</span> &middot; Day {session.missionDay}, {session.startedAt} &middot; {session.scenarioEvents.length} seeded event{session.scenarioEvents.length === 1 ? "" : "s"} &middot; {hasRecording ? "pressure recording available" : "no pressure recording"}</p>
         <p className="flex items-center gap-1.5 text-white" aria-live="polite"><span className={`led ${running ? "" : "led-warn"}`} aria-hidden="true" />Playback: {running ? "Running" : "Paused"} <span className="text-slate-500">(simulated)</span></p>
         <div className="flex flex-wrap gap-2">

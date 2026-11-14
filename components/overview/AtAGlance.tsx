@@ -10,7 +10,7 @@ import { AnimatedNumber } from "@/components/ui/motion";
 import { C } from "@/components/ui/chart";
 import { DEMO_DAY, todaysTasks, weekStartOf } from "@/lib/rehab";
 
-const TILE = "glass lift group flex min-w-0 items-center gap-3 rounded-xl p-4";
+const TILE = "glass lift group flex min-w-0 items-center gap-3 rounded-xl p-3 sm:p-4";
 const GO = "mt-1 inline-block text-[13px] text-cyan-300 transition-transform group-hover:translate-x-0.5";
 
 /**
@@ -29,9 +29,9 @@ export default function AtAGlance() {
   const flagged = p?.severity === "action";
 
   return (
-    <section aria-label="At a glance" className="stagger grid gap-3 md:grid-cols-3">
+    <section aria-label="At a glance" className="stagger grid grid-cols-2 gap-3 md:grid-cols-3">
       <Link href="/ai-insights" onClick={() => { if (p?.action.kind === "review-session") selectFinding(p.key); }}
-        className={`${TILE} border ${tone.box} ${flagged ? "glow-action" : ""}`}>
+        className={`${TILE} col-span-2 md:col-span-1 border ${tone.box} ${flagged ? "glow-action" : ""}`}>
         {/* Keyed on the label so the badge pops when Replay crosses from All Good to Action Required. */}
         <span key={p?.label ?? "none"} className={`status-pop flex h-12 w-12 shrink-0 items-center justify-center rounded-full border ${tone.box}`}>
           <SeverityIcon severity={p?.severity ?? "neutral"} className="h-7 w-7" />
@@ -72,11 +72,11 @@ export default function AtAGlance() {
       <Link href="/rehabilitation" className={TILE}>
         {t.kind === "tasks" ? (
           <>
-            <GaugeRing value={t.done} max={t.total} color={C.green} size="h-14 w-14" ariaLabel={`${t.done} of ${t.total} tasks complete`} />
+            <GaugeRing value={t.done} max={t.total} color={C.green} size="h-11 w-11 sm:h-14 sm:w-14" ariaLabel={`${t.done} of ${t.total} tasks complete`} />
             <span className="min-w-0">
               <span className="eyebrow block">Today&rsquo;s plan</span>
-              <span className="block text-xl font-semibold leading-tight text-white"><AnimatedNumber value={t.done} /> of {t.total} done</span>
-              <span className={GO}>Open today&rsquo;s plan &rarr;</span>
+              <span className="block text-lg font-semibold leading-tight text-white sm:text-xl"><AnimatedNumber value={t.done} /> of {t.total} done</span>
+              <span className={GO}><span className="sm:hidden">Open plan</span><span className="hidden sm:inline">Open today&rsquo;s plan</span> &rarr;</span>
             </span>
           </>
         ) : (
