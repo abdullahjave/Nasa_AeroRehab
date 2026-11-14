@@ -21,7 +21,7 @@ export default function RecordedPressure() {
   const pkR = x ? effectivePeak(x, "right") : { value: null, origin: null };
   const sh = x ? effectiveShares(x) : { shares: { kind: "unavailable", reason: "missing-force" } as LoadShares, origin: null };
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Load &amp; Pressure</h1>

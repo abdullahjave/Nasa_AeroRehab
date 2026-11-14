@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useAstronaut } from "@/components/AstronautProvider";
+import Disclosure from "@/components/ui/Disclosure";
 import Panel, { Chip, Stat } from "@/components/ui/Panel";
 import SessionPicker from "@/components/ui/SessionPicker";
 import GaugeRing from "@/components/ui/GaugeRing";
@@ -172,7 +173,7 @@ function DemoJointAnalytics() {
   );
 
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Joint Analytics <span className="font-normal text-slate-300">&mdash; Knee ({sideName(shown)})</span></h1>
@@ -283,42 +284,6 @@ function DemoJointAnalytics() {
 
       <div className="grid gap-3 xl:grid-cols-12">
         <div className="xl:col-span-4">
-          {live ? <ImuChart id="accel" title={`Accelerometer (${site === "shank" ? "Shank" : "Thigh"} IMU) XYZ`} unit="g" data={win} cursorT={t} t0={t0} domain={[-2, 2]} /> : <Panel id="accel" title="Accelerometer XYZ" icon="pulse" className="h-full"><p className="text-sm text-amber-200">Unavailable</p></Panel>}
-        </div>
-        <div className="xl:col-span-4">
-          {live ? <ImuChart id="gyro" title={`Gyroscope (${site === "shank" ? "Shank" : "Thigh"} IMU) XYZ`} unit="°/s" data={win} cursorT={t} t0={t0} domain={[-30, 30]} /> : <Panel id="gyro" title="Gyroscope XYZ" icon="pulse" className="h-full"><p className="text-sm text-amber-200">Unavailable</p></Panel>}
-        </div>
-        <div className="xl:col-span-4">
-          <Panel id="cal" title="Calibration & Sensor Status" icon="chip" className="h-full"
-            action={
-              <div role="group" aria-label="IMU site" className="flex overflow-hidden rounded-md border border-cyan-400/40">
-                {(["thigh", "shank"] as const).map((s) => (
-                  <button key={s} type="button" aria-pressed={site === s} onClick={() => setSite(s)}
-                    className={`px-2 py-0.5 text-[13px] ${site === s ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{s === "thigh" ? "Thigh" : "Shank"}</button>
-                ))}
-              </div>
-            }>
-            <div className="grid flex-1 grid-cols-[auto_1fr] items-center gap-3">
-              <div className="space-y-2">
-                <ImuChip className="h-24 w-28" />
-                {orient ? <OrientationGizmo roll={orient.roll} pitch={orient.pitch} yaw={orient.yaw} className="mx-auto h-20 w-20" /> : <p className="text-center text-xs text-amber-200">Orientation<br />Unavailable</p>}
-              </div>
-              <dl className="space-y-1 text-xs">
-                <div className="flex justify-between gap-2"><dt className="text-slate-400">Connection</dt><dd className={sensor?.status === "offline" ? "text-slate-300" : sensor?.status === "low-battery" ? "text-amber-300" : "text-emerald-300"}>{sensor?.status === "offline" ? "Offline" : sensor?.status === "low-battery" ? `Low battery (${sensor.battery}%)` : `Online (${fmt(sensor?.battery ?? null, "%")})`}</dd></div>
-                <div className="flex justify-between gap-2"><dt className="text-slate-400">Calibration</dt><dd className={cal.status === "valid" ? "text-emerald-300" : "text-amber-300"}>{cal.status === "valid" ? "✓ Valid" : cal.status === "stale" ? "Stale" : "Unavailable"}</dd></div>
-                {calRun && <div className="flex justify-between gap-2"><dt className="text-slate-400">Calibrated</dt><dd className="text-white">{fmtStamp(calRun.at)} <span className="text-slate-500">(sim.)</span></dd></div>}
-                <div className="flex justify-between gap-2"><dt className="text-slate-400">Bias (X/Y/Z)</dt><dd className="tabular-nums text-white">{cal.biasG.map((b) => b.toFixed(2)).join(" / ")} g</dd></div>
-                <div className="flex justify-between gap-2"><dt className="text-slate-400">Scale factor</dt><dd className="tabular-nums text-white">{fmt(cal.scaleFactor, "", 3)}</dd></div>
-                <div className="flex justify-between gap-2"><dt className="text-slate-400">Temp.</dt><dd className="tabular-nums text-white">{fmt(cal.tempC, " °C", 1)}</dd></div>
-                <div className="flex justify-between gap-2"><dt className="text-slate-400">Roll / pitch / yaw</dt><dd className="tabular-nums text-white">{orient ? `${orient.roll.toFixed(0)}° / ${orient.pitch.toFixed(0)}° / ${orient.yaw.toFixed(0)}°` : "Unavailable"}</dd></div>
-              </dl>
-            </div>
-          </Panel>
-        </div>
-      </div>
-
-      <div className="grid gap-3 xl:grid-cols-12">
-        <div className="xl:col-span-4">
           <Panel id="flex" title="Knee Flexion (°) · Session" icon="pulse" className="h-full">
             {live ? (
               <figure className="flex min-h-[200px] flex-1 flex-col rounded-md bg-black/35 p-2">
@@ -395,6 +360,44 @@ function DemoJointAnalytics() {
           </Panel>
         </div>
       </div>
+
+      <Disclosure title="Raw sensor data" hint="accelerometer, gyroscope, calibration and sensor status">
+        <div className="grid gap-3 xl:grid-cols-12">
+          <div className="xl:col-span-4">
+            {live ? <ImuChart id="accel" title={`Accelerometer (${site === "shank" ? "Shank" : "Thigh"} IMU) XYZ`} unit="g" data={win} cursorT={t} t0={t0} domain={[-2, 2]} /> : <Panel id="accel" title="Accelerometer XYZ" icon="pulse" className="h-full"><p className="text-sm text-amber-200">Unavailable</p></Panel>}
+          </div>
+          <div className="xl:col-span-4">
+            {live ? <ImuChart id="gyro" title={`Gyroscope (${site === "shank" ? "Shank" : "Thigh"} IMU) XYZ`} unit="°/s" data={win} cursorT={t} t0={t0} domain={[-30, 30]} /> : <Panel id="gyro" title="Gyroscope XYZ" icon="pulse" className="h-full"><p className="text-sm text-amber-200">Unavailable</p></Panel>}
+          </div>
+          <div className="xl:col-span-4">
+            <Panel id="cal" title="Calibration & Sensor Status" icon="chip" className="h-full"
+              action={
+                <div role="group" aria-label="IMU site" className="flex overflow-hidden rounded-md border border-cyan-400/40">
+                  {(["thigh", "shank"] as const).map((s) => (
+                    <button key={s} type="button" aria-pressed={site === s} onClick={() => setSite(s)}
+                      className={`px-2 py-0.5 text-[13px] ${site === s ? "bg-cyan-400/25 text-white" : "text-slate-300 hover:bg-white/10"}`}>{s === "thigh" ? "Thigh" : "Shank"}</button>
+                  ))}
+                </div>
+              }>
+              <div className="grid flex-1 grid-cols-[auto_1fr] items-center gap-3">
+                <div className="space-y-2">
+                  <ImuChip className="h-24 w-28" />
+                  {orient ? <OrientationGizmo roll={orient.roll} pitch={orient.pitch} yaw={orient.yaw} className="mx-auto h-20 w-20" /> : <p className="text-center text-xs text-amber-200">Orientation<br />Unavailable</p>}
+                </div>
+                <dl className="space-y-1 text-xs">
+                  <div className="flex justify-between gap-2"><dt className="text-slate-400">Connection</dt><dd className={sensor?.status === "offline" ? "text-slate-300" : sensor?.status === "low-battery" ? "text-amber-300" : "text-emerald-300"}>{sensor?.status === "offline" ? "Offline" : sensor?.status === "low-battery" ? `Low battery (${sensor.battery}%)` : `Online (${fmt(sensor?.battery ?? null, "%")})`}</dd></div>
+                  <div className="flex justify-between gap-2"><dt className="text-slate-400">Calibration</dt><dd className={cal.status === "valid" ? "text-emerald-300" : "text-amber-300"}>{cal.status === "valid" ? "✓ Valid" : cal.status === "stale" ? "Stale" : "Unavailable"}</dd></div>
+                  {calRun && <div className="flex justify-between gap-2"><dt className="text-slate-400">Calibrated</dt><dd className="text-white">{fmtStamp(calRun.at)} <span className="text-slate-500">(sim.)</span></dd></div>}
+                  <div className="flex justify-between gap-2"><dt className="text-slate-400">Bias (X/Y/Z)</dt><dd className="tabular-nums text-white">{cal.biasG.map((b) => b.toFixed(2)).join(" / ")} g</dd></div>
+                  <div className="flex justify-between gap-2"><dt className="text-slate-400">Scale factor</dt><dd className="tabular-nums text-white">{fmt(cal.scaleFactor, "", 3)}</dd></div>
+                  <div className="flex justify-between gap-2"><dt className="text-slate-400">Temp.</dt><dd className="tabular-nums text-white">{fmt(cal.tempC, " °C", 1)}</dd></div>
+                  <div className="flex justify-between gap-2"><dt className="text-slate-400">Roll / pitch / yaw</dt><dd className="tabular-nums text-white">{orient ? `${orient.roll.toFixed(0)}° / ${orient.pitch.toFixed(0)}° / ${orient.yaw.toFixed(0)}°` : "Unavailable"}</dd></div>
+                </dl>
+              </div>
+            </Panel>
+          </div>
+        </div>
+      </Disclosure>
     </div>
   );
 }

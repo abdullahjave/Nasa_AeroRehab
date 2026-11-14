@@ -28,7 +28,7 @@ export default function RecordedInsights() {
   const health = alerts.filter((x) => x.kind === "health");
   const data = alerts.filter((x) => x.kind === "data");
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">AI Insights</h1>

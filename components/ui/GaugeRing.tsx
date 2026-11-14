@@ -19,7 +19,7 @@ export default function GaugeRing({ value, max, color, ariaLabel, size = "h-24 w
       <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(148,163,184,0.2)" strokeWidth="9" />
       {value !== null && (
         <circle cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="9" strokeLinecap="round"
-          strokeDasharray={`${c * pct} ${c}`} transform="rotate(-90 50 50)" style={{ filter: `drop-shadow(0 0 4px ${color})` }} />
+          strokeDasharray={`${c * pct} ${c}`} transform="rotate(-90 50 50)" className="ring-draw" style={{ filter: `drop-shadow(0 0 4px ${color})` }} />
       )}
       {value === null ? (
         <text x="50" y="54" textAnchor="middle" fontSize="11" fill="#fde68a">Unavailable</text>
