@@ -2545,7 +2545,14 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(2, 9, 20, 0.66), rgba(2, 9, 20, 0.8));
+  background: linear-gradient(180deg, rgba(2, 9, 20, 0.74), rgba(2, 9, 20, 0.86));
+}
+.space-backdrop__overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,.95), transparent), radial-gradient(1px 1px at 90px 120px, rgba(255,255,255,.8), transparent), radial-gradient(1.5px 1.5px at 160px 60px, rgba(186,230,253,.9), transparent), radial-gradient(1px 1px at 230px 170px, rgba(255,255,255,.7), transparent), radial-gradient(1px 1px at 310px 90px, rgba(255,255,255,.75), transparent), radial-gradient(1.5px 1.5px at 370px 210px, rgba(186,230,253,.8), transparent);
+  background-size: 400px 260px;
 }
 html[data-reduce-motion="true"] *, html[data-reduce-motion="true"] *::before, html[data-reduce-motion="true"] *::after {
   animation-duration: 0.001ms !important;
