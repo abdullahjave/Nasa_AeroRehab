@@ -4,7 +4,7 @@
 
 AeroRehab is our team's project for the **NASA Space Apps Challenge 2026**. It is an astronaut health monitoring dashboard and decision support prototype that tracks **knee range of motion (ROM)** against each astronaut's own baseline, flags meaningful declines during **long-duration spaceflight**, explains every alert in plain language, and points the crew to evidence-informed countermeasures and rehabilitation exercises.
 
-[**Live demo**](https://nasa-aero-rehab.vercel.app/) · [Demo video (30 s)](docs/demo/aerorehab-demo-30s.mp4) · [Run it locally](#run-it-locally) · [Team](#team-aero-rehab)
+[**Live demo**](https://nasa-aero-rehab-two.vercel.app/) · [Demo video (30 s)](docs/demo/aerorehab-demo-30s.mp4) · [Run it locally](#run-it-locally) · [Team](#team-aero-rehab)
 
 ![AeroRehab overview on mission Day 42: knee range of motion 97°, 14.9% below the 114° baseline, status Action Required](docs/screenshots/overview-day42.webp)
 
@@ -13,6 +13,7 @@ AeroRehab is our team's project for the **NASA Space Apps Challenge 2026**. It i
 ---
 
 ## Contents
+
 - [The problem](#the-problem)
 - [Why we focused on joint movement](#why-we-focused-on-joint-movement)
 - [The demo story: Cmdr. Okafor, Day 38 to Day 42](#the-demo-story-cmdr-okafor-day-38-to-day-42)
@@ -40,6 +41,7 @@ Crews already exercise every day, but small, gradual losses are easy to miss in 
 Our first plan covered a broad set of signals: knee range of motion, physical activity, resting heart rate and sleep. With one hackathon weekend, we chose to go deep on one signal and do it properly instead of showing many shallow charts.
 
 We picked **knee range of motion** because:
+
 - The knee is a load-bearing joint that is directly affected when the legs stop carrying weight, so it is a clear marker of lower-limb deconditioning.
 - ROM is easy to explain (degrees of bend) and easy to compare with the astronaut's own earlier sessions.
 - It can be measured with small wearable sensors (for example thigh and shank IMUs), so the idea maps to realistic future hardware.
@@ -51,15 +53,15 @@ Heart rate, sleep and activity are kept as [future work](#future-work).
 
 The demo follows a simulated crew on a 120-day mission. Cmdr. Okafor is recovering from a right knee meniscus repair, and his personal baseline, recorded on mission Day 28, is a knee range of motion of **114°**.
 
-| Mission day | Knee ROM | Change vs baseline | Status |
-|---|---|---|---|
-| Day 38 | 109° | -4.4% | **All Good** |
-| Day 42 | 97° | -14.9% (about 15% below) | **Action Required** |
+| Mission day | Knee ROM | Change vs baseline       | Status              |
+| ----------- | -------- | ------------------------ | ------------------- |
+| Day 38      | 109°     | -4.4%                    | **All Good**        |
+| Day 42      | 97°      | -14.9% (about 15% below) | **Action Required** |
 
 On the Overview page, the **mission-day slider** (or **Replay mission**) walks through every session. On Day 38 his ROM is within 5% of baseline, so the status is All Good. On Day 42 it falls to 97°, about 15% below his 114° baseline, so the app raises **Action Required**, explains why in plain language ("Your knee moved less than usual in this session"), and links to the session review and his rehabilitation plan.
 
-| Day 38: All Good | Day 42: Action Required |
-|---|---|
+| Day 38: All Good                                                                                        | Day 42: Action Required                                                                                        |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | ![Overview on Day 38: knee ROM 109°, -4.4% vs baseline, All Good](docs/screenshots/overview-day38.webp) | ![Overview on Day 42: knee ROM 97°, -14.9% vs baseline, Action Required](docs/screenshots/overview-day42.webp) |
 
 The alert threshold (a drop of 5% or more against the personal baseline) is a demo setting, not a clinically validated limit.
@@ -79,16 +81,16 @@ The alert threshold (a drop of 5% or more against the personal baseline) is a de
 
 ## Screenshots
 
-| Joint Analytics | AI Insights |
-|---|---|
+| Joint Analytics                                                                                                                        | AI Insights                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | ![Joint Analytics: knee flexion, angular velocity, personal baseline and left/right comparison](docs/screenshots/joint-analytics.webp) | ![AI Insights: Action Required finding with plain-language explanation and AI recommendation button](docs/screenshots/ai-insights.webp) |
 
-| Rehabilitation | Reports |
-|---|---|
+| Rehabilitation                                                                                                      | Reports                                                                       |
+| ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | ![Rehabilitation: today's exercise plan, weekly calendar and recovery scores](docs/screenshots/rehabilitation.webp) | ![Reports: date range, trends and PDF preview](docs/screenshots/reports.webp) |
 
-| Load & Pressure | Stability & Balance |
-|---|---|
+| Load & Pressure                                                                                         | Stability & Balance                                                                          |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | ![Load and Pressure: foot pressure heatmap and centre of pressure](docs/screenshots/load-pressure.webp) | ![Stability and Balance: sway path and 95% ellipse](docs/screenshots/stability-balance.webp) |
 
 <details>
@@ -104,7 +106,7 @@ The alert threshold (a drop of 5% or more against the personal baseline) is a de
 
 - **Demo video (30 seconds, English captions):** [docs/demo/aerorehab-demo-30s.mp4](docs/demo/aerorehab-demo-30s.mp4), subtitles in [aerorehab-demo-30s.srt](docs/demo/aerorehab-demo-30s.srt).
 - **Slides:** our presentation is part of the Space Apps project submission. _Public link to be added._
-- **Live demo:** [nasa-aero-rehab.vercel.app](https://nasa-aero-rehab.vercel.app/). Pick **Cmdr. Okafor** in the top bar and drag the mission-day slider from Day 38 to Day 42.
+- **Live demo:** [nasa-aero-rehab.vercel.app](https://nasa-aero-rehab-two.vercel.app/). Pick **Cmdr. Okafor** in the top bar and drag the mission-day slider from Day 38 to Day 42.
 
 ## Run it locally
 
@@ -120,6 +122,7 @@ npm run dev
 Then open [http://localhost:3000](http://localhost:3000).
 
 Optional:
+
 - **AI recommendations:** copy `.env.example` to `.env.local` and set `GEMINI_API_KEY`. Without a key the app shows its built-in guidance.
 - **Recorded mode:** works locally out of the box. The SQLite database is created at `data/aerorehab.sqlite` on first use, or run `npm run db:migrate`.
 - **Production build:** `npm run build && npm start`. **Tests:** `npm test`.
@@ -128,15 +131,15 @@ More detail (database commands, sensor CSV format, alert history, migrations) is
 
 ## Tech stack
 
-| Area | Tools |
-|---|---|
-| Framework | Next.js 16 (App Router), React 19, TypeScript |
-| Styling | Tailwind CSS v4 |
-| Charts | Recharts |
-| Local database | SQLite via sql.js (WebAssembly, no native build step) |
-| AI recommendations | Google Gemini (`@google/genai`), server-side only |
-| Hosting | Vercel |
-| Testing | Node.js test runner |
+| Area               | Tools                                                 |
+| ------------------ | ----------------------------------------------------- |
+| Framework          | Next.js 16 (App Router), React 19, TypeScript         |
+| Styling            | Tailwind CSS v4                                       |
+| Charts             | Recharts                                              |
+| Local database     | SQLite via sql.js (WebAssembly, no native build step) |
+| AI recommendations | Google Gemini (`@google/genai`), server-side only     |
+| Hosting            | Vercel                                                |
+| Testing            | Node.js test runner                                   |
 
 ## Limitations
 
@@ -163,14 +166,14 @@ We want to be clear about what this prototype is and is not.
 
 AeroRehab was built by a team of six for NASA Space Apps Challenge 2026:
 
-| Name | Role |
-|---|---|
-| **Bisma Zafar** | Concept and clinical direction (physiotherapy), slides and demo video |
-| **Abdullah Javed** | Built the app |
-| **Muhammad Talal Jamil** | Software engineer, technical lead on the final polish |
-| **Fatima Arif** | Slides and voiceover |
-| **Lajpat Rai** | Research and ideas |
-| **Kashaf Noor Babar** | Review and demo testing |
+| Name                     | Role                                                                  |
+| ------------------------ | --------------------------------------------------------------------- |
+| **Bisma Zafar**          | Concept and clinical direction (physiotherapy), slides and demo video |
+| **Abdullah Javed**       | Built the app                                                         |
+| **Muhammad Talal Jamil** | Software engineer, technical lead on the final polish                 |
+| **Fatima Arif**          | Slides and voiceover                                                  |
+| **Lajpat Rai**           | Research and ideas                                                    |
+| **Kashaf Noor Babar**    | Review and demo testing                                               |
 
 Thanks to the NASA Space Apps Challenge organisers and to NASA for the public information on astronaut exercise and countermeasures that the Rehabilitation guide links to.
 
