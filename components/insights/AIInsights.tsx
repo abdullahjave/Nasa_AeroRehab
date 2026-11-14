@@ -77,7 +77,7 @@ function DemoAIInsights() {
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">AI Insights</h1>
           <p className="text-xs text-slate-300">
-            {astronaut.profile.displayName} &middot; {session.label} &middot; {v.context.side === "left" ? "Left" : "Right"} knee, {v.context.protocol} &middot; Simulated Data
+            {astronaut.profile.displayName} &middot; {session.label} &middot; {v.context.side === "left" ? "Left" : "Right"} knee, {v.context.protocol}
           </p>
         </div>
         <SessionPicker />

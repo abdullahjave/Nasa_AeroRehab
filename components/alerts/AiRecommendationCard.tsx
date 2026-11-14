@@ -47,7 +47,7 @@ export default function AiRecommendationCard({ alert, variant, selected = false 
         <span className="inline-flex flex-wrap items-center gap-2">
           <AlertBadge severity={alert.severity} label={alert.label} simulated={!!alert.simulatedScenario} />
           {alert.severity === "good" && alert.kind === "health" && <span className="text-xs text-slate-300" data-testid="good-scope">for {/^range of motion/i.test(alert.metric) ? "knee range of motion" : alert.metric.toLowerCase()} only</span>}
-          {alert.geminiEligible && <span className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[12px] font-medium text-violet-100">AI recommendation available on request</span>}
+          {alert.geminiEligible && !overview && <span className="rounded-full border border-violet-300/40 bg-violet-400/10 px-2 py-0.5 text-[12px] font-medium text-violet-100">AI recommendation available on request</span>}
         </span>
         {!overview && (selected ? (
           <span data-testid="selected-badge" className="rounded-full border border-cyan-300 bg-cyan-400/20 px-2.5 py-0.5 text-[13px] font-semibold text-cyan-50">&#10003; Selected &middot; details shown in Key Insight</span>
@@ -56,9 +56,10 @@ export default function AiRecommendationCard({ alert, variant, selected = false 
         ))}
       </div>
       {/* The title is kept for screen readers but not repeated visually when "What changed" already starts with it. */}
-      <h3 className={repeats ? "sr-only" : "mt-1.5 text-base font-semibold text-white"}>{alert.title}</h3>
+      <h3 className={repeats || overview ? "sr-only" : "mt-1.5 text-base font-semibold text-white"}>{alert.title}</h3>
 
-      <div className="mt-2" aria-live={overview ? "polite" : undefined}>
+      {/* Overview reserves the height of the longest state, so Replay does not push the page up and down. */}
+      <div className={`mt-2 ${overview ? "sm:min-h-[6.75rem]" : ""}`} aria-live={overview ? "polite" : undefined}>
         <p className={LABEL}>What changed</p>
         <p className="text-base leading-relaxed text-slate-100">{alert.changed}</p>
         {line && <p className="mt-0.5 text-sm tabular-nums text-slate-300">{line}</p>}

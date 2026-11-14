@@ -5,7 +5,6 @@ import { useAstronaut } from "@/components/AstronautProvider";
 import Panel from "@/components/ui/Panel";
 import AlertBadge from "./AlertBadge";
 import AiRecommendationCard from "./AiRecommendationCard";
-import NotAssessed from "./NotAssessed";
 import { useAlerts } from "./useAlerts";
 import type { Alert } from "@/lib/alerts";
 
@@ -35,27 +34,35 @@ export default function YourStatusCard() {
       ) : (
         <AiRecommendationCard alert={p} variant="overview" />
       )}
+      {/* Scope and data issues are one click away so the card leads with what changed and what to do. */}
+      <details className="group mt-2 text-[13px]">
+        <summary className="cursor-pointer list-none text-cyan-300 hover:text-white">
+          <span aria-hidden="true" className="mr-1 inline-block transition-transform group-open:rotate-90">&#9656;</span>
+          About this status{summary.dataIssues.length > 0 ? ` and ${summary.dataIssues.length} data note${summary.dataIssues.length === 1 ? "" : "s"}` : ""}
+        </summary>
+        <div className="reveal">
       <p className="mt-2 text-[13px] text-slate-300">{summary.scope}</p>
-      <NotAssessed />
-      {otherHealth > 0 && (
-        <p className="mt-1 text-[13px] text-slate-300">
-          {otherHealth} more finding{otherHealth === 1 ? "" : "s"} in <Link href="/ai-insights" className="text-cyan-300 hover:underline">AI Insights</Link>.
-        </p>
-      )}
-      {summary.dataIssues.length > 0 && (
-        <div className="mt-2 border-t border-cyan-400/15 pt-2">
-          <p className="text-[13px] font-medium text-slate-300">Data and sensor issues (not health findings)</p>
-          <ul className="mt-1 space-y-1">
-            {summary.dataIssues.slice(0, 3).map((d) => (
-              <li key={d.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-                <AlertBadge severity="neutral" label={d.label} />
-                <span className="text-slate-200">{d.title}.</span>
-                <Link href={overviewTarget(d)} onClick={() => open(d)} className="text-cyan-300 hover:underline">{d.action.label} &rarr;</Link>
-              </li>
-            ))}
-          </ul>
+          {otherHealth > 0 && (
+            <p className="mt-1 text-[13px] text-slate-300">
+              {otherHealth} more finding{otherHealth === 1 ? "" : "s"} in <Link href="/ai-insights" className="text-cyan-300 hover:underline">AI Insights</Link>.
+            </p>
+          )}
+          {summary.dataIssues.length > 0 && (
+            <div className="mt-2 border-t border-cyan-400/15 pt-2">
+              <p className="text-[13px] font-medium text-slate-300">Data and sensor issues (not health findings)</p>
+              <ul className="mt-1 space-y-1">
+                {summary.dataIssues.slice(0, 3).map((d) => (
+                  <li key={d.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+                    <AlertBadge severity="neutral" label={d.label} />
+                    <span className="text-slate-200">{d.title}.</span>
+                    <Link href={overviewTarget(d)} onClick={() => open(d)} className="text-cyan-300 hover:underline">{d.action.label} &rarr;</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-      )}
+      </details>
     </Panel>
   );
 }

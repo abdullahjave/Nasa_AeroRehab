@@ -81,7 +81,7 @@ function DemoStabilityBalance({ hasBalanceArt }: { hasBalanceArt: boolean }) {
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Stability &amp; Balance</h1>
-          <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label} &middot; {PROTOCOL_LABEL[view.protocol]} &middot; Simulated Data</p>
+          <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label} &middot; {PROTOCOL_LABEL[view.protocol]}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <SessionPicker />

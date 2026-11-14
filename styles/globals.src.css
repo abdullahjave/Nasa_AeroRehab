@@ -55,7 +55,20 @@ body { font-family: var(--font-geist-sans), system-ui, sans-serif; font-size: 1r
 /* Dark navy overlay keeps the sidebar, top bar, cards, charts and labels readable at bright and dark moments. */
 .space-backdrop__overlay {
   position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(2, 9, 20, 0.66), rgba(2, 9, 20, 0.8));
+  background: linear-gradient(180deg, rgba(2, 9, 20, 0.74), rgba(2, 9, 20, 0.86));
+}
+/* The supplied clip is 720x1280 portrait, so on a landscape screen it is enlarged about 2x and looks soft. Crisp stars drawn
+   at full device resolution sit over it, which gives the eye sharp detail to land on while the soft video recedes. */
+.space-backdrop__overlay::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,.95), transparent),
+    radial-gradient(1px 1px at 90px 120px, rgba(255,255,255,.8), transparent),
+    radial-gradient(1.5px 1.5px at 160px 60px, rgba(186,230,253,.9), transparent),
+    radial-gradient(1px 1px at 230px 170px, rgba(255,255,255,.7), transparent),
+    radial-gradient(1px 1px at 310px 90px, rgba(255,255,255,.75), transparent),
+    radial-gradient(1.5px 1.5px at 370px 210px, rgba(186,230,253,.8), transparent);
+  background-size: 400px 260px;
 }
 
 /* Reduced motion (system setting or the Display Settings switch, mirrored on <html> by SpaceBackdrop). */
@@ -102,6 +115,16 @@ select, textarea, input:not([type="checkbox"], [type="radio"], [type="range"], [
   font-size: 0.9375rem; background-color: var(--color-navy-900); color: #f1f7ff; border-color: rgba(34, 211, 238, 0.35);
 }
 ::placeholder { color: #8da2b9; }
+/* Native selects (forms) get the same smooth chevron as the custom Select. */
+select {
+  appearance: none; -webkit-appearance: none; padding-right: 1.75rem; border-radius: 0.375rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2367e8f9' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 0.875rem;
+  transition: border-color .18s ease;
+}
+select:hover { border-color: rgba(103, 232, 249, 0.8); }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+.select-pop { animation: pop-in .16s cubic-bezier(.2, .7, .2, 1) backwards; transform-origin: top; }
 
 @utility led {
   display: inline-block; height: 8px; width: 8px; border-radius: 9999px;
@@ -119,11 +142,52 @@ select, textarea, input:not([type="checkbox"], [type="radio"], [type="range"], [
   outline-offset: 2px;
 }
 
+
+/* Bottom tab bar (below lg). */
+.tabbar { border-width: 1px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+.tab-link {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding: 0.55rem 0.25rem 0.5rem;
+  font-size: 0.6875rem; line-height: 1; color: #a1b5cb; transition: color .18s ease;
+}
+.tab-link::before {
+  content: ""; position: absolute; top: -1px; left: 50%; height: 2px; width: 0; border-radius: 2px; background: #22d3ee;
+  box-shadow: 0 0 10px rgba(34, 211, 238, .8); transform: translateX(-50%); transition: width .25s cubic-bezier(.2, .7, .2, 1);
+}
+.tab-link[aria-current="page"] { color: #fff; font-weight: 600; }
+.tab-link[aria-current="page"] svg { color: #67e8f9; }
+.tab-link[aria-current="page"]::before { width: 2rem; }
+
+/* ---------- Motion ----------
+   Deliberately quiet: opacity fades, one small rise on first paint, nothing that loops and nothing that moves layout.
+   Only opacity and transform are animated. Switched off by html[data-reduce-motion="true"] above. */
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(4px); } }
+@keyframes ring-draw { from { stroke-dasharray: 0 999; } }
+@keyframes bar-grow { from { transform: scaleX(0); } }
+
+/* Route change: a short fade, no movement. */
+.page-enter { animation: fade-in .28s ease-out backwards; }
+/* Content the reader opened on purpose (disclosures, the More menu). */
+.reveal { animation: rise-in .24s ease-out backwards; }
+.ring-draw { animation: ring-draw .8s ease-out backwards; }
+.bar-grow { transform-origin: left; animation: bar-grow .8s ease-out backwards; transition: width .4s ease-out; }
+
+/* Hover: colour only on cards. Only the small linked tiles lift, by one pixel. */
+main .glass { transition: border-color .2s ease, background-color .2s ease; }
+.lift { transition: transform .2s ease, border-color .2s ease; }
+.lift:hover { transform: translateY(-1px); border-color: rgba(34, 211, 238, .55); }
+
+/* Card surface: a faint top highlight gives the glass some depth. */
+.glass { background-image: linear-gradient(180deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, 0) 40%); }
+
+/* Section labels used by the at-a-glance strip. */
+.eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-slate-400); }
+
 /* Print (Reports > Save PDF): only the report document, on white, no navigation/video/controls. */
 @media print {
   @page { size: A4; margin: 12mm; }
   html, body { background: #fff !important; color: #0f172a !important; }
-  .space-backdrop, aside, body header.glass.sticky, .no-print, nextjs-portal { display: none !important; }
+  .space-backdrop, aside, body header.glass.sticky, .tabbar, .no-print, nextjs-portal { display: none !important; }
   main { padding: 0 !important; }
   * { box-shadow: none !important; text-shadow: none !important; }
   .report-doc { box-shadow: none !important; max-width: none !important; padding: 0 !important; border-radius: 0 !important; }

@@ -1,0 +1,31 @@
+1
+00:00:00,000 --> 00:00:03,500
+AeroRehab: early warning for astronaut knee deconditioning.
+
+2
+00:00:03,500 --> 00:00:07,000
+In microgravity, leg muscles lose 10 to 15 percent of their strength.
+
+3
+00:00:07,000 --> 00:00:11,800
+AeroRehab compares every session with the astronaut's own baseline.
+
+4
+00:00:11,800 --> 00:00:17,000
+Here's Commander Okafor's knee range of motion, Day 12 to Day 42.
+
+5
+00:00:17,000 --> 00:00:21,000
+By Day 38 it's back within 5% of baseline: All Good.
+
+6
+00:00:21,000 --> 00:00:25,000
+On Day 42 it drops 15 percent below baseline: Action Required.
+
+7
+00:00:25,000 --> 00:00:28,000
+Every alert explains why, and links to a rehab plan.
+
+8
+00:00:28,000 --> 00:00:30,000
+AeroRehab. NASA Space Apps Challenge 2026.

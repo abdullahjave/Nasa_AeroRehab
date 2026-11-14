@@ -15,6 +15,9 @@ import OverviewBalance from "@/components/balance/OverviewBalance";
 import TrendCard from "./TrendCard";
 import { GaitPreviewCard } from "./Cards";
 import RecordedTrend from "@/components/recorded/RecordedTrend";
+import MissionReplay from "./MissionReplay";
+import AtAGlance from "./AtAGlance";
+import { CHALLENGE } from "@/lib/challenge";
 
 /** Measurement details start collapsed at every screen width; the reader opens them on purpose. */
 function Details({ children }: { children: React.ReactNode }) {
@@ -24,11 +27,11 @@ function Details({ children }: { children: React.ReactNode }) {
       <h2 id="details-title" className="text-[13px] font-semibold text-white">
         <button type="button" aria-expanded={open} aria-controls="measurement-details" onClick={() => setOpen(!open)}
           className="glass flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left hover:bg-white/5">
-          <span>Measurement details <span className="font-normal text-slate-400">&middot; summary rows, charts, gait, pressure, balance and trends</span></span>
+          <span>All measurements <span className="font-normal text-slate-400">&middot; today&rsquo;s tasks, charts, gait, pressure, balance and trends</span></span>
           <span aria-hidden="true" className={`shrink-0 text-cyan-300 transition-transform ${open ? "rotate-180" : ""}`}>&#9662;</span>
         </button>
       </h2>
-      {open && <div id="measurement-details" className="space-y-3">{children}</div>}
+      {open && <div id="measurement-details" className="reveal space-y-3">{children}</div>}
     </section>
   );
 }
@@ -43,15 +46,14 @@ export default function OverviewDashboard() {
   const p = astronaut.profile;
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-3">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+    <div className="mx-auto w-full max-w-5xl space-y-4">
+      <p className="eyebrow !text-[11px] !text-cyan-200/80 sm:!text-xs">{CHALLENGE.event} &middot; {CHALLENGE.title}</p>
+      <header className="!mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex min-w-0 items-center gap-3">
           <div className="h-12 w-11 shrink-0 overflow-hidden rounded-md bg-gradient-to-b from-[#0c2347] to-[#050d1f] ring-1 ring-cyan-400/30"><CrewPortrait profile={p} className="h-full w-full text-lg" /></div>
           <div className="min-w-0">
-            <h1 className="text-xl font-semibold text-white sm:text-2xl">Overview</h1>
-            <p className="text-sm text-slate-200">{p.displayName} &middot; {p.role}</p>
-            <p className="text-sm text-slate-300">Mission <strong className="text-white">{mission.name}</strong> &middot; Day {mission.day} of {mission.totalDays}</p>
-            <p className="text-xs text-slate-400">{recorded ? "Recorded Data (local database)" : "Simulated Data"}</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-[28px]">{p.displayName}</h1>
+            <p className="text-sm text-slate-300">{p.role} &middot; {mission.name} &middot; Day {mission.day} of {mission.totalDays}</p>
           </div>
         </div>
         {recorded && recordedStatus !== "ready" ? (
@@ -65,10 +67,14 @@ export default function OverviewDashboard() {
         ) : <SessionPicker />}
       </header>
 
-      <YourStatusCard />
-      <TodaysTasksCard />
+      <AtAGlance />
+      <div className="space-y-4">
+        {!recorded && <MissionReplay />}
+        <YourStatusCard />
+      </div>
 
       <Details>
+        <TodaysTasksCard />
         <MeasurementRows />
         {recorded ? (
           <>
