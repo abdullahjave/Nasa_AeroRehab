@@ -56,9 +56,10 @@ export default function AiRecommendationCard({ alert, variant, selected = false 
         ))}
       </div>
       {/* The title is kept for screen readers but not repeated visually when "What changed" already starts with it. */}
-      <h3 className={repeats ? "sr-only" : "mt-1.5 text-base font-semibold text-white"}>{alert.title}</h3>
+      <h3 className={repeats || overview ? "sr-only" : "mt-1.5 text-base font-semibold text-white"}>{alert.title}</h3>
 
-      <div className="mt-2" aria-live={overview ? "polite" : undefined}>
+      {/* Overview reserves the height of the longest state, so Replay does not push the page up and down. */}
+      <div className={`mt-2 ${overview ? "sm:min-h-[6.75rem]" : ""}`} aria-live={overview ? "polite" : undefined}>
         <p className={LABEL}>What changed</p>
         <p className="text-base leading-relaxed text-slate-100">{alert.changed}</p>
         {line && <p className="mt-0.5 text-sm tabular-nums text-slate-300">{line}</p>}

@@ -29,11 +29,10 @@ export default function AtAGlance() {
   const flagged = p?.severity === "action";
 
   return (
-    <section aria-label="At a glance" className="stagger grid grid-cols-2 gap-3 md:grid-cols-3">
+    <section aria-label="At a glance" className="grid grid-cols-2 gap-3 md:grid-cols-3">
       <Link href="/ai-insights" onClick={() => { if (p?.action.kind === "review-session") selectFinding(p.key); }}
-        className={`${TILE} col-span-2 md:col-span-1 border ${tone.box} ${flagged ? "glow-action" : ""}`}>
-        {/* Keyed on the label so the badge pops when Replay crosses from All Good to Action Required. */}
-        <span key={p?.label ?? "none"} className={`status-pop flex h-12 w-12 shrink-0 items-center justify-center rounded-full border ${tone.box}`}>
+        className={`${TILE} col-span-2 md:col-span-1 border ${tone.box}`}>
+        <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border ${tone.box}`}>
           <SeverityIcon severity={p?.severity ?? "neutral"} className="h-7 w-7" />
         </span>
         <span className="min-w-0">
@@ -72,7 +71,7 @@ export default function AtAGlance() {
       <Link href="/rehabilitation" className={TILE}>
         {t.kind === "tasks" ? (
           <>
-            <GaugeRing value={t.done} max={t.total} color={C.green} size="h-11 w-11 sm:h-14 sm:w-14" ariaLabel={`${t.done} of ${t.total} tasks complete`} />
+            <GaugeRing sweep value={t.done} max={t.total} color={C.green} size="h-11 w-11 sm:h-14 sm:w-14" ariaLabel={`${t.done} of ${t.total} tasks complete`} />
             <span className="min-w-0">
               <span className="eyebrow block">Today&rsquo;s plan</span>
               <span className="block text-lg font-semibold leading-tight text-white sm:text-xl"><AnimatedNumber value={t.done} /> of {t.total} done</span>
