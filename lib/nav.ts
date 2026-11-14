@@ -14,6 +14,9 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Settings", href: "/settings", icon: "M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 13a7.5 7.5 0 000-2l2-1.5-2-3.5-2.3 1a7.5 7.5 0 00-1.7-1L15 3.5h-4L10.6 6a7.5 7.5 0 00-1.7 1l-2.3-1-2 3.5 2 1.5a7.5 7.5 0 000 2l-2 1.5 2 3.5 2.3-1a7.5 7.5 0 001.7 1l.4 2.5h4l.4-2.5a7.5 7.5 0 001.7-1l2.3 1 2-3.5z", blurb: "Device, display and data preferences." },
 ];
 
+/** The pages shown in the main navigation; the rest sit under "More" so the demo path stays short. */
+export const PRIMARY_HREFS = ["/", "/joint-analytics", "/ai-insights", "/rehabilitation", "/reports"];
+
 export function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 }
