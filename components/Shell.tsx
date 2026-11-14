@@ -49,13 +49,13 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
   const more = NAV_ITEMS.filter((i) => !PRIMARY_HREFS.includes(i.href));
   const inMore = more.some((i) => isActive(pathname, i.href));
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       <NavItems items={primary} pathname={pathname} onNavigate={onNavigate} />
       <details open={inMore || undefined} className="group">
         <summary className="cursor-pointer list-none px-3 text-xs font-medium uppercase tracking-wide text-slate-400 hover:text-slate-200">
           More <span aria-hidden="true" className="inline-block transition-transform group-open:rotate-180">&#9662;</span>
         </summary>
-        <div className="mt-1.5"><NavItems items={more} pathname={pathname} onNavigate={onNavigate} /></div>
+        <div className="reveal mt-1.5"><NavItems items={more} pathname={pathname} onNavigate={onNavigate} /></div>
       </details>
     </div>
   );
@@ -202,7 +202,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                   <button type="button" onClick={refreshRecorded} className="underline">Retry</button>
                 </p>
               )}
-              {children}
+              {/* Keyed on the route so each page rises in once when you navigate. */}
+              <div key={pathname} className="page-enter">{children}</div>
             </>
           )}
         </main>

@@ -13,6 +13,7 @@ import KnowledgeCheck from "./KnowledgeCheck";
 import CountermeasureGuide from "./CountermeasureGuide";
 import MilestoneBadge from "./MilestoneBadge";
 import { CONTEXTS, CONTEXT_LABEL, DEMO_DAY, NO_PLAN, NO_PLAN_CONTEXT, PLAN_SOURCE_LABEL, SAMPLE_GROUND_ACTIVITIES, dayLabel, dayToDate, eligiblePlan, excludedTicksNote, planMilestone, sampleActivity, scheduleOf, weekStartOf, weekdayShort, type DayStatus, type ExerciseContext, type ExerciseId, type Ratio } from "@/lib/rehab";
+import { chartAnim } from "@/components/ui/motion";
 
 const pctText = (r: Ratio) => (r.kind === "value" ? `${r.pct.toFixed(0)}%` : "Unavailable");
 const STATUS: Record<DayStatus, { label: string; icon: string; cls: string }> = {
@@ -46,7 +47,7 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
   const savedEntries = Object.keys(edits).length + legacy.count;
 
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Rehabilitation <span className="font-normal text-slate-300">&ndash; Exercise Plan</span></h1>
@@ -97,7 +98,7 @@ function ContextSelector({ value, onChange }: { value: ExerciseContext; onChange
 function NoPlanView({ context, recorded, assets }: { context: ExerciseContext; recorded: boolean; assets: Record<string, boolean> }) {
   const { astronaut } = useAstronaut();
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       <Panel id="r-plan-empty" title={`${CONTEXT_LABEL[context]} plan`} icon="walk">
         <div className="rounded-md border border-dashed border-cyan-400/30 p-4" data-testid="no-plan">
           <p className="text-lg font-semibold text-white">{NO_PLAN_CONTEXT}</p>
@@ -172,7 +173,7 @@ function SamplePlanView({ assets }: { assets: Record<string, boolean> }) {
   const scoreRows = view.scores.map((r) => ({ label: `W${r.programWeek}`, day: r.missionDay, recovery: r.recoveryIndex, readiness: r.readiness }));
 
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       {/* Top row */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_1.2fr_1fr_1fr_1fr]">
         <Panel id="r-status" title="Program Status" icon="check">
@@ -309,8 +310,8 @@ function SamplePlanView({ assets }: { assets: Record<string, boolean> }) {
                       return <div className={TIP_CLASS}><p className="font-semibold text-white">{r.label} &middot; Day {r.day} ({dayLabel(r.day)})</p><p className="text-slate-300">Recovery Index <span className="font-semibold text-cyan-300">{r.recovery}%</span></p><p className="text-slate-300">Readiness <span className="font-semibold text-pink-300">{r.readiness}%</span></p></div>;
                     }} />
                     <Legend verticalAlign="top" align="right" height={22} iconType="circle" wrapperStyle={{ fontSize: 12, color: AXIS }} />
-                    <Line name="Recovery Index" dataKey="recovery" stroke={C.cyan} strokeWidth={2} dot={{ r: 3, fill: C.cyan }} isAnimationActive={false} />
-                    <Line name="Readiness" dataKey="readiness" stroke={C.magenta} strokeWidth={2} dot={{ r: 3, fill: C.magenta }} isAnimationActive={false} />
+                    <Line name="Recovery Index" dataKey="recovery" stroke={C.cyan} strokeWidth={2} dot={{ r: 3, fill: C.cyan }} {...chartAnim()} />
+                    <Line name="Readiness" dataKey="readiness" stroke={C.magenta} strokeWidth={2} dot={{ r: 3, fill: C.magenta }} {...chartAnim()} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

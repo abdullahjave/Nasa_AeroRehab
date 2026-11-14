@@ -30,7 +30,7 @@ export default function RecordedJoint() {
   const limit = Math.abs(REDUCED_ROM_DEMO.thresholdPct);
 
   return (
-    <div className="space-y-3">
+    <div className="stagger space-y-3">
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Joint Analytics <span className="font-normal text-slate-300">&mdash; Knee ({ctx.side === "left" ? "Left" : "Right"})</span></h1>

@@ -5,6 +5,7 @@ import { CartesianGrid, Line, LineChart, ReferenceArea, ReferenceDot, ReferenceL
 import { useAstronaut } from "@/components/AstronautProvider";
 import Panel from "@/components/ui/Panel";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
+import { useChartAnim } from "@/components/ui/motion";
 import { REDUCED_ROM_DEMO } from "@/lib/insights/config";
 
 type Point = { id: string; day: number; label: string; rom: number | null };
@@ -19,6 +20,7 @@ export default function MissionReplay() {
   const points: Point[] = sessions.map((s) => ({ id: s.id, day: s.missionDay, label: s.label, rom: s.knee.romDeg }));
   const idx = Math.max(0, sessions.findIndex((s) => s.id === session.id));
   const [playing, setPlaying] = useState(false);
+  const anim = useChartAnim(1100);
 
   // Replay steps through the sessions in order and stops on the last one.
   useEffect(() => {
@@ -62,14 +64,14 @@ export default function MissionReplay() {
             {limit !== null && <ReferenceArea y1={lo} y2={limit} fill={C.amber} fillOpacity={0.08} />}
             {baseline !== null && <ReferenceLine y={baseline} stroke={C.green} strokeDasharray="5 4" label={{ value: `Baseline ${baseline}°`, fill: C.green, fontSize: 11, position: "insideTopLeft" }} />}
             {limit !== null && <ReferenceLine y={limit} stroke={C.amber} strokeDasharray="2 4" label={{ value: `Flag below ${limit}° (${REDUCED_ROM_DEMO.thresholdPct}%)`, fill: C.amber, fontSize: 11, position: "insideBottomRight" }} />}
-            <ReferenceLine x={cur.day} stroke={C.cyan} strokeOpacity={0.5} />
+            <ReferenceLine x={cur.day} stroke={C.cyan} strokeOpacity={0.5} className="glide" />
             <Tooltip content={({ active, payload }) => {
               const p = (payload?.[0] as { payload?: Point } | undefined)?.payload;
               if (!active || !p) return null;
               return <div className={TIP_CLASS}><p className="font-semibold text-white">{p.label}</p><p className="text-slate-300">ROM <span className="font-semibold text-cyan-300">{p.rom ?? "–"}°</span></p></div>;
             }} />
-            <Line type="linear" dataKey="rom" stroke={C.cyan} strokeWidth={2} dot={{ r: 2.5, fill: C.cyan }} connectNulls={false} isAnimationActive={false} />
-            {cur.rom !== null && <ReferenceDot x={cur.day} y={cur.rom} r={6} fill={C.cyan} stroke="#fff" strokeWidth={2} />}
+            <Line type="linear" dataKey="rom" stroke={C.cyan} strokeWidth={2} dot={{ r: 2.5, fill: C.cyan }} connectNulls={false} {...anim} />
+            {cur.rom !== null && <ReferenceDot x={cur.day} y={cur.rom} r={6} fill={C.cyan} stroke="#fff" strokeWidth={2} className="glide" />}
           </LineChart>
         </ResponsiveContainer>
       </div>

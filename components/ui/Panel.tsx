@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ICONS, type IconName } from "@/lib/icons";
+import { AnimatedNumber } from "@/components/ui/motion";
 
 type Props = {
   id: string;
@@ -48,7 +49,7 @@ export function Stat({ label, value, unit, sub, digits, big = false }: { label: 
     <div className="min-w-0">
       <p className="text-[13px] text-slate-300">{label}</p>
       <p className={`font-semibold tabular-nums ${missing ? "text-sm text-amber-200" : big ? "text-2xl text-white" : "text-xl text-white"}`}>
-        {text}
+        {!missing && (digits !== undefined || (Number.isInteger(value) && Math.abs(value) < 1000)) ? <AnimatedNumber value={value} digits={digits ?? 0} /> : text}
         {!missing && unit && <span className="ml-1 text-xs font-normal text-slate-300">{unit}</span>}
       </p>
       {sub && <p className="text-[12px] text-slate-400">{sub}</p>}
