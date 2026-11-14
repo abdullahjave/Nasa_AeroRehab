@@ -1,148 +1,179 @@
-# AeroRehab (Nasa_AeroRehab)
+# AeroRehab: Astronaut Knee Health Monitoring for Long-Duration Spaceflight
 
-**Built for:** NASA Space Apps Challenge 2026, *Autonomous astronaut musculoskeletal health monitoring* (set in `lib/challenge.ts`; replace with the exact challenge title).
+**Early warning for musculoskeletal deconditioning in space, one knee at a time.**
 
-Rehabilitation analytics dashboard for a simulated astronaut mission (Artemis-II, Day 42). It has two data modes:
-**Demo (simulated)**, fixtures in `lib/demo/` with no backend, and **Recorded (local)**, manual entries and imported sensor CSV files saved in a local SQLite database.
-Simulated and recorded data are always labelled and never mixed.
+AeroRehab is our team's project for the **NASA Space Apps Challenge 2026**. It is an astronaut health monitoring dashboard and decision support prototype that tracks **knee range of motion (ROM)** against each astronaut's own baseline, flags meaningful declines during **long-duration spaceflight**, explains every alert in plain language, and points the crew to evidence-informed countermeasures and rehabilitation exercises.
 
-Next.js (App Router) + TypeScript + Tailwind CSS v4 + Recharts + sql.js (SQLite). Local prototype: no sign-in and no real patient data.
+[**Live demo**](https://nasa-aero-rehab.vercel.app/) · [Demo video (30 s)](docs/demo/aerorehab-demo-30s.mp4) · [Run it locally](#run-it-locally) · [Team](#team-aero-rehab)
 
-## Pages
-The main navigation shows five pages: Overview, Joint Analytics, AI Insights, Rehabilitation and Reports. Gait Analysis, Load & Pressure,
-Stability & Balance, Patient Management and Settings are under **More**. Overview opens with the knee range-of-motion chart and a
-mission-day slider (with **Replay mission**): moving it selects that session, and the Your Status card below updates with it.
+![AeroRehab overview on mission Day 42: knee range of motion 97°, 14.9% below the 114° baseline, status Action Required](docs/screenshots/overview-day42.webp)
 
-**Hosted demo:** Recorded mode needs a writable SQLite file, so it is hidden on Vercel builds (the Data switch disappears and the site
-always shows Demo data). Set `NEXT_PUBLIC_RECORDED_MODE=on` to force it on, or `off` to hide it anywhere.
+> **Prototype notice.** All astronaut data in the demo is simulated. AeroRehab is a hackathon prototype, not a medical device, and must not be used for clinical decisions.
 
-## Quick start
+---
+
+## Contents
+- [The problem](#the-problem)
+- [Why we focused on joint movement](#why-we-focused-on-joint-movement)
+- [The demo story: Cmdr. Okafor, Day 38 to Day 42](#the-demo-story-cmdr-okafor-day-38-to-day-42)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Demo video and slides](#demo-video-and-slides)
+- [Run it locally](#run-it-locally)
+- [Tech stack](#tech-stack)
+- [Limitations](#limitations)
+- [Future work](#future-work)
+- [Team Aero Rehab](#team-aero-rehab)
+
+## The problem
+
+In microgravity the legs no longer carry body weight, and astronauts lose muscle strength, bone density and joint mobility over weeks and months in orbit. This **musculoskeletal deconditioning** is one of the main health risks of long-duration missions, especially on future flights to the Moon and Mars where crews will be far from ground medical support and communication delays make real-time advice hard.
+
+Crews already exercise every day, but small, gradual losses are easy to miss in raw sensor numbers. What is missing is a simple, autonomous way to answer three questions for each astronaut:
+
+1. Is this person moving the way they normally do?
+2. If not, how big is the change, and is it worth acting on?
+3. What should they do next?
+
+## Why we focused on joint movement
+
+Our first plan covered a broad set of signals: knee range of motion, physical activity, resting heart rate and sleep. With one hackathon weekend, we chose to go deep on one signal and do it properly instead of showing many shallow charts.
+
+We picked **knee range of motion** because:
+- The knee is a load-bearing joint that is directly affected when the legs stop carrying weight, so it is a clear marker of lower-limb deconditioning.
+- ROM is easy to explain (degrees of bend) and easy to compare with the astronaut's own earlier sessions.
+- It can be measured with small wearable sensors (for example thigh and shank IMUs), so the idea maps to realistic future hardware.
+- A single well-explained signal makes the alert logic transparent, which matters for trust in an autonomous system.
+
+Heart rate, sleep and activity are kept as [future work](#future-work).
+
+## The demo story: Cmdr. Okafor, Day 38 to Day 42
+
+The demo follows a simulated crew on a 120-day mission. Cmdr. Okafor is recovering from a right knee meniscus repair, and his personal baseline, recorded on mission Day 28, is a knee range of motion of **114°**.
+
+| Mission day | Knee ROM | Change vs baseline | Status |
+|---|---|---|---|
+| Day 38 | 109° | -4.4% | **All Good** |
+| Day 42 | 97° | -14.9% (about 15% below) | **Action Required** |
+
+On the Overview page, the **mission-day slider** (or **Replay mission**) walks through every session. On Day 38 his ROM is within 5% of baseline, so the status is All Good. On Day 42 it falls to 97°, about 15% below his 114° baseline, so the app raises **Action Required**, explains why in plain language ("Your knee moved less than usual in this session"), and links to the session review and his rehabilitation plan.
+
+| Day 38: All Good | Day 42: Action Required |
+|---|---|
+| ![Overview on Day 38: knee ROM 109°, -4.4% vs baseline, All Good](docs/screenshots/overview-day38.webp) | ![Overview on Day 42: knee ROM 97°, -14.9% vs baseline, Action Required](docs/screenshots/overview-day42.webp) |
+
+The alert threshold (a drop of 5% or more against the personal baseline) is a demo setting, not a clinically validated limit.
+
+## Features
+
+- **Personal baselines.** Each session is compared with the astronaut's own baseline session for the same knee, movement and protocol, not with a population average.
+- **Explainable alerts.** Every status (All Good, Needs Attention, Action Required) shows what changed, the numbers behind it, a "Why am I seeing this?" explanation and a suggested next step. Readings without an alert rule are clearly marked "Not assessed".
+- **Mission replay.** A mission-day slider and replay button show how knee ROM changes across the mission.
+- **Joint Analytics.** Knee flexion over the session, angular velocity and acceleration, left/right comparison, movement smoothness and simulated cartilage load.
+- **AI Insights.** A list of findings with **Mark as seen** and an alert history, plus an optional **AI recommendation** (Google Gemini, server-side) with built-in guidance as the fallback. Only numbers and status are sent, never names.
+- **Rehabilitation.** A sample exercise plan with progress tracking, and a **NASA Countermeasure Guide** that explains the ISS exercise devices (ARED, T2/COLBERT, CEVIS) with links to the NASA pages behind each statement.
+- **More analysis pages.** Gait Analysis, Load & Pressure (foot pressure heatmap and centre of pressure), and Stability & Balance (sway path and 95% ellipse). These show simulated readings without an alert rule.
+- **Reports.** Pick a date range, preview the report and save it as a PDF.
+- **Two data modes.** **Demo** uses simulated data for three astronauts (Dr. Chen, Cmdr. Okafor, Maj. Alvarez). **Recorded** stores manual entries and imported sensor CSV files in a local SQLite database. The two are always labelled and never mixed.
+- **Works on phones.** A responsive layout with a bottom tab bar on small screens.
+
+## Screenshots
+
+| Joint Analytics | AI Insights |
+|---|---|
+| ![Joint Analytics: knee flexion, angular velocity, personal baseline and left/right comparison](docs/screenshots/joint-analytics.webp) | ![AI Insights: Action Required finding with plain-language explanation and AI recommendation button](docs/screenshots/ai-insights.webp) |
+
+| Rehabilitation | Reports |
+|---|---|
+| ![Rehabilitation: today's exercise plan, weekly calendar and recovery scores](docs/screenshots/rehabilitation.webp) | ![Reports: date range, trends and PDF preview](docs/screenshots/reports.webp) |
+
+| Load & Pressure | Stability & Balance |
+|---|---|
+| ![Load and Pressure: foot pressure heatmap and centre of pressure](docs/screenshots/load-pressure.webp) | ![Stability and Balance: sway path and 95% ellipse](docs/screenshots/stability-balance.webp) |
+
+<details>
+<summary>Gait Analysis and phone layout</summary>
+
+![Gait Analysis](docs/screenshots/gait-analysis.webp)
+
+<img src="docs/screenshots/mobile.webp" alt="AeroRehab on a phone" width="320">
+
+</details>
+
+## Demo video and slides
+
+- **Demo video (30 seconds, English captions):** [docs/demo/aerorehab-demo-30s.mp4](docs/demo/aerorehab-demo-30s.mp4), subtitles in [aerorehab-demo-30s.srt](docs/demo/aerorehab-demo-30s.srt).
+- **Slides:** our presentation is part of the Space Apps project submission. _Public link to be added._
+- **Live demo:** [nasa-aero-rehab.vercel.app](https://nasa-aero-rehab.vercel.app/). Pick **Cmdr. Okafor** in the top bar and drag the mission-day slider from Day 38 to Day 42.
+
+## Run it locally
+
+Requirements: **Node.js 20 or newer** and npm.
+
 ```bash
+git clone https://github.com/abdullahjave/Nasa_AeroRehab.git
+cd Nasa_AeroRehab
 npm install
-npm run dev          # CSS watcher + Next.js on http://localhost:3000
-```
-Release/start command (after `npm run build`): `npm start` (http://localhost:3000).
-Production check: `npm run build && npm start`. Quality gates: `npm test` (188 tests), `npx tsc --noEmit`, `npm run lint`, `npm run build`.
-
-### Optional: AI explanations
-The **Get Recommendation** button (Overview "Your Status" card and AI Insights) calls Gemini from the server only. Copy `.env.example` to
-`.env.local` (ignored by Git) and set `GEMINI_API_KEY`; `GEMINI_MODEL` defaults to `gemini-3.5-flash`. Without a key, or if the service is slow or
-down, the card shows **Built-in guidance** instead. Only the metric, units, values, mission day and body area are sent; never a name or record text.
-
-## Demo walkthrough (about 5 minutes)
-1. **Demo mode** (default): on **Overview**, read "Your Status" (Dr. Chen, Day 42: knee ROM 114 vs 121 baseline, -5.8%), open **Why am I seeing this?**,
-   and press **Get Recommendation** (or see Built-in guidance). Try the astronaut and session pickers in the top bar.
-2. Visit **Load & Pressure** (heatmap, timeline scrubbing, CoP trail) and **Stability & Balance** (sway path, 95% ellipse, replay).
-3. **Reports**: pick a range, open **PDF Preview**, then **Save PDF** (browser print dialog).
-4. Switch **Data** to **Recorded (local)**. In **Patient Management** add a pressure assessment (e.g. quiet standing, left 40 N, right 60 N),
-   then **Import sensor CSV** and choose `fixtures/sensor-csv/pressure-synthetic.csv` (synthetic test data, see `fixtures/sensor-csv/README.md`).
-   Preview it, **Save import**, then open **Load & Pressure** to scrub the imported frames. Values from the file carry an **Imported CSV** label.
-5. In Recorded mode open **Reports**: only sections supported by saved records appear, and the Rehabilitation box appears only when rehab
-   completions were saved in Recorded mode. Rehab completions are stored separately for Demo and Recorded.
-
-### CSS workflow
-Authored CSS lives in `styles/globals.src.css`. `scripts/build-css.mjs` compiles it with Tailwind's JavaScript
-compiler into `app/globals.css` (generated, committed). It runs automatically before `dev` and `build`, and works
-on machines where Tailwind's native binary is blocked.
-
-## Assets
-- `public/images/*.webp` are derived from the artwork supplied by the project owner. `assets/ATTRIBUTIONS.md` records what could be verified (several originals carry Google-signed AI-generation credentials) and what still awaits confirmation; confirm the licence terms before publishing.
-- The old Sketchfab knee renders (Terrie, CC BY 4.0) are no longer in `public/images/`.
-- `public/models/astronaut.glb`: creator, source and licence could not be identified (see `assets/ATTRIBUTIONS.md`). Confirm before publishing.
-- Optional background video: add `public/videos/space-loop.mp4` (and `public/images/space-backdrop.webp` as poster).
-  Without them the app uses a CSS starfield.
-
-## Recorded mode and the local database (Backend Phase 1)
-
-The app has two data modes, switched with **Data** in the top bar (the choice is remembered in the browser):
-
-- **Demo (simulated)** is the original fixture-based demo. Nothing in it changes.
-- **Recorded (local)** reads astronaut profiles and saved records from a local SQLite database: **knee sessions** (min/max angle, torque, baseline),
-  **walking sessions** (distance, duration, steps), **pressure assessments** (left/right force and peak pressure) and **balance trials** (standing leg,
-  protocol, duration, sway RMS). A pressure or balance record can also carry an imported **sensor CSV** (see below), which adds the foot heatmap,
-  centre-of-pressure playback or sway path and replay from the saved samples. Overview, the detail pages and Reports show only what was saved or
-  imported, each value labelled **Manual entry** or **Imported CSV**. It never falls back to demo values: anything not entered (IMU trace, live sensors,
-  or samples for a manual-only record) shows as unavailable, for example "Sensor samples needed".
-
-**Setup** (Node 20+; no native build step, the database engine is `sql.js`, SQLite compiled to WebAssembly):
-
-```bash
-npm install
-npm run db:migrate   # create data/aerorehab.sqlite, apply migrations, seed 1 mission + 3 profiles (safe to repeat)
-npm run db:status    # path, applied migrations, row counts
-npm run db:reset     # delete the file and start again (all recorded data is lost)
-npm run dev          # or: npm run build && npm start
+npm run dev
 ```
 
-- Database file: `data/aerorehab.sqlite` (ignored by Git). Override with `AEROREHAB_DB=/path/to/file.sqlite`.
-- The server also migrates and seeds on first use, so `db:migrate` is optional.
-- Add records in **Patient Management** (Recorded mode). Knee sessions take date and time (UTC), activity, knee side, movement, protocol, minimum and
-  maximum knee angle in degrees, optional torque in Nm; walking, pressure and balance records have their own forms. ROM = maximum - minimum. Mark a session **Use as baseline**; later sessions for the same
-  astronaut, side, movement and protocol are compared with it. Validation runs on the server.
-- **AI Recommendation** works for Recorded sessions too, but only when you press the button. The server rebuilds the alert from the saved records and sends the AI service just the knee numbers, the app's status and the next-action label (no names, notes or dates).
-- **Local prototype only.** There is no sign-in and no per-astronaut access control. Do not enter real patient data until authentication and
-  access control exist.
+Then open [http://localhost:3000](http://localhost:3000).
 
-## Sensor CSV import (Backend Phase 2C)
+Optional:
+- **AI recommendations:** copy `.env.example` to `.env.local` and set `GEMINI_API_KEY`. Without a key the app shows its built-in guidance.
+- **Recorded mode:** works locally out of the box. The SQLite database is created at `data/aerorehab.sqlite` on first use, or run `npm run db:migrate`.
+- **Production build:** `npm run build && npm start`. **Tests:** `npm test`.
 
-Attach a pressure or balance sensor recording to a saved **recorded** assessment: Patient Management > *Import sensor CSV*.
-The server parses and validates the file, you see a preview, and **Save import** writes the import and all its samples in one transaction.
-A rejected file writes nothing. The same file submitted twice is a no-op; a different file needs the explicit *Replace* tick.
+More detail (database commands, sensor CSV format, alert history, migrations) is in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-**Migration.** Migration 4 (`sensor_csv_imports`) is additive: new tables `sensor_imports`, `pressure_sensors`, `pressure_samples`,
-`balance_samples`. It is applied automatically the first time the server opens the database, or run `npm run db:migrate`. Existing
-manual fields, knee, gait and walking records are not touched. No samples are ever seeded. Use a disposable database for tests:
-`AEROREHAB_DB=/path/to/test.sqlite npm start`.
+## Tech stack
 
-**Templates and limits** (details and synthetic fixtures: `fixtures/sensor-csv/README.md`). 2 MB, 60,000 pressure rows / 30,000 balance rows.
+| Area | Tools |
+|---|---|
+| Framework | Next.js 16 (App Router), React 19, TypeScript |
+| Styling | Tailwind CSS v4 |
+| Charts | Recharts |
+| Local database | SQLite via sql.js (WebAssembly, no native build step) |
+| AI recommendations | Google Gemini (`@google/genai`), server-side only |
+| Hosting | Vercel |
+| Testing | Node.js test runner |
 
-* Pressure: `time_ms,foot,sensor_id,pressure_kpa,area_cm2,x_mm,y_mm`. Foot-local frame, the same for both feet: origin heel centre, +y toes, +x medial.
-  Blank pressure = missing (never 0); 0 is a real zero.
-* Balance: `time_ms,ml_mm,ap_mm`. One trial frame, +ML right, +AP anterior. Both blank = missing sample. Side and protocol come from the saved trial.
+## Limitations
 
-**Which value does a summary use?** A manually entered value wins; a reading that was not entered by hand is filled from the imported CSV and labelled
-*Imported CSV* (Overview, Load & Pressure, Stability & Balance, Reports). Both values stay visible on the detail pages. No Balance Index or fall-risk alert is
-created from an import. The checks above were run on synthetic data; no real sensor export was supplied.
+We want to be clear about what this prototype is and is not.
 
-**Rehab completion storage.** Ticks are kept in the browser, separately per mode: `aerorehab.rehab.edits.demo.v1` and `aerorehab.rehab.edits.recorded.v1`
-(per astronaut). Entries saved before the split (`aerorehab.rehab.edits.v1`) have no mode, so they are kept as read-only legacy data, still shown in Demo, excluded
-from Recorded and Reports, and never deleted. Recorded > Rehabilitation offers an explicit **Import into Recorded**, which copies them without removing the originals.
+- **Simulated data.** The astronauts, sessions and sensor readings in Demo mode are simulated. No NASA or third-party dataset is loaded or analysed. See [docs/PROVENANCE.md](docs/PROVENANCE.md).
+- **Not a medical device.** The alert threshold is a demo rule, not a clinically validated limit, and the guidance has not been reviewed by clinicians. Do not use it for medical decisions or enter real patient data.
+- **Knee movement only.** Alerts cover knee range of motion. Walking pace, load and pressure, and balance are shown without a status.
+- **Recorded mode is off on the live demo.** It needs a writable database file, which Vercel does not provide, so the hosted site always shows Demo data. Run the app locally to use Recorded mode.
+- **AI recommendations need a Gemini API key.** Without one, or if the service is slow, the app shows built-in guidance.
+- **No live sensors and no sign-in.** Recorded data is typed in or imported from CSV files, and there is no access control.
+- **Asset licences.** Some images and 3D models still need licence confirmation; see [assets/ATTRIBUTIONS.md](assets/ATTRIBUTIONS.md).
 
-## Alert history ("Mark as seen")
-On **AI Insights**, each finding has **Mark as seen**, and an **Alert history** panel lists what was seen, newest first (this session or all sessions), each row with the
-severity, values and source it had at that moment and an **Open this measurement** link to the exact session, knee side and time.
+## Future work
 
-- Seen records that you saw a finding. It never resolves, hides or downgrades it: the live alert is always recomputed from the data.
-- Marking unchanged data again does nothing. If the finding later reads differently (severity, values or source), the card says **Changed since you saw it**
-  and shows both states; marking it again adds a new history entry.
-- **Recorded** history is stored in SQLite (migration 5, `alert_acknowledgements`: astronaut, session, finding id, time and a severity/value/source snapshot built on the server from the
-  saved records). **Demo** history is stored separately in this browser (`aerorehab.alerts.seen.demo.v1`). Each astronaut and mode is isolated. Overview only shows a read-only "Seen" chip.
+- Add the other signals from our original plan: physical activity, resting heart rate and sleep, each against a personal baseline.
+- Connect real wearable sensors (thigh and shank IMUs, pressure insoles) instead of simulated or imported data.
+- Use alert rules that look at trends over several sessions, with thresholds reviewed by clinicians.
+- Validate the approach with published spaceflight and bed-rest research data.
+- Add sign-in, access control and secure storage so real data could be handled safely.
+- Support offline use on board, where ground contact is delayed or unavailable.
 
-## NASA Countermeasure Guide
-**Rehabilitation** has a collapsed **NASA Countermeasure Guide** (ARED, COLBERT/T2, CEVIS): short plain-language notes, a strength / locomotion / aerobic filter, and a link to the NASA page behind
-every statement (content and sources: `lib/countermeasures/content.ts`; all pages were read on 2026-11-12). It is educational only: it does not set exercise type, load or intensity, and it does not claim
-what equipment is in use today. Its status note repeats NASA's dated wording only (a May 2024 article, page updated Feb 2025).
+## Team Aero Rehab
 
-## Upgrading an existing database (migration 5)
-Migrations are additive and applied automatically the first time the server opens the file, or with `npm run db:migrate`. The database is a single file (no WAL or
-journal sidecar files: it is written through a temp file and an atomic rename), so a plain file copy is a consistent backup. Before upgrading:
-```bash
-# stop any running server first, then:
-copy dataerorehab.sqlite dataackupserorehab-before-upgrade.sqlite     # Windows (use cp on macOS/Linux)
-npm run db:migrate
-npm run db:status
-```
-`data/` and every `*.sqlite` file are ignored by Git.
+AeroRehab was built by a team of six for NASA Space Apps Challenge 2026:
 
-## What a status covers (and what it does not)
-Alert rules evaluate **knee movement only**: range of motion against a personal baseline, plus movement events and sensor/data checks. **Walking pace, load & pressure and balance have no
-alert rule**, so Overview and AI Insights list them as **Not assessed**, and a green "All Good" is labelled "for knee range of motion only". Their values are still shown, without a status.
+| Name | Role |
+|---|---|
+| **Bisma Zafar** | Concept and clinical direction (physiotherapy), slides and demo video |
+| **Abdullah Javed** | Built the app |
+| **Muhammad Talal Jamil** | Software engineer, technical lead on the final polish |
+| **Fatima Arif** | Slides and voiceover |
+| **Lajpat Rai** | Research and ideas |
+| **Kashaf Noor Babar** | Review and demo testing |
 
-## Release limitations
-- **Provenance and project status:** see `docs/PROVENANCE.md` (selected challenge not yet confirmed; no datasets used; Recorded mode is local only).
-- **Not a clinical or flight tool.** Alerts use a demo rule, not clinically validated limits, and guidance is not clinician-reviewed. Do not use for medical decisions or enter real patient data: there is no sign-in or access control.
-- **No live sensors.** Demo data is simulated. Recorded data is typed in by hand or imported from CSV files (an imported file, not a live feed). There is no device or live-sensor integration.
-- **Local, single-user.** Data is in a local SQLite file and this browser's storage (Demo alert history and rehab ticks are per browser).
-- **Assets awaiting licence confirmation** (see `assets/ATTRIBUTIONS.md`): `public/models/astronaut.glb` (no creator or licence found); the AI-generated images (Google-signed credentials, licence terms not stated);
-  five supplied images and four videos with no embedded source or licence. Only the Sketchfab skeleton (CC BY 4.0, Terrie) is verified. Confirm before publishing or redistributing.
-- **AI recommendations** need a server-side Gemini key and can fail or time out; the built-in guidance is always shown as the fallback.
+Thanks to the NASA Space Apps Challenge organisers and to NASA for the public information on astronaut exercise and countermeasures that the Rehabilitation guide links to.
+
+---
+
+<sub>Keywords: NASA Space Apps Challenge 2026, astronaut health monitoring, musculoskeletal deconditioning, knee range of motion, long-duration spaceflight, microgravity, decision support, space medicine, rehabilitation dashboard, wearable sensors.</sub>
