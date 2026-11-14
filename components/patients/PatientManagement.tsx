@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "@/components/ui/Select";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useAstronaut } from "@/components/AstronautProvider";
@@ -84,10 +85,8 @@ function Roster({ filtered, total, query, setQuery, missions, missionFilter, set
       <div className="mb-2 flex flex-col gap-1.5">
         <input type="search" aria-label="Search astronauts by name or ID" placeholder="Search astronaut…" value={query} onChange={(e) => setQuery(e.target.value)}
           className="w-full min-w-0 rounded border border-cyan-400/40 bg-navy-900 px-2 py-1 text-xs text-white placeholder:text-slate-500" />
-        <select aria-label="Filter by mission" value={missionFilter} onChange={(e) => setMissionFilter(e.target.value)} className="w-full rounded border border-cyan-400/40 bg-navy-900 px-1.5 py-1 text-xs text-white">
-          <option value="all">All missions</option>
-          {missions.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-        </select>
+        <Select ariaLabel="Filter by mission" value={missionFilter} onChange={setMissionFilter} className="text-xs"
+          options={[{ value: "all", label: "All missions" }, ...missions.map(([id, name]) => ({ value: id, label: name }))]} />
       </div>
       {filtered.length === 0 ? (
         <div className="rounded-md border border-dashed border-cyan-400/30 p-3 text-xs text-slate-300" role="status">

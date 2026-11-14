@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NAV_ITEMS, PRIMARY_HREFS, isActive } from "@/lib/nav";
 import { RECORDED_ENABLED } from "@/lib/features";
+import Select from "@/components/ui/Select";
 import { useAstronaut } from "@/components/AstronautProvider";
 import { useRecorded } from "@/components/recorded/store";
+
+const SHORT_LABEL: Record<string, string> = { "/": "Overview", "/joint-analytics": "Joint", "/ai-insights": "Insights", "/rehabilitation": "Rehab", "/reports": "Reports" };
 
 function Icon({ d }: { d: string }) {
   return (
@@ -100,7 +103,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="glass bar sticky top-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 text-sm">
+        <header className="glass bar sticky top-0 z-20 flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2 text-sm sm:gap-x-4 sm:px-4">
           <button
             type="button"
             className="rounded-md border border-cyan-400/40 p-2 text-cyan-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 lg:hidden"
@@ -113,33 +116,24 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
           </button>
-          <span className="lg:hidden"><Brand /></span>
-          <dl className="flex flex-1 flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm">
+          <span className="hidden sm:block lg:hidden"><Brand /></span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo.png" alt="AeroRehab" className="h-8 w-8 shrink-0 object-contain sm:hidden" />
+          <dl className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs sm:justify-start sm:gap-x-4 sm:text-sm">
             <div className="flex items-center gap-1.5">
-              <dt><label htmlFor="astronaut-select" className="text-slate-400">Astronaut</label></dt>
+              <dt className="sr-only sm:not-sr-only"><label htmlFor="astronaut-select" className="text-slate-400">Astronaut</label></dt>
               <dd>
-                <select
-                  id="astronaut-select"
-                  value={selectedId}
-                  onChange={(e) => select(e.target.value as typeof selectedId)}
-                  className="rounded border border-cyan-400/40 bg-navy-900 px-1.5 py-0.5 text-white"
-                >
-                  {astronauts.map((a) => (
-                    <option key={a.id} value={a.id}>{a.profile.displayName}</option>
-                  ))}
-                </select>
+                <Select id="astronaut-select" value={selectedId} onChange={select}
+                  options={astronauts.map((a) => ({ value: a.id, label: a.profile.displayName }))} />
               </dd>
             </div>
-            <div className="flex gap-1.5"><dt className="text-slate-400">Mission</dt><dd className="text-white">{mission.name}</dd></div>
-            <div className="flex gap-1.5"><dt className="text-slate-400">Mission day</dt><dd className="text-white">Day {mission.day}</dd></div>
+            <div className="hidden gap-1.5 sm:flex"><dt className="text-slate-400">Mission</dt><dd className="text-white">{mission.name}</dd></div>
+            <div className="hidden gap-1.5 sm:flex"><dt className="text-slate-400">Mission day</dt><dd className="text-white">Day {mission.day}</dd></div>
             {RECORDED_ENABLED && <div className="flex items-center gap-1.5">
-              <dt><label htmlFor="data-mode-select" className="text-slate-400">Data</label></dt>
+              <dt className="sr-only sm:not-sr-only"><label htmlFor="data-mode-select" className="text-slate-400">Data</label></dt>
               <dd>
-                <select id="data-mode-select" value={dataMode} onChange={(e) => setDataMode(e.target.value as "demo" | "recorded")}
-                  className="rounded border border-cyan-400/40 bg-navy-900 px-1.5 py-0.5 text-white">
-                  <option value="demo">Demo (simulated)</option>
-                  <option value="recorded">Recorded (local)</option>
-                </select>
+                <Select id="data-mode-select" value={dataMode} onChange={setDataMode}
+                  options={[{ value: "demo", label: "Demo (simulated)" }, { value: "recorded", label: "Recorded (local)" }]} />
               </dd>
             </div>}
             <div>
@@ -151,7 +145,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               ) : (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-300" aria-hidden="true" />
-                  Simulated demo
+                  <span className="sm:hidden">Demo</span><span className="hidden sm:inline">Simulated demo</span>
                 </span>
               )}
             </div>
@@ -183,7 +177,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <main className="min-w-0 flex-1 p-4 sm:p-6">
+        <main className="min-w-0 flex-1 p-3 pb-24 sm:p-6 lg:pb-6">
           {recordedUnavailable ? (
             <section role="alert" data-testid="recorded-unavailable" className="glass mx-auto max-w-2xl rounded-lg border border-amber-300/50 p-4">
               <h1 className="text-xl font-semibold text-white">Recorded mode is unavailable here</h1>
@@ -207,6 +201,19 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             </>
           )}
         </main>
+
+        {/* Phone and tablet: the five main pages stay one tap away. The menu button still opens everything else. */}
+        <nav aria-label="Quick navigation" className="tabbar glass bar fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 lg:hidden">
+          {NAV_ITEMS.filter((i) => PRIMARY_HREFS.includes(i.href)).map((item) => {
+            const active = isActive(pathname, item.href);
+            return (
+              <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className="tab-link">
+                <Icon d={item.icon} />
+                <span>{SHORT_LABEL[item.href] ?? item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
