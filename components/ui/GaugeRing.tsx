@@ -7,10 +7,12 @@ type Props = {
   /** Optional text in the middle. */
   center?: string;
   centerSub?: string;
+  /** Draw the ring in once on mount. Leave off for gauges that update during playback. */
+  sweep?: boolean;
 };
 
 /** SVG progress ring. null shows Unavailable and an empty track. */
-export default function GaugeRing({ value, max, color, ariaLabel, size = "h-24 w-24", center, centerSub }: Props) {
+export default function GaugeRing({ value, max, color, ariaLabel, size = "h-24 w-24", center, centerSub, sweep = false }: Props) {
   const r = 40;
   const c = 2 * Math.PI * r;
   const pct = value === null ? 0 : Math.max(0, Math.min(1, value / max));
@@ -19,7 +21,7 @@ export default function GaugeRing({ value, max, color, ariaLabel, size = "h-24 w
       <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(148,163,184,0.2)" strokeWidth="9" />
       {value !== null && (
         <circle cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="9" strokeLinecap="round"
-          strokeDasharray={`${c * pct} ${c}`} transform="rotate(-90 50 50)" className="ring-draw" style={{ filter: `drop-shadow(0 0 4px ${color})` }} />
+          strokeDasharray={`${c * pct} ${c}`} transform="rotate(-90 50 50)" className={sweep ? "ring-draw" : undefined} style={{ filter: `drop-shadow(0 0 4px ${color})` }} />
       )}
       {value === null ? (
         <text x="50" y="54" textAnchor="middle" fontSize="11" fill="#fde68a">Unavailable</text>

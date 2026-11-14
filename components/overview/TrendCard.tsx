@@ -5,7 +5,6 @@ import Panel from "@/components/ui/Panel";
 import { AXIS, C, GRID, TIP_CLASS } from "@/components/ui/chart";
 import { fmt } from "@/lib/format";
 import type { ProgressPoint } from "@/lib/demo/progress";
-import { chartAnim } from "@/components/ui/motion";
 
 type TipPayload = ReadonlyArray<{ payload?: ProgressPoint }>;
 
@@ -36,9 +35,9 @@ export default function TrendCard({ trend }: { trend: ProgressPoint[] }) {
               <YAxis domain={[50, 110]} ticks={[50, 60, 70, 80, 90, 100, 110]} tickFormatter={(v) => `${v}%`} tick={{ fill: AXIS, fontSize: 12 }} stroke={AXIS} width={38} />
               <Tooltip content={({ active, payload }) => <TrendTooltip active={active} payload={payload as never} />} cursor={{ stroke: C.cyan, strokeOpacity: 0.5 }} />
               <Legend verticalAlign="top" height={22} wrapperStyle={{ fontSize: 12, color: AXIS }} />
-              <Line name="Knee ROM (of baseline)" type="linear" connectNulls={false} dataKey="kneeRomPctOfBaseline" stroke={C.cyan} strokeWidth={2} dot={{ r: 3, fill: C.cyan }} {...chartAnim()} />
-              <Line name="Gait symmetry" type="linear" connectNulls={false} dataKey="gaitSymmetryPct" stroke={C.magenta} strokeWidth={2} dot={{ r: 3, fill: C.magenta }} {...chartAnim()} />
-              <Line name="Movement smoothness" type="linear" connectNulls={false} dataKey="movementSmoothnessPct" stroke={C.lime} strokeWidth={2} dot={{ r: 3, fill: C.lime }} {...chartAnim()} />
+              <Line name="Knee ROM (of baseline)" type="linear" connectNulls={false} dataKey="kneeRomPctOfBaseline" stroke={C.cyan} strokeWidth={2} dot={{ r: 3, fill: C.cyan }} isAnimationActive={false} />
+              <Line name="Gait symmetry" type="linear" connectNulls={false} dataKey="gaitSymmetryPct" stroke={C.magenta} strokeWidth={2} dot={{ r: 3, fill: C.magenta }} isAnimationActive={false} />
+              <Line name="Movement smoothness" type="linear" connectNulls={false} dataKey="movementSmoothnessPct" stroke={C.lime} strokeWidth={2} dot={{ r: 3, fill: C.lime }} isAnimationActive={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>

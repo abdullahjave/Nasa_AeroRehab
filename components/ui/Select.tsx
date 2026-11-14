@@ -12,7 +12,7 @@ type Props<T extends string> = {
   id?: string;
   ariaLabel?: string;
   ariaLabelledBy?: string;
-  /** Extra classes for the button (width, max-width). */
+  /** Extra classes for the wrapper (width, text size). */
   className?: string;
   /** Open the list aligned to the right edge of the button. */
   alignRight?: boolean;
@@ -75,11 +75,11 @@ export default function Select<T extends string>({ value, onChange, options, id,
   };
 
   return (
-    <div ref={root} className="relative inline-block min-w-0 max-w-full align-middle">
+    <div ref={root} className={`relative inline-block min-w-0 max-w-full align-middle ${className}`}>
       <button type="button" id={id} role="combobox" aria-haspopup="listbox" aria-expanded={open} aria-controls={listId}
         aria-label={ariaLabel} aria-labelledby={ariaLabelledBy} aria-activedescendant={open ? `${listId}-${active}` : undefined}
         onClick={() => (open ? setOpen(false) : show())} onKeyDown={onKey}
-        className={`select-btn flex w-full min-w-0 items-center justify-between gap-2 rounded-md border border-cyan-400/40 bg-navy-900 px-2.5 py-1 text-left text-white hover:border-cyan-300/80 ${open ? "border-cyan-300/80" : ""} ${className}`}>
+        className={`select-btn flex w-full min-w-0 items-center justify-between gap-2 rounded-md border border-cyan-400/40 bg-navy-900 px-2.5 py-1 text-left text-white hover:border-cyan-300/80 ${open ? "border-cyan-300/80" : ""}`}>
         <span className="truncate">{current?.label ?? ""}</span>
         <svg viewBox="0 0 16 16" className={`h-3.5 w-3.5 shrink-0 text-cyan-300 transition-transform duration-200 ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 6l4 4 4-4" />

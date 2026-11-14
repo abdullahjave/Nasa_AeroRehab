@@ -31,7 +31,7 @@ function Details({ children }: { children: React.ReactNode }) {
           <span aria-hidden="true" className={`shrink-0 text-cyan-300 transition-transform ${open ? "rotate-180" : ""}`}>&#9662;</span>
         </button>
       </h2>
-      {open && <div id="measurement-details" className="stagger space-y-3">{children}</div>}
+      {open && <div id="measurement-details" className="reveal space-y-3">{children}</div>}
     </section>
   );
 }
@@ -68,7 +68,7 @@ export default function OverviewDashboard() {
       </header>
 
       <AtAGlance />
-      <div className="stagger space-y-4">
+      <div className="space-y-4">
         {!recorded && <MissionReplay />}
         <YourStatusCard />
       </div>

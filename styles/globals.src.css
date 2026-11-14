@@ -134,7 +134,7 @@ select:hover { border-color: rgba(103, 232, 249, 0.8); }
 .tabbar { border-width: 1px 0 0; padding-bottom: env(safe-area-inset-bottom); }
 .tab-link {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding: 0.55rem 0.25rem 0.5rem;
-  font-size: 0.6875rem; line-height: 1; color: #a1b5cb; transition: color .18s ease, transform .18s ease;
+  font-size: 0.6875rem; line-height: 1; color: #a1b5cb; transition: color .18s ease;
 }
 .tab-link::before {
   content: ""; position: absolute; top: -1px; left: 50%; height: 2px; width: 0; border-radius: 2px; background: #22d3ee;
@@ -143,51 +143,26 @@ select:hover { border-color: rgba(103, 232, 249, 0.8); }
 .tab-link[aria-current="page"] { color: #fff; font-weight: 600; }
 .tab-link[aria-current="page"] svg { color: #67e8f9; }
 .tab-link[aria-current="page"]::before { width: 2rem; }
-.tab-link:active { transform: scale(.94); }
 
 /* ---------- Motion ----------
-   Short, quiet movement that explains change: pages rise in, cards arrive in order, cards lift on hover.
-   Every rule here is switched off by html[data-reduce-motion="true"] above (system setting or Display Settings). */
-@keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+   Deliberately quiet: opacity fades, one small rise on first paint, nothing that loops and nothing that moves layout.
+   Only opacity and transform are animated. Switched off by html[data-reduce-motion="true"] above. */
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(4px); } }
 @keyframes ring-draw { from { stroke-dasharray: 0 999; } }
 @keyframes bar-grow { from { transform: scaleX(0); } }
-@keyframes status-pop { 0% { transform: scale(.94); opacity: .4; } 60% { transform: scale(1.03); opacity: 1; } 100% { transform: none; } }
-@keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0); } 50% { box-shadow: 0 0 22px 2px rgba(251, 113, 133, .28); } }
 
-.page-enter { animation: rise-in .45s cubic-bezier(.2, .7, .2, 1) backwards; }
+/* Route change: a short fade, no movement. */
+.page-enter { animation: fade-in .28s ease-out backwards; }
+/* Content the reader opened on purpose (disclosures, the More menu). */
+.reveal { animation: rise-in .24s ease-out backwards; }
+.ring-draw { animation: ring-draw .8s ease-out backwards; }
+.bar-grow { transform-origin: left; animation: bar-grow .8s ease-out backwards; transition: width .4s ease-out; }
 
-/* Direct children arrive one after another. */
-.stagger > * { animation: rise-in .5s cubic-bezier(.2, .7, .2, 1) backwards; }
-.stagger > *:nth-child(1) { animation-delay: .04s; }
-.stagger > *:nth-child(2) { animation-delay: .1s; }
-.stagger > *:nth-child(3) { animation-delay: .16s; }
-.stagger > *:nth-child(4) { animation-delay: .22s; }
-.stagger > *:nth-child(5) { animation-delay: .28s; }
-.stagger > *:nth-child(6) { animation-delay: .34s; }
-.stagger > *:nth-child(n+7) { animation-delay: .4s; }
-
-.reveal { animation: rise-in .35s cubic-bezier(.2, .7, .2, 1) backwards; }
-.ring-draw { animation: ring-draw 1s cubic-bezier(.2, .7, .2, 1) backwards; transition: stroke-dasharray .6s cubic-bezier(.2, .7, .2, 1); }
-.bar-grow { transform-origin: left; animation: bar-grow .9s cubic-bezier(.2, .7, .2, 1) backwards; transition: width .6s cubic-bezier(.2, .7, .2, 1); }
-.status-pop { animation: status-pop .5s cubic-bezier(.2, .7, .2, 1) backwards; }
-.glow-action { animation: glow-pulse 2.6s ease-in-out infinite; }
-/* Recharts reference dot glides between mission days during Replay. */
-.glide circle, circle.glide { transition: cx .45s cubic-bezier(.2, .7, .2, 1), cy .45s cubic-bezier(.2, .7, .2, 1); }
-.glide line, line.glide { transition: x1 .45s cubic-bezier(.2, .7, .2, 1), x2 .45s cubic-bezier(.2, .7, .2, 1); }
-
-/* Cards in the page lift a little and pick up a cyan edge on hover. */
-main .glass { transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease, background-color .25s ease; }
-main section.glass:hover, .lift:hover {
-  border-color: rgba(34, 211, 238, .55);
-  box-shadow: 0 10px 30px -12px rgba(8, 145, 178, .45), 0 0 0 1px rgba(34, 211, 238, .12);
-}
-.lift { transition: transform .25s cubic-bezier(.2, .7, .2, 1), border-color .25s ease, box-shadow .25s ease; }
-.lift:hover { transform: translateY(-2px); }
-
-/* Press feedback on buttons and button-like links. */
-main button, main a[class*="rounded"], .nav-link { transition-property: background-color, border-color, color, box-shadow, transform; transition-duration: .18s; }
-main button:not(:disabled):active, main a[class*="rounded"]:active, .nav-link:active { transform: scale(.97); }
+/* Hover: colour only on cards. Only the small linked tiles lift, by one pixel. */
+main .glass { transition: border-color .2s ease, background-color .2s ease; }
+.lift { transition: transform .2s ease, border-color .2s ease; }
+.lift:hover { transform: translateY(-1px); border-color: rgba(34, 211, 238, .55); }
 
 /* Card surface: a faint top highlight gives the glass some depth. */
 .glass { background-image: linear-gradient(180deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, 0) 40%); }

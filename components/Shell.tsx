@@ -52,7 +52,7 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
   const more = NAV_ITEMS.filter((i) => !PRIMARY_HREFS.includes(i.href));
   const inMore = more.some((i) => isActive(pathname, i.href));
   return (
-    <div className="stagger space-y-3">
+    <div className="space-y-3">
       <NavItems items={primary} pathname={pathname} onNavigate={onNavigate} />
       <details open={inMore || undefined} className="group">
         <summary className="cursor-pointer list-none px-3 text-xs font-medium uppercase tracking-wide text-slate-400 hover:text-slate-200">
