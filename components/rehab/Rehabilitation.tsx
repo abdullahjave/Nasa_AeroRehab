@@ -52,7 +52,6 @@ function RehabPage({ assets }: { assets: Record<string, boolean> }) {
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Rehabilitation <span className="font-normal text-slate-300">&ndash; Exercise Plan</span></h1>
           <p className="text-sm text-slate-300">{astronaut.profile.displayName} &middot; {CONTEXT_LABEL[ctx]} &middot; {plan ? `${plan.program.name} (${PLAN_SOURCE_LABEL[plan.source].toLowerCase()})` : NO_PLAN} &middot; Demo date Day {DEMO_DAY} ({dayLabel(DEMO_DAY)}, {dayToDate(DEMO_DAY).getUTCFullYear()})</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-300/10 px-2.5 py-0.5 text-sm font-medium text-amber-200">{recorded ? "Recorded Data" : "Simulated Data"}</span>
       </header>
 
       <ContextSelector value={ctx} onChange={(c) => setPick({ ctx: c, at: stamp() })} />

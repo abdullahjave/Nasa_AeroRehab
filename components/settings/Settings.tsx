@@ -47,7 +47,7 @@ export default function Settings({ assets }: { assets: Assets }) {
     <div className="space-y-3">
       <header className="glass rounded-lg px-3 py-2">
         <h1 className="text-xl font-semibold text-white sm:text-2xl">Settings <span className="text-base font-normal text-slate-300">&ndash; Sensors, Calibration &amp; System Configuration</span></h1>
-        <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label} &middot; Simulated Data. Device changes here are simulated and never alter saved readings.</p>
+        <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label}. Device changes here are simulated and never alter saved readings.</p>
       </header>
       <Devices details={details} />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">

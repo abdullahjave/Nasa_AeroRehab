@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { createLocalStore } from "@/components/settings/stores";
 import type { RecordedSnapshot } from "@/lib/recorded/types";
+import { RECORDED_ENABLED } from "@/lib/features";
 
 // Browser side of recorded mode. The database lives on the server; the browser only holds the last snapshot it received and
 // the chosen data mode ("demo" = simulated fixtures, "recorded" = saved sessions). Every page reads the same snapshot.
@@ -10,7 +11,8 @@ import type { RecordedSnapshot } from "@/lib/recorded/types";
 export type DataMode = "demo" | "recorded";
 export const MODE_KEY = "aerorehab.data-mode.v1";
 const mode = createLocalStore<DataMode>(MODE_KEY, "demo", (raw) => (raw === "recorded" ? "recorded" : "demo"));
-export const useDataMode = mode.use;
+// With Recorded mode disabled (hosted demo), a "recorded" choice saved earlier in this browser is ignored.
+export const useDataMode = (): DataMode => { const m = mode.use(); return RECORDED_ENABLED ? m : "demo"; };
 export const setDataMode = (m: DataMode) => mode.write(m);
 
 export type RecordedState = { status: "idle" | "loading" | "ready" | "error"; snapshot: RecordedSnapshot | null; error: string | null; loadedAt: number | null };

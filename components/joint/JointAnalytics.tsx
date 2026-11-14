@@ -176,7 +176,7 @@ function DemoJointAnalytics() {
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">Joint Analytics <span className="font-normal text-slate-300">&mdash; Knee ({sideName(shown)})</span></h1>
-          <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label} &middot; Simulated Data</p>
+          <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <SessionPicker />

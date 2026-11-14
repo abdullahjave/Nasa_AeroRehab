@@ -15,6 +15,8 @@ import OverviewBalance from "@/components/balance/OverviewBalance";
 import TrendCard from "./TrendCard";
 import { GaitPreviewCard } from "./Cards";
 import RecordedTrend from "@/components/recorded/RecordedTrend";
+import MissionReplay from "./MissionReplay";
+import { CHALLENGE } from "@/lib/challenge";
 
 /** Measurement details start collapsed at every screen width; the reader opens them on purpose. */
 function Details({ children }: { children: React.ReactNode }) {
@@ -51,7 +53,7 @@ export default function OverviewDashboard() {
             <h1 className="text-xl font-semibold text-white sm:text-2xl">Overview</h1>
             <p className="text-sm text-slate-200">{p.displayName} &middot; {p.role}</p>
             <p className="text-sm text-slate-300">Mission <strong className="text-white">{mission.name}</strong> &middot; Day {mission.day} of {mission.totalDays}</p>
-            <p className="text-xs text-slate-400">{recorded ? "Recorded Data (local database)" : "Simulated Data"}</p>
+            <p className="text-xs text-cyan-200/80">{CHALLENGE.event} &middot; {CHALLENGE.title}</p>
           </div>
         </div>
         {recorded && recordedStatus !== "ready" ? (
@@ -65,6 +67,7 @@ export default function OverviewDashboard() {
         ) : <SessionPicker />}
       </header>
 
+      {!recorded && <MissionReplay />}
       <YourStatusCard />
       <TodaysTasksCard />
 

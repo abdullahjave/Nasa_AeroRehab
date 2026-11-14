@@ -116,7 +116,7 @@ function DemoLoadPressure() {
     <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
       <div>
         <h1 className="text-xl font-semibold text-white sm:text-2xl">Load &amp; Pressure</h1>
-        <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label} &middot; Simulated Data</p>
+        <p className="text-xs text-slate-300">{astronaut.profile.displayName} &middot; {session.label}</p>
         <InsoleStatus />
       </div>
       <SessionPicker />

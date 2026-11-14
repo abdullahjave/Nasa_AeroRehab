@@ -1,5 +1,7 @@
 # AeroRehab (Nasa_AeroRehab)
 
+**Built for:** NASA Space Apps Challenge 2026, *Autonomous astronaut musculoskeletal health monitoring* (set in `lib/challenge.ts`; replace with the exact challenge title).
+
 Rehabilitation analytics dashboard for a simulated astronaut mission (Artemis-II, Day 42). It has two data modes:
 **Demo (simulated)**, fixtures in `lib/demo/` with no backend, and **Recorded (local)**, manual entries and imported sensor CSV files saved in a local SQLite database.
 Simulated and recorded data are always labelled and never mixed.
@@ -7,8 +9,12 @@ Simulated and recorded data are always labelled and never mixed.
 Next.js (App Router) + TypeScript + Tailwind CSS v4 + Recharts + sql.js (SQLite). Local prototype: no sign-in and no real patient data.
 
 ## Pages
-Ten routes: Overview, Joint Analytics, Gait Analysis, Load & Pressure, Stability & Balance, AI Insights, Rehabilitation, Reports,
-Patient Management and Settings. Overview is a vertical page with the status card, today's tasks and measurement details.
+The main navigation shows five pages: Overview, Joint Analytics, AI Insights, Rehabilitation and Reports. Gait Analysis, Load & Pressure,
+Stability & Balance, Patient Management and Settings are under **More**. Overview opens with the knee range-of-motion chart and a
+mission-day slider (with **Replay mission**): moving it selects that session, and the Your Status card below updates with it.
+
+**Hosted demo:** Recorded mode needs a writable SQLite file, so it is hidden on Vercel builds (the Data switch disappears and the site
+always shows Demo data). Set `NEXT_PUBLIC_RECORDED_MODE=on` to force it on, or `off` to hide it anywhere.
 
 ## Quick start
 ```bash
