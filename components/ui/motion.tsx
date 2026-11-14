@@ -11,35 +11,25 @@ export function useReducedMotion() {
   return system || prefs.reduceMotion;
 }
 
-/** Recharts props for a one-time draw-in on mount. Off with reduced motion. */
-export function useChartAnim(duration = 900) {
-  const reduced = useReducedMotion();
-  return { isAnimationActive: !reduced, animationDuration: duration, animationEasing: "ease-out" as const };
-}
-
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 /**
- * A number that counts from its previous value to the new one. Screen readers and the first server render get the final
- * value straight away; only the visible digits animate.
+ * A number that eases to a new value when it changes. It does not count up on first paint, so a page never loads with
+ * moving digits; screen readers always get the final value.
  */
-export function AnimatedNumber({ value, digits = 0, duration = 700, className, signed = false }: { value: number; digits?: number; duration?: number; className?: string; signed?: boolean }) {
+export function AnimatedNumber({ value, digits = 0, duration = 320, className, signed = false }: { value: number; digits?: number; duration?: number; className?: string; signed?: boolean }) {
   const reduced = useReducedMotion();
   const [shown, setShown] = useState(value);
-  const from = useRef<number | null>(null);
   const shownRef = useRef(value);
 
   useEffect(() => {
-    if (reduced) { shownRef.current = value; from.current = value; return; }
-    // First mount counts up from zero; later changes count from what is on screen.
-    const start = from.current === null ? 0 : shownRef.current;
-    from.current = value;
-    if (start === value) return;
+    const start = shownRef.current;
+    if (reduced || start === value) { shownRef.current = value; return; }
     let raf = 0;
     const t0 = performance.now();
     const tick = (now: number) => {
       const t = Math.min(1, (now - t0) / duration);
-      const v = start + (value - start) * easeOut(t);
+      const v = t === 1 ? value : start + (value - start) * easeOut(t);
       shownRef.current = v;
       setShown(v);
       if (t < 1) raf = requestAnimationFrame(tick);
@@ -59,8 +49,3 @@ export function AnimatedNumber({ value, digits = 0, duration = 700, className, s
   );
 }
 
-/** Same as useChartAnim for places where a hook is awkward: reads the attribute SpaceBackdrop keeps on <html>. */
-export function chartAnim(duration = 900) {
-  const reduced = typeof document !== "undefined" && document.documentElement.dataset.reduceMotion === "true";
-  return { isAnimationActive: !reduced, animationDuration: duration, animationEasing: "ease-out" as const };
-}

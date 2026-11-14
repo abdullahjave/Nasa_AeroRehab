@@ -132,7 +132,7 @@ function DemoGaitAnalysis() {
   const regLabel = g.regularity === null ? null : g.regularity >= 0.9 ? "Stable" : g.regularity >= 0.8 ? "Moderate" : "Irregular";
 
   return (
-    <div className="stagger space-y-3">
+    <div className="space-y-3">
       {header}
 
       <div className="grid gap-3 xl:grid-cols-12">

@@ -172,7 +172,7 @@ function DemoLoadPressure() {
   const copText = (a: FootAnalysis) => (a.copMm.kind === "value" ? `(${a.copMm.value.x.toFixed(1)}, ${a.copMm.value.y.toFixed(1)}) mm` : show(a.copMm as Metric<number>, "").text);
 
   return (
-    <div className="stagger space-y-3">
+    <div className="space-y-3">
       {header}
 
       {/* Shared timeline cursor */}

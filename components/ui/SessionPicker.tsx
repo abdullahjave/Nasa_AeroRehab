@@ -11,7 +11,7 @@ export default function SessionPicker() {
     <div className="flex min-w-0 items-center gap-2 text-xs text-slate-300">
       <span id="session-picker-label">Session</span>
       <Select ariaLabelledBy="session-picker-label" value={session.id} onChange={selectSession} alignRight
-        options={astronaut.sessions.map((s) => ({ value: s.id, label: s.label }))} className="max-w-[16rem] text-sm" />
+        options={astronaut.sessions.map((s) => ({ value: s.id, label: s.label }))} className="w-[15.5rem] max-w-full text-sm" />
     </div>
   );
 }

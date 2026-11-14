@@ -17,7 +17,6 @@ import { useSavedReports } from "./useSavedReports";
 import { MAX_DAY, METRIC_META, MIN_DAY, buildReport, latestRecordDay, paddedDomain, validateRange, visibleMetrics, type MetricKey, type Range } from "@/lib/reports";
 import { dayLabel, dayToDate, eligibleSessions, recordedRehabInScope, weekStartOf } from "@/lib/rehab";
 import { ASTRONAUTS } from "@/lib/demo";
-import { chartAnim } from "@/components/ui/motion";
 
 const QUICK = [7, 14, 30, 60, 90] as const;
 const DAY1 = Date.UTC(2026, 8, 30);
@@ -101,7 +100,7 @@ export default function Reports() {
   const ticks = report ? tickDays(report.range.start, report.range.end, 6) : [];
 
   return (
-    <div className="stagger space-y-3">
+    <div className="space-y-3">
       <div className="no-print space-y-3">
         <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
           <div>
@@ -206,7 +205,7 @@ export default function Reports() {
                                   if (!active || !p) return null;
                                   return <div className={TIP_CLASS}><p className="font-semibold text-white">{fullDate(p.day)} &middot; Day {p.day}</p><p className="text-slate-300">{meta.label} <span className="font-semibold" style={{ color: c.color }}>{p.value === null ? "Missing measurement" : `${p.value.toFixed(meta.digits)}${meta.unit}`}</span></p><p className="text-[12px] text-slate-400">{p.sessionId}</p></div>;
                                 }} />
-                                <Area type="linear" dataKey="value" stroke={c.color} strokeWidth={1.6} fill={`url(#grad-${c.key})`} dot={{ r: 2.6, fill: c.color, strokeWidth: 0 }} activeDot={{ r: 4.5 }} connectNulls {...chartAnim()} />
+                                <Area type="linear" dataKey="value" stroke={c.color} strokeWidth={1.6} fill={`url(#grad-${c.key})`} dot={{ r: 2.6, fill: c.color, strokeWidth: 0 }} activeDot={{ r: 4.5 }} connectNulls isAnimationActive={false} />
                               </AreaChart>
                             </ResponsiveContainer>
                           </div>

@@ -20,7 +20,6 @@ import AlertHistory from "@/components/alerts/AlertHistory";
 import NotAssessed from "@/components/alerts/NotAssessed";
 import { TONE } from "@/components/alerts/AlertBadge";
 import { useAlerts } from "@/components/alerts/useAlerts";
-import { chartAnim } from "@/components/ui/motion";
 
 const VIOLET = "#a78bfa";
 const n1 = (v: number) => v.toFixed(1).replace(/\.0$/, "");
@@ -73,7 +72,7 @@ function DemoAIInsights() {
   const deltaEvents = v.previousEventCount === null ? null : v.events.length - v.previousEventCount;
 
   return (
-    <div className="stagger space-y-3">
+    <div className="space-y-3">
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">AI Insights</h1>
@@ -173,9 +172,9 @@ function DemoAIInsights() {
                         );
                       }} />
                       <Legend verticalAlign="top" align="right" height={30} wrapperStyle={{ fontSize: 12, color: AXIS }} />
-                      <Line name={`Current (Day ${session.missionDay})`} dataKey="current" stroke={C.cyan} strokeWidth={2.2} dot={false} connectNulls {...chartAnim()} type="monotone" />
+                      <Line name={`Current (Day ${session.missionDay})`} dataKey="current" stroke={C.cyan} strokeWidth={2.2} dot={false} connectNulls isAnimationActive={false} type="monotone" />
                       {v.chart.baseline.kind === "value" && (
-                        <Line name={`Personal baseline (Day ${v.baselineDay})`} dataKey="baseline" stroke={VIOLET} strokeWidth={2} strokeDasharray="6 4" dot={false} connectNulls {...chartAnim()} type="monotone" />
+                        <Line name={`Personal baseline (Day ${v.baselineDay})`} dataKey="baseline" stroke={VIOLET} strokeWidth={2} strokeDasharray="6 4" dot={false} connectNulls isAnimationActive={false} type="monotone" />
                       )}
                       <ReferenceDot x={v.chart.current.value.peak.pct} y={v.chart.current.value.peak.deg} r={5} fill="#fff" stroke={C.cyan} strokeWidth={2}
                         label={{ value: `${n1(v.chart.current.value.peak.deg)}° (Current)`, position: "bottom", fill: "#a5f3fc", fontSize: 12 }} />

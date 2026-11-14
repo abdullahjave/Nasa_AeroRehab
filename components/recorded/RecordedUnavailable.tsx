@@ -12,7 +12,7 @@ import SessionPicker from "@/components/ui/SessionPicker";
 export default function RecordedUnavailable({ title, what }: { title: string; what: string }) {
   const { astronaut, session } = useAstronaut();
   return (
-    <div className="stagger space-y-3">
+    <div className="space-y-3">
       <header className="glass flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-2">
         <div>
           <h1 className="text-xl font-semibold text-white sm:text-2xl">{title}</h1>
